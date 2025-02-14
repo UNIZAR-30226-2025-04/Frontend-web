@@ -34,7 +34,7 @@ jobs:
         uses: actions/configure-pages@v3
 
       - name: Subir archivos a GitHub Pages
-        uses: actions/upload-pages-artifact@v2  # <-- Versión actualizada
+        uses: actions/upload-pages-artifact@v4  # <-- Versión actualizada
         with:
           path: sveltekit-github-pages  # Usa la carpeta correcta
 
