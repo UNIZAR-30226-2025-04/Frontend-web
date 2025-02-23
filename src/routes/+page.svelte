@@ -31,7 +31,7 @@
 
 	.howToPlay:hover {
 		transform: scale(1.1);
-		color: #007BFF; /* Azul */
+		color: #007BFF;
 	}
 
 	.howToPlay:hover p {
@@ -39,7 +39,7 @@
 	}
 
 	.howToPlay:hover .arrow {
-		border-color: #007BFF; /* Cambio de color de la flecha */
+		border-color: #007BFF;
 	}
 
 	.down {
