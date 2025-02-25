@@ -2,7 +2,7 @@
   <style>
     @font-face {
       font-family: 'Pixelify Sans';
-      src: url('/fonts/PixelifySans-Medium.otf') format('woff'),
+      src: url('/fonts/PixelifySans-Medium.otf') format('woff');
     }
   </style>
 </svelte:head>
@@ -35,7 +35,7 @@
 
 <style>
     :global(body) {
-		background-color: #ffffff;
+		background-image: url('/5.jpg') !important;
 		margin: 0;
 		width: 100%;
 		display: flex;
@@ -117,6 +117,7 @@
 
 
 </style>
+
 
 
 
