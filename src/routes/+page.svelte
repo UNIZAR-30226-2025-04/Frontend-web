@@ -122,7 +122,7 @@
 
 
 <!-- Game logo -->
-<img class='logo' src='/nogler.png' alt="Nogler" style="margin-top: 50px; width: 950px; height: 400px"/>
+<img class='logo' src='./nogler.png' alt="Nogler" style="margin-top: 50px; width: 950px; height: 400px"/>
 <!-- Game description -->
 <p class='description' style="font-size: 20px; margin-top: 50px;">
 	Card game... Lorem ipsum dolor sit amet, consectetur adipiscing elit, 
