@@ -8,6 +8,5 @@
 .svelte-kit/
 package
 node_modules/*
-sveltekit-github-pages/*
 
 # End of https://www.toptal.com/developers/gitignore/api/svelte

@@ -24,10 +24,8 @@ const config = {
 		adapter: adapter({
 			pages: 'sveltekit-github-pages', // Carpeta de salida para GitHub Pages
 			assets: 'sveltekit-github-pages', // Carpeta de assets estáticos
-		}),
-		prerender: {
-			entries: ['*'],
-		}
+			fallback: 'index.html' // Necesario para SPA en GitHub Pages
+		})
 	}
 
 };
