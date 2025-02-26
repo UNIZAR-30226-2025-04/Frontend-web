@@ -1,7 +1,2 @@
 export const prerender = true;
 
-export const load = async () => {
-  return {
-    message: "Este es un sitio prerenderizado"
-  };
-};
