@@ -131,7 +131,7 @@
 	nisi ut aliquip ex ea commodo consequat. 
 </p>
 <!-- Button: Start playing-->
-<a href="home" class="btn variant-filled" style="margin-top: 50px;">
+<a href="/login" class="btn variant-filled" style="margin-top: 50px;">
 	<span>Start playing</span>
 </a>
 <!-- Scroll how to play	-->
