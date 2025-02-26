@@ -2,7 +2,7 @@
   <style>
     @font-face {
       font-family: 'Pixelify Sans';
-      src: url('/fonts/PixelifySans-Medium.otf') format('woff');
+      src: url('fonts/PixelifySans-Medium.otf') format('woff');
     }
   </style>
 </svelte:head>
@@ -122,7 +122,7 @@
 
 
 <!-- Game logo -->
-<img class='logo' src='./nogler.png' alt="Nogler" style="margin-top: 50px; width: 950px; height: 400px"/>
+<img class='logo' src='nogler.png' alt="Nogler" style="margin-top: 50px; width: 950px; height: 400px"/>
 <!-- Game description -->
 <p class='description' style="font-size: 20px; margin-top: 50px;">
 	Card game... Lorem ipsum dolor sit amet, consectetur adipiscing elit, 
@@ -131,7 +131,7 @@
 	nisi ut aliquip ex ea commodo consequat. 
 </p>
 <!-- Button: Start playing-->
-<a href="/" class="btn variant-filled" style="margin-top: 50px;">
+<a href="home" class="btn variant-filled" style="margin-top: 50px;">
 	<span>Start playing</span>
 </a>
 <!-- Scroll how to play	-->

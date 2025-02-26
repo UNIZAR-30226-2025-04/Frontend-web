@@ -21,13 +21,17 @@ const config = {
 	}
 	*/
 	kit: {
+		paths: {
+			base: '',
+		},
 		adapter: adapter({
 			pages: 'sveltekit-github-pages', // Carpeta de salida para GitHub Pages
 			assets: 'sveltekit-github-pages', // Carpeta de assets estáticos
+			fallback: 'indexFallback.html',
 		}),
 		prerender: {
 			entries: ['*'],
-		}
+		},
 	}
 
 };
