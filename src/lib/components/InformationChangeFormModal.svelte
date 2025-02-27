@@ -4,6 +4,7 @@
     import { getModalStore } from "@skeletonlabs/skeleton";
     import { userDataStore } from '$lib/stores';
     import  AvatarDisplay  from "./AvatarDisplay.svelte";
+    import { avatarDirectory } from "$lib/avatarsDirectory";
 
     // Props
     /** Exposes parent props to this component. */
@@ -19,27 +20,44 @@
     // Error code data
     let errorCode:boolean[] = [];
 
-    // We've created a custom submit function to pass the response and close the modal.
-    function onFormSubmit(): void {
+    // Test that's displayed on the change button
+    let ChangeButtonText = "Change";
+
+    /**
+     * It checks for errors and if there are'nt any it calls the API to change the user's data
+     * @async
+    */
+    async function onFormSubmit(){
         errorCode[0] = false; // This username already exists
         errorCode[1] = false; // Username must follow this directives ...
         errorCode[2] = false; // Password must follow this directives ...
         errorCode[3] = password1 !== password2; // Password doesn't match
 
         if (errorCode.every((v) => v === false)){
+            ChangeButtonText = "...";
             let formData: ProfileChangeFormData = {
                 image: avatar,name: username,password: null
             }
             if(password1 !== ""){
                 formData.password = password1;
             }
-            alert("TODO make the form submit the changes");
+            await sleep(2000);
             modalStore.close();
+            alert("TODO make the form submit the changes");
         }
         errorCode = errorCode;
     }
 
-    // Tailwind classes
+    /**
+     * Dummy function to sleep ms while we wait or backend to have the API ready
+     * @param ms
+     */
+    function sleep(ms: number): Promise<void> {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+
+    // Style classes for the error message and the containers that hold it
     const errorContainer = 'alert variant-ghost-error p-2';
     const errorMessage = 'alert-message text-left'
 
@@ -51,14 +69,12 @@
     <form class="modal-form card p-4 w-400 shadow-xl space-y-4">
         <div class="flex">
             <AvatarDisplay icon={avatar} width={100}/>
-            <label class="label text-left">
+            <label class="label text-left ml-10 mt-5">
                 <span>Avatar</span>
                 <select bind:value={avatar} class="select">
-                    <option value="1">Avatar 1</option>
-                    <option value="2">Avatar 2</option>
-                    <option value="3">Avatar 3</option>
-                    <option value="4">Avatar 4</option>
-                    <option value="5">Avatar 5</option>
+                    {#each avatarDirectory as v,i}
+                        <option value="{i+1}">{v.name}</option>
+                    {/each}
                 </select>
             </label>
         </div>
@@ -118,10 +134,10 @@
             {/if}
         </label>
         
-        <div class="flex justify-center gap-6">
-			<button class="block btn {parent.buttonNeutral}" on:click={onFormSubmit}>Change</button>
-			<button class="block btn {parent.buttonNeutral}" on:click={parent.onClose}>Log off</button>
-			<button class="block btn {parent.buttonPositive}" on:click={parent.onClose}>Cancel</button>
+        <div class="flex gap-6 justify-stretch">
+			<button class="block btn {parent.buttonNeutral} w-full" on:click={onFormSubmit}>{ChangeButtonText}</button>
+			<button class="block btn {parent.buttonNeutral} w-full" on:click={parent.onClose}>Log off</button>
+			<button class="block btn {parent.buttonPositive} w-full" on:click={parent.onClose}>Cancel</button>
 	    </div>
     </form>
     
