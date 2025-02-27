@@ -23,6 +23,50 @@
 
 </script>
 
+
+
+<div class="login"> 
+  <h1>Welcome back!</h1>
+  <p>Don't have an account yet? <a href="/">Create account</a></p>
+  
+  <div class="login-form">
+    <form id="login-form" on:submit={login}> 
+      <label for="email">Email</label>
+      <input 
+        type="email" 
+        id="email" 
+        bind:value={email} 
+        name="email" 
+        placeholder="your-email@example.com"
+        required
+      >
+      
+      <label for="passwd">Password</label>
+      <input 
+        type="password" 
+        id="passwd" 
+        bind:value={passwd} 
+        name="passwd" 
+        placeholder="Your password"
+        required
+      >
+      
+      <label class="flex items-center space-x-2">
+        <input 
+          class="checkbox" 
+          type="checkbox" 
+          id="remember" 
+          bind:checked={remember} 
+          name="remember"
+        >
+        <span>Remember me</span>
+      </label>
+      
+      <button type="submit">Login</button>
+    </form>
+  </div>
+</div>
+
 <style>
 	:global(body) {
 	  	background-image: url('/5.jpg') !important;
@@ -90,45 +134,3 @@
 		background-color: #a82c2c;
 	}
 </style>
-
-<div class="login"> 
-  <h1>Welcome back!</h1>
-  <p>Don't have an account yet? <a href="/">Create account</a></p>
-  
-  <div class="login-form">
-    <form id="login-form" on:submit={login}> 
-      <label for="email">Email</label>
-      <input 
-        type="email" 
-        id="email" 
-        bind:value={email} 
-        name="email" 
-        placeholder="your-email@example.com"
-        required
-      >
-      
-      <label for="passwd">Password</label>
-      <input 
-        type="password" 
-        id="passwd" 
-        bind:value={passwd} 
-        name="passwd" 
-        placeholder="Your password"
-        required
-      >
-      
-      <label class="flex items-center space-x-2">
-        <input 
-          class="checkbox" 
-          type="checkbox" 
-          id="remember" 
-          bind:checked={remember} 
-          name="remember"
-        >
-        <span>Remember me</span>
-      </label>
-      
-      <button type="submit">Login</button>
-    </form>
-  </div>
-</div>

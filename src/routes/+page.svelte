@@ -131,8 +131,11 @@
 	nisi ut aliquip ex ea commodo consequat. 
 </p>
 <!-- Button: Start playing-->
-<a href="/login" class="btn variant-filled" style="margin-top: 50px;">
-	<span>Start playing</span>
+<a href="login" class="btn variant-filled" style="margin-top: 50px;">
+	<span>Login page</span>
+</a>
+<a href="home" class="btn variant-filled" style="margin-top: 50px;">
+	<span>Home</span>
 </a>
 <!-- Scroll how to play	-->
 <button class='howToPlay' style="margin-top: 150px;" on:click={scrollToBottom}>
