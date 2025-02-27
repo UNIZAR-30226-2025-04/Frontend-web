@@ -71,7 +71,7 @@
 		<span style="font-size: 18px; color: red;">{errorMessage}</span>
 	  {/if}
       
-      <button type="submit">Login</button>
+      <button type="submit">Register</button>
     </form>
   </div>
 </div>
