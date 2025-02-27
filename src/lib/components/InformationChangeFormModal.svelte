@@ -1,59 +1,125 @@
 <script lang="ts">
-	import type { SvelteComponent } from 'svelte';
+    import type { SvelteComponent } from "svelte";
+    import type { ProfileChangeFormData } from "$lib/interfaces";
+    import { getModalStore } from "@skeletonlabs/skeleton";
+    import { hide } from "@floating-ui/dom";
+    import { userDataStore } from '$lib/stores';
 
-	// Stores
-	import { getModalStore } from '@skeletonlabs/skeleton';
+    // Props
+    /** Exposes parent props to this component. */
+    export let parent: SvelteComponent;
 
-	// Props
-	/** Exposes parent props to this component. */
-	export let parent: SvelteComponent;
+    const modalStore = getModalStore();
 
-	const modalStore = getModalStore();
+    // Form Data
+    let username: string = $userDataStore.username;
+    let avatar: number = $userDataStore.icon;
+    let password1: string, password2: string;
 
-	// Form Data
-	const formData = {
-		name: 'Jane Doe',
-		tel: '214-555-1234',
-		email: 'jdoe@email.com'
-	};
+    // Error code data
+    let errorCode:boolean[] = [];
 
-	// We've created a custom submit function to pass the response and close the modal.
-	function onFormSubmit(): void {
-		if ($modalStore[0].response) $modalStore[0].response(formData);
-		modalStore.close();
-	}
+    // We've created a custom submit function to pass the response and close the modal.
+    function onFormSubmit(): void {
+        errorCode[0] = false; // This username already exists
+        errorCode[1] = false; // Username must follow this directives ...
+        errorCode[2] = false; // Password must follow this directives ...
+        errorCode[3] = password1 !== password2; // Password doesn't match
 
-	// Base Classes
-	const cBase = 'card p-4 w-modal shadow-xl space-y-4';
-	const cHeader = 'text-2xl font-bold';
-	const cForm = 'border border-surface-500 p-4 space-y-4 rounded-container-token';
+        if (errorCode.every((v) => v === false)){
+            let formData: ProfileChangeFormData = {
+                image: avatar,name: username,password: null
+            }
+            if(password1 !== ""){
+                formData.password = password1;
+            }
+            alert("TODO make the form submit the changes");
+            modalStore.close();
+        }
+        errorCode = errorCode;
+    }
+
+    // Tailwind classes
+    const errorContainer = 'alert variant-ghost-error p-2';
+    const errorMessage = 'alert-message text-left'
+
 </script>
 
 <!-- @component This example creates a simple form modal. -->
 
 {#if $modalStore[0]}
-	<div class="modal-example-form {cBase}">
-		<header class={cHeader}>{$modalStore[0].title ?? '(title missing)'}</header>
-		<article>{$modalStore[0].body ?? '(body missing)'}</article>
-		<!-- Enable for debugging: -->
-		<form class="modal-form {cForm}">
-			<label class="label">
-				<span>Name</span>
-				<input class="input" type="text" bind:value={formData.name} placeholder="Enter name..." />
-			</label>
-			<label class="label">
-				<span>Phone Number</span>
-				<input class="input" type="tel" bind:value={formData.tel} placeholder="Enter phone..." />
-			</label>
-			<label class="label">
-				<span>Email</span>
-				<input class="input" type="email" bind:value={formData.email} placeholder="Enter email address..." />
-			</label>
-		</form>
-		<!-- prettier-ignore -->
-		<footer class="modal-footer {parent.regionFooter}">
-			<button class="btn {parent.buttonNeutral}" on:click={parent.onClose}>{parent.buttonTextCancel}</button>
-			<button class="btn {parent.buttonPositive}" on:click={onFormSubmit}>{parent.buttonTextSubmit}</button>
-		</footer>
-	</div>
+    <form class="modal-form card p-4 w-400 shadow-xl space-y-4">
+        <label class="label text-left">
+            <span>Avatar</span>
+            <select bind:value={avatar} class="select">
+                <option value="1">Avatar 1</option>
+                <option value="2">Avatar 2</option>
+                <option value="3">Avatar 3</option>
+                <option value="4">Avatar 4</option>
+                <option value="5">Avatar 5</option>
+            </select>
+        </label>
+        <label class="label text-left">
+            <span>Username</span>
+            <input
+                class="input"
+                type="text"
+                bind:value={username}
+                placeholder="Enter name..."
+            />
+            {#if errorCode[0]}
+                <aside class="{errorContainer}">
+                    <div class="{errorMessage}">
+                        This username already exists
+                    </div>
+                </aside>
+            {/if}
+            {#if errorCode[1]}
+                <aside class="{errorContainer}">
+                    <div class="{errorMessage}">
+                        Username must follow this directives ... TODO
+                    </div>
+                </aside>
+            {/if}
+        </label>
+        <label class="label text-left">
+            <span>Password</span>
+            <input
+                class="input"
+                type="password"
+                bind:value={password1}
+                placeholder="Your new password..."
+            />
+            {#if errorCode[2]}
+                <aside class="{errorContainer}">
+                    <div class="{errorMessage}">
+                        Password must follow this directives ... TODO
+                    </div>
+                </aside>
+            {/if}
+        </label>
+        <label class="label text-left">
+            <span>Repeat your password</span>
+            <input
+                class="input"
+                type="password"
+                bind:value={password2}
+                placeholder="Your new password..."
+            />
+            {#if errorCode[3]}
+                <aside class="{errorContainer}">
+                    <div class="{errorMessage}">
+                        Password doesn't match
+                    </div>
+                </aside>
+            {/if}
+        </label>
+        
+        <div class="flex justify-evenly gap-15">
+			<button class="block btn {parent.buttonNeutral}" on:click={onFormSubmit}>Change</button>
+			<button class="block btn {parent.buttonNeutral}" on:click={parent.onClose}>Log off</button>
+			<button class="block btn {parent.buttonPositive}" on:click={parent.onClose}>Cancel</button>
+	    </div>
+    </form>
+    
 {/if}

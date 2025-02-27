@@ -6,16 +6,13 @@
   
   const modalInfoChange: ModalSettings = {
     type: 'component',
-    component: 'infoChangeModal',
+    component: 'infoChangeModal'
   };
 
   function clickOnProfile(){
     modalStore.trigger(modalInfoChange);
   }
 
-  function closeModal(){
-    modalStore.close();
-  }
 </script>
 
 
