@@ -21,22 +21,22 @@
   <!-- Game buttons -->
   <div class="card flex p-3 gap-3">
     <!-- JOIN -->
-    <div class="card p-3 content-center text-[40px]">
+    <div class="card p-3 content-center text-[40px] w-[190px]">
       JOIN
     </div>
 
     <!-- HOST -->
-    <div class="card p-3 content-center text-[40px]">
+    <div class="card p-3 content-center text-[40px] w-[190px]">
       HOST
     </div>
 
     <!-- INBOX -->
-    <div class="card p-3 content-center text-[40px]">
+    <div class="card p-3 content-center text-[40px] w-[190px]">
       INBOX
     </div>
 
     <!-- FRIENDS -->
-    <div class="card p-3 content-center text-[40px]">
+    <div class="card p-3 content-center text-[40px] w-[190px]">
       FRIENDS
     </div>
   </div>
