@@ -117,7 +117,7 @@
 	}
 
 	.arrow {
-		border: solid black;
+		border: solid rgb(255, 255, 255);
 		border-width: 0 3px 3px 0;
 		display: inline-block;
 		padding: 3px;
