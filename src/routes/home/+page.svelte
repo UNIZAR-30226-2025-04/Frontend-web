@@ -1,21 +1,21 @@
 <script lang="ts">
-  // Setup for modals
-  import { getModalStore, type ModalSettings } from '@skeletonlabs/skeleton';
-	
-  // Modal store for getting all modals
-  const modalStore = getModalStore();
+  import { getModalStore, type ModalComponent, type ModalSettings } from '@skeletonlabs/skeleton';
+  import { userDataStore } from '$lib/stores';
 
-  const modal: ModalSettings = {
-    type: 'alert',
-    // Data
-    title: 'Example Alert',
-    body: 'This is an example modal.',
-    image: 'https://i.imgur.com/WOgTG96.gif',
+  const modalStore = getModalStore();
+  
+  const modalInfoChange: ModalSettings = {
+    type: 'component',
+    component: 'infoChangeModal'
   };
+
   function clickOnProfile(){
-    modalStore.trigger(modal);
+    modalStore.trigger(modalInfoChange);
   }
+
 </script>
+
+
 
 
 <!-- Game logo -->
@@ -28,7 +28,7 @@
     Profile
     <!-- Profile button -->
     <button class="block card p-3 mt-3" on:click={clickOnProfile}>
-      'NAME'
+      {$userDataStore.username}
     </button>
   </div>
 
