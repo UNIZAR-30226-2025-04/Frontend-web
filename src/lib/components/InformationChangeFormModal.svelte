@@ -2,8 +2,8 @@
     import type { SvelteComponent } from "svelte";
     import type { ProfileChangeFormData } from "$lib/interfaces";
     import { getModalStore } from "@skeletonlabs/skeleton";
-    import { hide } from "@floating-ui/dom";
     import { userDataStore } from '$lib/stores';
+    import  AvatarDisplay  from "./AvatarDisplay.svelte";
 
     // Props
     /** Exposes parent props to this component. */
@@ -49,16 +49,19 @@
 
 {#if $modalStore[0]}
     <form class="modal-form card p-4 w-400 shadow-xl space-y-4">
-        <label class="label text-left">
-            <span>Avatar</span>
-            <select bind:value={avatar} class="select">
-                <option value="1">Avatar 1</option>
-                <option value="2">Avatar 2</option>
-                <option value="3">Avatar 3</option>
-                <option value="4">Avatar 4</option>
-                <option value="5">Avatar 5</option>
-            </select>
-        </label>
+        <div class="flex">
+            <AvatarDisplay icon={avatar} width={100}/>
+            <label class="label text-left">
+                <span>Avatar</span>
+                <select bind:value={avatar} class="select">
+                    <option value="1">Avatar 1</option>
+                    <option value="2">Avatar 2</option>
+                    <option value="3">Avatar 3</option>
+                    <option value="4">Avatar 4</option>
+                    <option value="5">Avatar 5</option>
+                </select>
+            </label>
+        </div>
         <label class="label text-left">
             <span>Username</span>
             <input
@@ -115,7 +118,7 @@
             {/if}
         </label>
         
-        <div class="flex justify-evenly gap-15">
+        <div class="flex justify-center gap-6">
 			<button class="block btn {parent.buttonNeutral}" on:click={onFormSubmit}>Change</button>
 			<button class="block btn {parent.buttonNeutral}" on:click={parent.onClose}>Log off</button>
 			<button class="block btn {parent.buttonPositive}" on:click={parent.onClose}>Cancel</button>

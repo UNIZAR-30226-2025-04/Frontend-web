@@ -1,6 +1,6 @@
 <script lang="ts">
-  import InformationChangeFormModal from '$lib/components/InformationChangeFormModal.svelte';
   import { getModalStore, type ModalComponent, type ModalSettings } from '@skeletonlabs/skeleton';
+  import { userDataStore } from '$lib/stores';
 
   const modalStore = getModalStore();
   
@@ -28,7 +28,7 @@
     Profile
     <!-- Profile button -->
     <button class="block card p-3 mt-3" on:click={clickOnProfile}>
-      'NAME'
+      {$userDataStore.username}
     </button>
   </div>
 
