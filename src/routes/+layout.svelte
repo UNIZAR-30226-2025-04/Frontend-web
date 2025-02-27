@@ -14,6 +14,11 @@
 	import { computePosition, autoUpdate, flip, shift, offset, arrow } from '@floating-ui/dom';
 	import { storePopup } from '@skeletonlabs/skeleton';
 	storePopup.set({ computePosition, autoUpdate, flip, shift, offset, arrow });
+
+  // Modal signleton setup, once per proyect
+  import { initializeStores, Modal } from '@skeletonlabs/skeleton';
+  initializeStores();
 </script>
 
+<Modal/>
 <slot />
