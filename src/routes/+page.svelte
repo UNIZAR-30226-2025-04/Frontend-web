@@ -1,12 +1,3 @@
-<svelte:head>
-  <style>
-    @font-face {
-      font-family: 'Pixelify Sans';
-      src: url('fonts/PixelifySans-Medium.otf') format('woff');
-    }
-  </style>
-</svelte:head>
-
 <script lang="ts">
 	function scrollToBottom() {
 	  const targetPosition = document.body.scrollHeight;
@@ -32,6 +23,80 @@
 	  requestAnimationFrame(scrollAnimation);
 	}
   </script>
+
+
+<!-- Game logo -->
+<img class='logo' src='nogler.png' alt="Nogler" style="margin-top: 50px; width: 950px; height: 400px"/>
+<!-- Game description -->
+<p class='description' style="font-size: 20px; margin-top: 50px;">
+	Card game... Lorem ipsum dolor sit amet, consectetur adipiscing elit, 
+	sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
+	<br> Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris 
+	nisi ut aliquip ex ea commodo consequat. 
+</p>
+<!-- Button: Start playing-->
+<a href="login" class="btn variant-filled" style="margin-top: 50px;">
+	<span>Login page</span>
+</a>
+<a href="home" class="btn variant-filled" style="margin-top: 50px;">
+	<span>Home</span>
+</a>
+<!-- Scroll how to play	-->
+<button class='howToPlay' style="margin-top: 150px;" on:click={scrollToBottom}>
+	<p>How to play</p>
+	<i class="arrow down" style="margin-top: 0;"></i>
+</button>
+
+ 
+ <!-- Card 1: Cards -->
+ <div class="card-hover" style="height: 225px; width: 1000px; margin-top: 150px; flex-direction: row;">
+     <div style="margin-right: 175px;">
+		<h1>Cards</h1>
+		<p>
+			Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+			eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
+			ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
+			aliquip ex ea commodo consequat.
+		</p>
+	</div>
+	<img src='' alt='icon' style="margin-right: 250px;">
+ </div>
+<!-- Card 2: Shop -->
+<div class="card-hover" style="flex-direction: row; height: 225px; width: 1000px;">
+	<img src='' alt='icon' style="margin-right: 250px;">
+	<div>
+		<h1>Shop</h1>
+		<p>
+			Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+			eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
+			ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
+			aliquip ex ea commodo consequat.
+		</p>
+	</div>
+</div>
+<!-- Card Container: align cards in a row -->
+<div class="card-container">
+     <!-- Card 3: Friends -->
+     <div class="card-hover" style="height: 225px; width: 490px;">
+         <h1>Friends</h1>
+         <p>
+             Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+             eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
+             ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
+             aliquip ex ea commodo consequat.
+         </p>
+     </div>
+     <!-- Card 4: Compete -->
+     <div class="card-hover" style="height: 225px; width: 490px;">
+         <h1>Compete</h1>
+         <p>
+             Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+             eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
+             ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
+             aliquip ex ea commodo consequat.
+         </p>
+     </div>
+</div>
 
 <style>
     :global(body) {
@@ -117,79 +182,3 @@
 
 
 </style>
-
-
-
-
-<!-- Game logo -->
-<img class='logo' src='nogler.png' alt="Nogler" style="margin-top: 50px; width: 950px; height: 400px"/>
-<!-- Game description -->
-<p class='description' style="font-size: 20px; margin-top: 50px;">
-	Card game... Lorem ipsum dolor sit amet, consectetur adipiscing elit, 
-	sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
-	<br> Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris 
-	nisi ut aliquip ex ea commodo consequat. 
-</p>
-<!-- Button: Start playing-->
-<a href="login" class="btn variant-filled" style="margin-top: 50px;">
-	<span>Login page</span>
-</a>
-<a href="home" class="btn variant-filled" style="margin-top: 50px;">
-	<span>Home</span>
-</a>
-<!-- Scroll how to play	-->
-<button class='howToPlay' style="margin-top: 150px;" on:click={scrollToBottom}>
-	<p>How to play</p>
-	<i class="arrow down" style="margin-top: 0;"></i>
-</button>
-
- 
- <!-- Card 1: Cards -->
- <div class="card-hover" style="height: 225px; width: 1000px; margin-top: 150px; flex-direction: row;">
-     <div style="margin-right: 175px;">
-		<h1>Cards</h1>
-		<p>
-			Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-			eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
-			ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-			aliquip ex ea commodo consequat.
-		</p>
-	</div>
-	<img src='' alt='icon' style="margin-right: 250px;">
- </div>
-<!-- Card 2: Shop -->
-<div class="card-hover" style="flex-direction: row; height: 225px; width: 1000px;">
-	<img src='' alt='icon' style="margin-right: 250px;">
-	<div>
-		<h1>Shop</h1>
-		<p>
-			Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-			eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
-			ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-			aliquip ex ea commodo consequat.
-		</p>
-	</div>
-</div>
-<!-- Card Container: align cards in a row -->
-<div class="card-container">
-     <!-- Card 3: Friends -->
-     <div class="card-hover" style="height: 225px; width: 490px;">
-         <h1>Friends</h1>
-         <p>
-             Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-             eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
-             ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-             aliquip ex ea commodo consequat.
-         </p>
-     </div>
-     <!-- Card 4: Compete -->
-     <div class="card-hover" style="height: 225px; width: 490px;">
-         <h1>Compete</h1>
-         <p>
-             Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-             eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
-             ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-             aliquip ex ea commodo consequat.
-         </p>
-     </div>
-</div>
