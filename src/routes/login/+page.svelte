@@ -20,7 +20,7 @@
 
 <div class="login"> 
   <h1>Welcome back!</h1>
-  <p>Don't have an account yet? <a href="/">Create account</a></p>
+  <p>Don't have an account yet? <a href="register">Create account</a></p>
   
   <div class="login-form">
     <form id="login-form" on:submit={login}> 
