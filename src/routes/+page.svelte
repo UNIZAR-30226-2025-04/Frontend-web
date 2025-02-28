@@ -26,60 +26,68 @@
 
 
 <!-- Game logo -->
-<img class='logo' src='nogler.png' alt="Nogler" style="margin-top: 50px; width: 950px; height: 400px"/>
+<img class='logo' src='nogler.png' alt="Nogler" style="margin-top: 2vh; height: 40vmin; width: auto"/>
 <!-- Game description -->
-<p class='description' style="font-size: 20px; margin-top: 50px;">
+<p class='description' style="font-size: max(2vmin,15px); margin-top: 4%; margin-right: 10%; margin-left: 10%; ">
 	Card game... Lorem ipsum dolor sit amet, consectetur adipiscing elit, 
 	sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
 	<br> Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris 
 	nisi ut aliquip ex ea commodo consequat. 
 </p>
 <!-- Button: Start playing-->
-<a href="login" class="btn variant-filled" style="margin-top: 50px;">
+<a href="login" class="btn variant-filled p-[1.5vmin]" style="margin-top: 2%; font-size: max(2vmin,15px);">
 	<span>Login page</span>
 </a>
-<a href="home" class="btn variant-filled" style="margin-top: 50px;">
+<a href="home" class="btn variant-filled p-[1.5vmin]" style="margin-top: 2%; font-size: max(2vmin,15px);">
 	<span>Home</span>
 </a>
 <!-- Scroll how to play	-->
-<button class='howToPlay' style="margin-top: 150px;" on:click={scrollToBottom}>
+<button class='howToPlay' style="margin-top: 6%; font-size: max(1.5vmin,12px);" on:click={scrollToBottom}>
 	<p>How to play</p>
 	<i class="arrow down" style="margin-top: 0;"></i>
 </button>
 
  
  <!-- Card 1: Cards -->
- <div class="card-hover" style="height: 225px; width: 1000px; margin-top: 150px; flex-direction: row;">
-     <div style="margin-right: 175px;">
-		<h1>Cards</h1>
-		<p>
+ <div class="card-hover" style="height: auto; width: 50vw; margin-top: 10%; display: flex; flex-direction: row; flex-wrap: wrap; align-items: center;">
+    <div style="max-width: 85%; flex: 1;">
+		<h1 style="font-size: max(2vmin,15px);">Cards</h1>
+		<p style="text-justify: inter-word; text-align: justify; font-size: max(1.5vmin,12px);">
+			Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+			eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
+			ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
+			aliquip ex ea commodo consequat.
 			Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
 			eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
 			ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
 			aliquip ex ea commodo consequat.
 		</p>
 	</div>
-	<img src='' alt='icon' style="margin-right: 250px;">
+	<img src='icons/pxArt.png' alt='icon' style="height: auto; width:125px; margin-right=2%">
  </div>
 <!-- Card 2: Shop -->
-<div class="card-hover" style="flex-direction: row; height: 225px; width: 1000px;">
-	<img src='' alt='icon' style="margin-right: 250px;">
-	<div>
-		<h1>Shop</h1>
-		<p>
+<div class="card-hover" style="height: auto; width: 50vw; display: flex; flex-direction: row; flex-wrap: wrap; align-items: center;">
+    <img src='icons/pxArt.png' alt='icon' style="height: auto; width:125px; margin-left=2%">
+	<div style="max-width: 85%; flex: 1;">
+		<h1 style="font-size: max(2vmin,15px);">Shop</h1>
+		<p style="text-justify: inter-word; text-align: justify; font-size: max(1.5vmin,12px);">
+			Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+			eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
+			ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
+			aliquip ex ea commodo consequat.
 			Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
 			eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
 			ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
 			aliquip ex ea commodo consequat.
 		</p>
 	</div>
-</div>
+ </div>
 <!-- Card Container: align cards in a row -->
 <div class="card-container">
      <!-- Card 3: Friends -->
-     <div class="card-hover" style="height: 225px; width: 490px;">
-         <h1>Friends</h1>
-         <p>
+     <div class="card-hover" style="height: auto; width: 24.5vw">
+         <h1 style="font-size: max(2vmin,15px);">Friends</h1>
+         <p style="text-justify: inter-word; text-align: justify; font-size: max(1.5vmin,12px);">
              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
              eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
              ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
@@ -87,9 +95,9 @@
          </p>
      </div>
      <!-- Card 4: Compete -->
-     <div class="card-hover" style="height: 225px; width: 490px;">
-         <h1>Compete</h1>
-         <p>
+     <div class="card-hover" style="height: auto; width: 24.5vw;">
+         <h1 style="font-size: max(2vmin,15px);">Compete</h1>
+         <p style="text-justify: inter-word; text-align: justify; font-size: max(1.5vmin,12px);">
              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
              eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
              ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
