@@ -9,8 +9,17 @@
     component: 'infoChangeModal'
   };
 
+  const modalCreateLobby: ModalSettings = {
+    type: 'component',
+    component: 'createLobbyModal'
+  };
+  
   function clickOnProfile(){
     modalStore.trigger(modalInfoChange);
+  }
+
+  function clickOnJoin(){
+    modalStore.trigger(modalCreateLobby);
   }
 
 </script>
@@ -35,7 +44,7 @@
   <!-- Game buttons -->
   <div class="card flex p-3 gap-3">
     <!-- JOIN -->
-    <button class="block card p-3 content-center text-[40px] w-[190px]">
+    <button class="block card p-3 content-center text-[40px] w-[190px]" on:click={clickOnJoin}>
       JOIN
     </button>
 
