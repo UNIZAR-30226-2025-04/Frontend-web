@@ -1,5 +1,8 @@
 <script lang="ts">
 
+	const errorContainer = 'alert variant-ghost-error p-2';
+    const errorMessagePasswd = 'alert-message text-left'
+
 	let email = '';
 	let username = '';
 	let passwd1 = '';
@@ -7,7 +10,7 @@
 	let errorMessage = "";
   
 	// Test handler function
-	function login(event: SubmitEvent): void {
+	function register(event: SubmitEvent): void {
 	  event.preventDefault();
 
 	  if(passwd1 != passwd2){
@@ -25,12 +28,12 @@
 
 
 
-<div class="login"> 
-  <h1 style="font-size: 30px;">Create an account on Nøgler!</h1>
-  <p style="font-size: 20px;">Already have an account? <a href="login">Sing in</a></p>
+<div class="register"> 
+  <h1>Create an account on Nøgler!</h1>
+  <p>Already have an account? <a href="register">Sing in</a></p>
   
-  <div class="login-form">
-    <form id="login-form" on:submit={login}> 
+  <div class="register-form">
+    <form id="register-form" on:submit={register}> 
       <label for="email">Email</label>
       <input 
         type="email" 
@@ -68,7 +71,11 @@
       >
 
 	  {#if errorMessage}
-		<span style="font-size: 18px; color: red;">{errorMessage}</span>
+		<aside class="{errorContainer}">
+			<div class="{errorMessagePasswd}">
+				Password doesn't match
+			</div>
+		</aside>
 	  {/if}
       
       <button type="submit">Register</button>
@@ -84,21 +91,26 @@
 	  	font-family: 'Pixelify Sans'
 	}
   
-	.login {
+	.register {
 	  	text-align: center;
 	  	color: rgb(255, 255, 255);
         margin-top: 120px;
 	}
   
-	.login h1 {
+	.register h1 {
 	  	margin-bottom: 10px;
+		font-size: 30px;
+	}
+
+	.register p {
+		font-size: 20px;
 	}
   
-	.login a {
+	.register a {
 	  	text-decoration: underline;
 	}
   
-	.login-form {
+	.register-form {
 	  	margin-top: 20px;
 	  	background: rgba(255, 255, 255, 0.863);
 	  	padding: 30px;
@@ -111,7 +123,7 @@
 		font-size: 18px;
 	}
   
-	.login-form label {
+	.register-form label {
 	  	text-align: left;
 	  	color: #333333;
 	}

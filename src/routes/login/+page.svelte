@@ -76,6 +76,11 @@
   
 	.login h1 {
 	  	margin-bottom: 10px;
+		font-size: 30px;
+	}
+
+	.login p {
+		font-size: 20px;
 	}
   
 	.login a {
@@ -84,7 +89,7 @@
   
 	.login-form {
 	  	margin-top: 20px;
-	  	background: rgba(255, 255, 255, 0.575);
+	  	background: rgba(255, 255, 255, 0.863);
 	  	padding: 30px;
 	  	border-radius: 10px;
 	  	box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
@@ -92,6 +97,7 @@
 	  	width: 550px;
 	  	display: flex;
 	  	flex-direction: column;
+		font-size: 18px;
 	}
   
 	.login-form label {
@@ -110,6 +116,7 @@
 	  	color: #333333;
 	  	background-color: #ffffff;
 	  	box-sizing: border-box;
+		font-size: 17px;
 	}
   
 	button {
