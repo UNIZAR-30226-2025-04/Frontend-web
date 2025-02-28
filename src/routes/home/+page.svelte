@@ -18,7 +18,7 @@
     modalStore.trigger(modalInfoChange);
   }
 
-  function clickOnJoin(){
+  function clickOnHost(){
     modalStore.trigger(modalCreateLobby);
   }
 
@@ -44,12 +44,12 @@
   <!-- Game buttons -->
   <div class="card flex p-3 gap-3">
     <!-- JOIN -->
-    <button class="block card p-3 content-center text-[40px] w-[190px]" on:click={clickOnJoin}>
+    <button class="block card p-3 content-center text-[40px] w-[190px]">
       JOIN
     </button>
 
     <!-- HOST -->
-    <button class="block card p-3 content-center text-[40px] w-[190px]">
+    <button class="block card p-3 content-center text-[40px] w-[190px]" on:click={clickOnHost}>
       HOST
     </button>
 

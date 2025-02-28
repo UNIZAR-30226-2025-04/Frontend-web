@@ -23,14 +23,11 @@
 
   	const modalRegistry: Record<string, ModalComponent> = {
     infoChangeModal: { ref: InformationChangeFormModal },
-  };
-
-  	const modalCreateLobby: Record<string, ModalComponent> = {
 	createLobbyModal: { ref: CreateLobbyFormModal },
   };
+
   
 </script>
 
 <Modal components={modalRegistry}/>
-<Modal components={modalCreateLobby}/>
 <slot />
