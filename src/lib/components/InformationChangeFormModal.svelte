@@ -5,6 +5,8 @@
     import { userDataStore } from '$lib/stores';
     import  AvatarDisplay  from "./AvatarDisplay.svelte";
     import { avatarDirectory } from "$lib/avatarsDirectory";
+    import { goto } from '$app/navigation';
+
 
     // Props
     /** Exposes parent props to this component. */
@@ -12,15 +14,16 @@
 
     const modalStore = getModalStore();
 
-    // Form Data
+    // Form data, it shows username and stored icon so it needs some initializing
     let username: string = $userDataStore.username;
     let avatar: number = $userDataStore.icon;
+    // Not initalized, if they are empty when "Change" is pressed we don't change the password of user
     let password1: string, password2: string;
 
-    // Error code data
+    // Error code data, if error i is triggered errorCode[i] = true
     let errorCode:boolean[] = [];
 
-    // Test that's displayed on the change button
+    // Test that's displayed on the change button to show that the form is waiting for a response
     let ChangeButtonText = "Change";
 
     /**
@@ -49,6 +52,19 @@
     }
 
     /**
+     * Deletes all data saved on the user and boots it to the landing page (/)
+     */
+    function onLogOff(){
+        $userDataStore.username = "";
+        $userDataStore.email = "";
+        $userDataStore.password = "";
+        $userDataStore.icon = 1;
+        $userDataStore.token = 0;
+        goto("/");
+        modalStore.close();
+    }
+
+    /**
      * Dummy function to sleep ms while we wait or backend to have the API ready
      * @param ms
      */
@@ -63,10 +79,11 @@
 
 </script>
 
-<!-- @component This example creates a simple form modal. -->
+<!-- @component This creates a form with built-in function to change the user data in the bd and in the store. -->
 
 {#if $modalStore[0]}
     <form class="modal-form card p-4 w-400 shadow-xl space-y-4">
+        <!--Avatar section-->
         <div class="flex">
             <AvatarDisplay icon={avatar} width={100}/>
             <label class="label text-left ml-10 mt-5">
@@ -78,6 +95,7 @@
                 </select>
             </label>
         </div>
+        <!--Username section-->
         <label class="label text-left">
             <span>Username</span>
             <input
@@ -101,6 +119,7 @@
                 </aside>
             {/if}
         </label>
+        <!--Password section-->
         <label class="label text-left">
             <span>Password</span>
             <input
@@ -117,6 +136,7 @@
                 </aside>
             {/if}
         </label>
+        <!--Password repeat check section-->
         <label class="label text-left">
             <span>Repeat your password</span>
             <input
@@ -133,10 +153,10 @@
                 </aside>
             {/if}
         </label>
-        
+        <!--Button section-->
         <div class="flex gap-6 justify-stretch">
 			<button class="block btn {parent.buttonNeutral} w-full" on:click={onFormSubmit}>{ChangeButtonText}</button>
-			<button class="block btn {parent.buttonNeutral} w-full" on:click={parent.onClose}>Log off</button>
+			<button class="block btn {parent.buttonNeutral} w-full" on:click={onLogOff}>Log off</button>
 			<button class="block btn {parent.buttonPositive} w-full" on:click={parent.onClose}>Cancel</button>
 	    </div>
     </form>

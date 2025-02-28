@@ -2,9 +2,9 @@ import { writable } from 'svelte/store';
 import type { UserData } from '$lib/interfaces';
 
 let userDataInitial: UserData = {
-    username: "Placeholder",
-    email: "Placeholder",
-    password: "Placeholder",
+    username: "",
+    email: "",
+    password: "",
     icon: 1,
     token: 0
 }
