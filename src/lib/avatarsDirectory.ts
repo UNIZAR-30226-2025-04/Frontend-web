@@ -4,8 +4,8 @@ import type { avatar } from "./interfaces";
 export const avatarDirectory:avatar[] = [
     {name:"pixelHeart",link:"icons/pxArt.png"},
     {name:"pixelPica",link:"icons/pxArt(1).png"},
-    {name:"pixelTrebol",link:"icons/pxArt(2).png"},
-    {name:"pixelDaimond",link:"icons/pxArt(3).png"},
+    {name:"pixelDaimond",link:"icons/pxArt(2).png"},
+    {name:"pixelTrebol",link:"icons/pxArt(3).png"},
     {name:"pixelSinoc",link:"icons/pxArt(4).png"},
     {name:"pixelSoyi",link:"icons/pxArt(5).png"},
     {name:"pixelBrat",link:"icons/pxArt(6).png"},
