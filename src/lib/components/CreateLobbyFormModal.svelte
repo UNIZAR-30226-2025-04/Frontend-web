@@ -39,7 +39,7 @@
 
         <div class='publicLobby' style="display: flex; align-items: center; gap: 3%;">
             <p style="font-size:120%">Public lobby</p>
-            <SlideToggle name="slider-large" bind:value={publicValue} on:click={onSwitchPublic} checked active="bg-primary-500"/>
+            <SlideToggle name="slider-large" bind:value={publicValue} on:click={onSwitchPublic} active="bg-primary-500 block h-[32px]" checked/>
         </div>
         
         <!--Button section-->
