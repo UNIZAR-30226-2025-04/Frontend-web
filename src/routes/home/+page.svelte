@@ -9,8 +9,17 @@
     component: 'infoChangeModal'
   };
 
+  const modalCreateLobby: ModalSettings = {
+    type: 'component',
+    component: 'createLobbyModal'
+  };
+  
   function clickOnProfile(){
     modalStore.trigger(modalInfoChange);
+  }
+
+  function clickOnHost(){
+    modalStore.trigger(modalCreateLobby);
   }
 
 </script>
@@ -40,7 +49,7 @@
     </button>
 
     <!-- HOST -->
-    <button class="block card p-3 content-center text-[40px] w-[190px]">
+    <button class="block card p-3 content-center text-[40px] w-[190px]" on:click={clickOnHost}>
       HOST
     </button>
 
