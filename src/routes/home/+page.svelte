@@ -28,52 +28,52 @@
 
 
 <!-- Game logo -->
-<img class='logo' src='nogler.png' alt="Nogler" style="margin-top: 50px; width: 55%;"/>
+<img class='mt-[2vh] h-[50vmin] w-auto' src='nogler.png' alt="Nogler" />
 
-<!-- Button bar -->
-<div class="gap-7 mt-10 flex">
-  <!-- Profile card -->
-  <div class="card p-3 text-[20px]">
-    Profile
-    <!-- Profile button -->
-    <button class="block card p-3 mt-3" on:click={clickOnProfile}>
-      {$userDataStore.username}
-    </button>
-  </div>
+  <!-- Button bar -->
+  <div class="gap-[2vmin] mt-[4%] flex">
+    <!-- Profile card -->
+    <div class="card p-3 text-[1.7vmin]">
+      Profile
+      <!-- Profile button -->
+      <button class="block card p-3 mt-3" on:click={clickOnProfile}>
+        {$userDataStore.username}
+      </button>
+    </div>
 
-  <!-- Game buttons -->
-  <div class="card flex p-3 gap-3">
-    <!-- JOIN -->
-    <button class="block card p-3 content-center text-[40px] w-[190px]">
-      JOIN
-    </button>
+    <!-- Game buttons -->
+    <div class="card flex p-3 gap-3">
+      <!-- JOIN -->
+      <button class="block card p-3 content-center text-[3.5vmin] w-[17vmin]">
+        JOIN
+      </button>
 
-    <!-- HOST -->
-    <button class="block card p-3 content-center text-[40px] w-[190px]" on:click={clickOnHost}>
-      HOST
-    </button>
+      <!-- HOST -->
+      <button class="block card p-3 content-center text-[3.5vmin] w-[17vmin]" on:click={clickOnHost}>
+        HOST
+      </button>
 
-    <!-- INBOX -->
-    <button class="block card p-3 content-center text-[40px] w-[190px]">
-      INBOX
-    </button>
+      <!-- INBOX -->
+      <button class="block card p-3 content-center text-[3.5vmin] w-[17vmin]">
+        INBOX
+      </button>
 
-    <!-- FRIENDS -->
-    <button class="block card p-3 content-center text-[40px] w-[190px]">
-      FRIENDS
-    </button>
-  </div>
+      <!-- FRIENDS -->
+      <button class="block card p-3 content-center text-[3.5vmin] w-[17vmin]">
+        FRIENDS
+      </button>
+    </div>
 
-  <!-- Github button -->
-  <div class="content-center">
-    <a href="https://github.com/UNIZAR-30226-2025-04">
-      <img src="github.svg" alt="Github logo" class="w-12 mx-auto"/>
-      <div class="card p-3 text-[20px]">
-        Github
-      </div>
-    </a>
-  </div>
-</div> 
+    <!-- Github button -->
+    <div class="content-center">
+      <a href="https://github.com/UNIZAR-30226-2025-04">
+        <img src="github.svg" alt="Github logo" class="w-[4vmin] mx-auto"/>
+        <div class="card p-3 text-[1.7vmin]">
+          Github
+        </div>
+      </a>
+    </div>
+  </div> 
 
 
 <style>
