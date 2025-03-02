@@ -4,6 +4,7 @@
   import { goto } from "$app/navigation";
   import { flip } from "svelte/animate";
   import { cubicOut } from "svelte/easing";
+  import { base } from '$app/paths';
 
 
 
@@ -32,7 +33,7 @@
 
   // Function to leave the lobby
   function onLeave(){
-    goto("/home");
+    goto(base+"/home");
   }
 
   // Player type

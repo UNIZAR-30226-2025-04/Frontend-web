@@ -3,6 +3,7 @@
     import { getModalStore } from "@skeletonlabs/skeleton";
     import { SlideToggle } from '@skeletonlabs/skeleton';
     import { goto } from '$app/navigation';
+    import { base } from '$app/paths';
     
 
     // Props
@@ -22,7 +23,7 @@
  
     // Function to create a lobby
     function onCreateLobby(){
-        goto("lobby");
+        goto(base+"lobby");
         modalStore.close();
     }
 

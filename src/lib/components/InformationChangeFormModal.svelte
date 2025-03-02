@@ -6,6 +6,7 @@
     import  AvatarDisplay  from "./AvatarDisplay.svelte";
     import { avatarDirectory } from "$lib/avatarsDirectory";
     import { goto } from '$app/navigation';
+    import { base } from '$app/paths';
 
 
     // Props
@@ -60,7 +61,7 @@
         $userDataStore.password = "";
         $userDataStore.icon = 1;
         $userDataStore.token = 0;
-        goto("/");
+        goto(base+"/");
         modalStore.close();
     }
 

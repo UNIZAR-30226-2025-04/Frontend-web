@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { base } from '$app/paths';
+
 	function scrollToBottom() {
 	  const targetPosition = document.body.scrollHeight;
 	  const startPosition = window.scrollY;
@@ -35,10 +37,10 @@
 	nisi ut aliquip ex ea commodo consequat. 
 </p>
 <!-- Button: Start playing-->
-<a href="login" class="btn variant-filled p-[1.5vmin]" style="margin-top: 2%; font-size: max(2vmin,15px);">
+<a href="{base}/login" class="btn variant-filled p-[1.5vmin]" style="margin-top: 2%; font-size: max(2vmin,15px);">
 	<span>Login page</span>
 </a>
-<a href="home" class="btn variant-filled p-[1.5vmin]" style="margin-top: 2%; font-size: max(2vmin,15px);">
+<a href="{base}/home" class="btn variant-filled p-[1.5vmin]" style="margin-top: 2%; font-size: max(2vmin,15px);">
 	<span>Home</span>
 </a>
 <!-- Scroll how to play	-->

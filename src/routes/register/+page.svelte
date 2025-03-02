@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { base } from '$app/paths';
 
 	const errorContainer = 'alert variant-ghost-error p-2';
     const errorMessagePasswd = 'alert-message text-left'
@@ -30,7 +31,7 @@
 
 <div class="register"> 
   <h1>Create an account on Nøgler!</h1>
-  <p>Already have an account? <a href="register">Sing in</a></p>
+  <p>Already have an account? <a href="{base}/login">Sing in</a></p>
   
   <div class="register-form">
     <form id="register-form" on:submit={register}> 
