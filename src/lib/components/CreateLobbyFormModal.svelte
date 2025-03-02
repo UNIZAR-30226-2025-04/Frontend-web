@@ -3,6 +3,7 @@
     import { getModalStore } from "@skeletonlabs/skeleton";
     import { SlideToggle } from '@skeletonlabs/skeleton';
     import { goto } from '$app/navigation';
+    
 
     // Props
     /** Exposes parent props to this component. */
@@ -11,7 +12,7 @@
     const modalStore = getModalStore();
 
 
-    let publicValue = false;
+    let publicValue = true;
 
     // Function to switch the public value
     function onSwitchPublic(){
@@ -21,7 +22,7 @@
  
     // Function to create a lobby
     function onCreateLobby(){
-        goto("/");
+        goto("/lobby");
         modalStore.close();
     }
 
@@ -44,10 +45,10 @@
         
         <!--Button section-->
         <div class="flex gap-6 justify-stretch">
-			<button style="font-size:112%"class="block btn {parent.buttonNeutral} w-full" on:click={onCreateLobby}>Vs AI</button>
+			<button style="font-size:112%"class="block btn {parent.buttonNeutral} w-full" on:click={parent.onClose}>Vs AI</button>
 			<button style="font-size:112%" class="block btn {parent.buttonPositive} w-full" on:click={parent.onClose}>Cancel</button>
         </div>
-        <button style="font-size:112%" class="block btn {parent.buttonNeutral} w-full" on:click={parent.onClose}>Create</button>
+        <button style="font-size:112%" class="block btn {parent.buttonNeutral} w-full" type="button" on:click={onCreateLobby}>Create</button>
     </form>
     
 {/if}
