@@ -60,7 +60,7 @@
         $userDataStore.password = "";
         $userDataStore.icon = 1;
         $userDataStore.token = 0;
-        goto("..");
+        goto("/");
         modalStore.close();
     }
 
