@@ -1,6 +1,7 @@
 <script lang="ts">
   import  AvatarDisplay  from "../../lib/components/AvatarDisplay.svelte";
   import { userDataStore } from '$lib/stores';
+  import { goto } from "$app/navigation";
 
 
   let actual = 8; // Actual number of players
@@ -19,6 +20,16 @@
   // Function copy code to clipboard
   function onCopyCode(){
     navigator.clipboard.writeText(code);
+  }
+
+  // Function to start the game
+  function onStart(){
+    console.log("Starting game");
+  }
+
+  // Function to leave the lobby
+  function onLeave(){
+    goto("/home");
   }
 
   // Player type
@@ -65,9 +76,9 @@
 
 
 <!-- Players -->
-<div class="mt-[5%] gap-[5vmin] ml-[5%] mr-[5%] grid grid-cols-2 md:grid-cols-4 gap-4">
+<div class="mt-[4%] gap-[5vmin] ml-[5%] mr-[5%] grid grid-cols-2 md:grid-cols-4 gap-4">
   {#each players as player, index}
-    <div class="block card card-hover p-4 h-[30vmin] w-[40vmin] shadow-xl space-y-7  text-left" style="flex: 0 0 40vmin;"> 
+    <div class="block card card-hover p-4 h-[28vmin] w-[40vmin] shadow-xl space-y-6  text-left" style="flex: 0 0 40vmin;"> 
       <AvatarDisplay icon={player.icon} width={100}/>
       <h1 class="text-[3vmin]">{player.username}</h1>
       {#if index != 0}
@@ -76,3 +87,9 @@
     </div>
   {/each}
 </div>
+
+<!-- Leave / Start button -->
+ <div class="flex flex-row gap-[5vmin] mt-[1%] ml-[-47%]">
+  <button type="button" class="btn btn-lg variant-filled w-[40vmin] h-[7vmin] mt-[5%] ml-[5%]" on:click={onLeave}>Leave</button>
+  <button type="button" class="btn btn-lg variant-filled w-[40vmin] h-[7vmin] mt-[5%] ml-[5%]" on:click={onStart}>Start</button>
+ </div>
