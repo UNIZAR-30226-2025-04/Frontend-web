@@ -22,7 +22,7 @@
  
     // Function to create a lobby
     function onCreateLobby(){
-        goto("/lobbyHost");
+        goto("/lobby");
         modalStore.close();
     }
 

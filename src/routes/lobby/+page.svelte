@@ -2,6 +2,9 @@
   import  AvatarDisplay  from "../../lib/components/AvatarDisplay.svelte";
   import { userDataStore } from '$lib/stores';
   import { goto } from "$app/navigation";
+  import { flip } from "svelte/animate";
+  import { cubicOut } from "svelte/easing";
+
 
 
   let actual = 8; // Actual number of players
@@ -34,31 +37,45 @@
 
   // Player type
   type Player = {
-    username: string;
-    icon: number;
+    key: number
+    username: string
+    icon: number
   };
 
   // Local player
   let username: string = $userDataStore.username;
   let avatar: number = $userDataStore.icon;
 
-  // List of players
+  // List of players, includes testing data for viewing purposes
   let players: Player[] = [
-    {username: username, icon: avatar},
-    {username: "Player2", icon: 2},
-    {username: "Player3", icon: 3},
-    {username: "Player4", icon: 4},
-    {username: "Player5", icon: 5},
-    {username: "Player6", icon: 6},
-    {username: "Player7", icon: 7},
-    {username: "Player8", icon: 8},
+    {username: username, icon: avatar, key:0},
+    {username: "Player2", icon: 2, key:1},
+    {username: "Player3", icon: 3, key:2},
+    {username: "Player4", icon: 4, key:3},
+    {username: "Player5", icon: 5, key:4},
+    {username: "Player6", icon: 6, key:5},
+    {username: "Player7", icon: 7, key:6},
+    {username: "Player8", icon: 8, key:7},
   ];
 
-  // Function to kick a player
+  /**
+   * Function to kick a player of the list that has index
+   * @number index
+   * */ 
   function onKickPlayer(index: number){
     console.log("Kicking player", players[index].username);
     players = [...players.slice(0, index), ...players.slice(index + 1)];
     actual = players.length;
+  }
+
+  /**
+   * Adds user to the list
+   * @param username
+   * @param icon
+   */
+  function addPlayer(username:string, icon:number){
+    let newUser:Player = {username:username,icon:icon,key:players.length};
+    players = [...players,newUser]
   }
 
 </script>
@@ -76,9 +93,9 @@
 
 
 <!-- Players -->
-<div class="mt-[4%] gap-[5vmin] ml-[5%] mr-[5%] grid grid-cols-2 md:grid-cols-4 gap-4">
-  {#each players as player, index}
-    <div class="block card card-hover p-4 h-[28vmin] w-[40vmin] shadow-xl space-y-6  text-left" style="flex: 0 0 40vmin;"> 
+<div class="mt-[4%] gap-[5vmin] ml-[5%] mr-[5%] grid grid-cols-2 md:grid-cols-4">
+  {#each players as player, index (player.key)}
+    <div animate:flip={{ duration: 500, easing: cubicOut }} class="block card card-hover p-4 h-[28vmin] w-[40vmin] shadow-xl space-y-6  text-left" style="flex: 0 0 40vmin;"> 
       <AvatarDisplay icon={player.icon} width={100}/>
       <h1 class="text-[3vmin]">{player.username}</h1>
       {#if index != 0}
