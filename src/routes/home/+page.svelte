@@ -13,6 +13,11 @@
     type: 'component',
     component: 'createLobbyModal'
   };
+
+  const modalFriends: ModalSettings = {
+    type: 'component',
+    component: 'friendsModal'
+  }
   
   function clickOnProfile(){
     modalStore.trigger(modalInfoChange);
@@ -20,6 +25,10 @@
 
   function clickOnHost(){
     modalStore.trigger(modalCreateLobby);
+  }
+
+  function clickOnFriends(){
+    modalStore.trigger(modalFriends);
   }
 
 </script>
@@ -59,7 +68,7 @@
       </button>
 
       <!-- FRIENDS -->
-      <button class="block card p-3 content-center text-[clamp(20px,3.5vmin,999px)] w-[clamp(100px,17vmin,999px)]">
+      <button class="block card p-3 content-center text-[clamp(20px,3.5vmin,999px)] w-[clamp(100px,17vmin,999px)]" on:click={clickOnFriends}>
         FRIENDS
       </button>
     </div>

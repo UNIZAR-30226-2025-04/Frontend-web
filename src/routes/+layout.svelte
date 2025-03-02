@@ -19,11 +19,13 @@
 
 	// Modal signleton setup, once per proyect
 	import { initializeStores, Modal } from '@skeletonlabs/skeleton';
+    import FriendsModal from '$lib/components/FriendsModal.svelte';
 	initializeStores();
 
   	const modalRegistry: Record<string, ModalComponent> = {
     infoChangeModal: { ref: InformationChangeFormModal },
 	createLobbyModal: { ref: CreateLobbyFormModal },
+	friendsModal: { ref : FriendsModal },
   };
 
   
