@@ -3,21 +3,24 @@
     import { userDataStore } from '$lib/stores';
     import  AvatarDisplay  from "./AvatarDisplay.svelte";
     import { avatarDirectory } from "$lib/avatarsDirectory";
-    import type { publicInformationUser } from "$lib/interfaces";
 	import { flip } from 'svelte/animate';
-
-
 
     // Props
     /** Exposes parent props to this component. */
     export let parent: SvelteComponent;
 
+    interface listItem {
+        key: number
+        username: string
+        icon: number
+    }
+
     // Value of the username search bar
     let usernameSearch: string;
     // Array of saved users, only icon and username
-    let savedFriends: publicInformationUser[];
+    let savedFriends: listItem[];
     // Array of pending user requests, only icon and username
-    let pendingRequests: publicInformationUser[];
+    let pendingRequests: listItem[];
     // Text of the Add button, used to change it to "..." while it process
     let AddText: string = "Add";
 
@@ -57,7 +60,7 @@
     async function clickOnAdd() {
         AddText = "...";
         await sleep(2000);
-        let newFriendRequest: publicInformationUser = {username:usernameSearch,icon:1};
+        let newFriendRequest: listItem = {username:usernameSearch,icon:1,key:pendingRequests.length};
         pendingRequests = [...pendingRequests, newFriendRequest];
         AddText = "Add";
     }
@@ -72,23 +75,23 @@
 
     // Test data while we wait for endpoints
     savedFriends = [
-        {username:"Victor",icon:1},
-        {username:"Emilliano",icon:2},
-        {username:"Jogue",icon:3},
-        {username:"Ruben",icon:4},
-        {username:"Jota",icon:1},
-        {username:"Josemi",icon:2},
-        {username:"Yago",icon:3},
-        {username:"Nicolas",icon:4},
+        {username:"Victor",icon:1,key:0},
+        {username:"Emilliano",icon:2,key:1},
+        {username:"Jogue",icon:3,key:2},
+        {username:"Ruben",icon:4,key:3},
+        {username:"Jota",icon:1,key:4},
+        {username:"Josemi",icon:2,key:5},
+        {username:"Yago",icon:3,key:6},
+        {username:"Nicolas",icon:4,key:7},
 
     ]
     pendingRequests = [
-        {username:"Solana",icon:5},
-        {username:"Diego",icon:6},
-        {username:"Elias",icon:7},
-        {username:"Zanos",icon:8},
-        {username:"Raul",icon:5},
-        {username:"Tristan",icon:6},
+        {username:"Solana",icon:5,key:0},
+        {username:"Diego",icon:6,key:1},
+        {username:"Elias",icon:7,key:2},
+        {username:"Zanos",icon:8,key:3},
+        {username:"Raul",icon:5,key:4},
+        {username:"Tristan",icon:6,key:5},
     ]
     
 
@@ -109,7 +112,7 @@
     <!--Title and vertical scroll for saved friends-->
     <div class="content-center text-[18px]">Save friends</div>
     <div class="h-52 overflow-y-auto p-2">
-        {#each savedFriends as friend, index (friend.username)}
+        {#each savedFriends as friend, index (friend.key)}
             <div animate:flip class="flex mb-2 gap-3">
                 <!--on:click funtions need to be anonimus so a landa function is necesary-->
                 <button class="btn-icon-sm rounded-md font-bold variant-filled text-[15px]" on:click={() => {removeFriend(index)}}>X</button>
@@ -121,7 +124,7 @@
     <!--Title and vertical scroll for pending friend requests-->
     <div class="content-center text-[18px]">Pending friend requests</div>
     <div class="h-52 overflow-y-auto p-2">
-        {#each pendingRequests as request, index (request.username)}
+        {#each pendingRequests as request, index (request.key)}
             <div animate:flip class="flex mb-2 gap-3">
                 <!--on:click funtions need to be anonimus so a landa function is necesary-->
                 <button class="btn-icon-sm rounded-md font-bold variant-filled text-[15px]" on:click={() => {removeRequest(index)}}>X</button>
