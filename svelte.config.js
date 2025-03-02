@@ -1,8 +1,6 @@
 import adapter from '@sveltejs/adapter-static';
 import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 
-// base variable to detect if it's been deployed on github-pages
-const base = process.env.DEPLOY_ENV === 'github-pages' ? '/Frontend-web' : '';
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
@@ -28,7 +26,7 @@ const config = {
 
 	kit: {
 		paths: {
-			base,
+			base: process.env.DEPLOY_ENV === 'github-pages' ? '/Frontend-web' : ''
 		},
 		adapter: adapter({
 			pages: 'sveltekit-github-pages', // Carpeta de salida para GitHub Pages
