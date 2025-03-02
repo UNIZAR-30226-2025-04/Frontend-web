@@ -1,15 +1,30 @@
 <script lang="ts">
+    import { goto } from '$app/navigation';
 	import { base } from '$app/paths';
-	let email = '';
-	let passwd = '';
-	let remember = false;
+    import type { UserData } from '$lib/interfaces';
+	import { userDataStore } from '$lib/stores';
+
+	let email:string = '';
+	let passwd:string = '';
+	let remember:boolean = false;
   
 	// Test handler function
 	function login(event: SubmitEvent): void {
-	  event.preventDefault();
-	  console.log("Email:", email);
-	  console.log("Password:", passwd);
-	  console.log("Remember me:", remember);
+		event.preventDefault();
+		console.log("Email:", email);
+		console.log("Password:", passwd);
+		console.log("Remember me:", remember);
+		if(remember){
+			let userDataInput:UserData = {
+				email:email,
+				username:"RememberPlaceholder",
+				password:passwd,
+				icon:2,
+				token:1,
+			}
+			userDataStore.set(userDataInput);
+		}
+		goto(base+"/home");
 	}
 
 </script>

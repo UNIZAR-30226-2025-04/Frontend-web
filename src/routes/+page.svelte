@@ -1,5 +1,13 @@
 <script lang="ts">
 	import { base } from '$app/paths';
+	import { goto } from '$app/navigation';
+	import { userDataStore } from '$lib/stores';
+
+	// If user is cached we boot it to home
+	if( $userDataStore.token !== 0){
+		goto(base+"/home");
+	}
+
 
 	function scrollToBottom() {
 	  const targetPosition = document.body.scrollHeight;

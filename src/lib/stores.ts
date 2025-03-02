@@ -1,5 +1,6 @@
 import { writable } from 'svelte/store';
 import type { UserData } from '$lib/interfaces';
+import { persisted } from 'svelte-persisted-store'
 
 let userDataInitial: UserData = {
     username: "Name",
@@ -9,5 +10,5 @@ let userDataInitial: UserData = {
     token: 0
 }
 
-export let userDataStore = writable(userDataInitial)
+export let userDataStore = persisted('userDataNogler',userDataInitial)
 
