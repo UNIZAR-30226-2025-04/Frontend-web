@@ -28,12 +28,12 @@
 
 
 <!-- Game logo -->
-<img class='mt-[2vh] h-[50vmin] w-auto' src='nogler.png' alt="Nogler" />
+<img class='mt-[2vh] h-[50vmin] w-auto' src='nogler2.png' alt="Nogler" />
 
   <!-- Button bar -->
   <div class="gap-[2vmin] mt-[4%] flex">
     <!-- Profile card -->
-    <div class="card p-3 text-[1.7vmin]">
+    <div class="card p-3 text-[clamp(14px,1.7vmin,999px)]">
       Profile
       <!-- Profile button -->
       <button class="block card p-3 mt-3" on:click={clickOnProfile}>
@@ -44,22 +44,22 @@
     <!-- Game buttons -->
     <div class="card flex p-3 gap-3">
       <!-- JOIN -->
-      <button class="block card p-3 content-center text-[3.5vmin] w-[17vmin]">
+      <button class="block card p-3 content-center text-[clamp(20px,3.5vmin,999px)] w-[clamp(100px,17vmin,999px)] break-words">
         JOIN
       </button>
 
       <!-- HOST -->
-      <button class="block card p-3 content-center text-[3.5vmin] w-[17vmin]" on:click={clickOnHost}>
+      <button class="block card p-3 content-center text-[clamp(20px,3.5vmin,999px)] w-[clamp(100px,17vmin,999px)]" on:click={clickOnHost}>
         HOST
       </button>
 
       <!-- INBOX -->
-      <button class="block card p-3 content-center text-[3.5vmin] w-[17vmin]">
+      <button class="block card p-3 content-center text-[clamp(20px,3.5vmin,999px)] w-[clamp(100px,17vmin,999px)]">
         INBOX
       </button>
 
       <!-- FRIENDS -->
-      <button class="block card p-3 content-center text-[3.5vmin] w-[17vmin]">
+      <button class="block card p-3 content-center text-[clamp(20px,3.5vmin,999px)] w-[clamp(100px,17vmin,999px)]">
         FRIENDS
       </button>
     </div>
@@ -68,7 +68,7 @@
     <div class="content-center">
       <a href="https://github.com/UNIZAR-30226-2025-04">
         <img src="github.svg" alt="Github logo" class="w-[4vmin] mx-auto"/>
-        <div class="card p-3 text-[1.7vmin]">
+        <div class="card p-3 text-[clamp(14px,1.7vmin,999px)]">
           Github
         </div>
       </a>
