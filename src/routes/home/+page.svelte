@@ -28,7 +28,7 @@
 
 
 <!-- Game logo -->
-<img class='mt-[2vh] h-[50vmin] w-auto' src='nogler2.png' alt="Nogler" />
+<img class='mt-[2vh] h-[50vmin] w-auto' src='nogler.png' alt="Nogler" />
 
   <!-- Button bar -->
   <div class="gap-[2vmin] mt-[4%] flex">
@@ -67,7 +67,7 @@
     <!-- Github button -->
     <div class="content-center">
       <a href="https://github.com/UNIZAR-30226-2025-04">
-        <img src="github.svg" alt="Github logo" class="w-[4vmin] mx-auto"/>
+        <img src="github.svg" alt="Github logo" class="w-[clamp(40px,4vmin,999px)] mx-auto"/>
         <div class="card p-3 text-[clamp(14px,1.7vmin,999px)]">
           Github
         </div>
