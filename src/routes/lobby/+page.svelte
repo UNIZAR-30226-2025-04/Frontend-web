@@ -4,6 +4,7 @@
   import { goto } from "$app/navigation";
   import { flip } from "svelte/animate";
   import { cubicOut } from "svelte/easing";
+  import { ChatFill } from "svelte-bootstrap-icons";
 
 
 
@@ -12,7 +13,7 @@
   let publicString = "PUBLIC"; // String to show if the lobby is public or private
   let publicValue = true; // Boolean to know if the lobby is public or private
   let code = "1234"; // Code of the lobby
-  let host = true; // Boolean to know if the player is the host
+  let host = false; // Boolean to know if the player is the host
   
   // Function to switch the public value
   function onSwitchPublic(){
@@ -85,13 +86,16 @@
 
 
 <!-- Lobby header -->
-<div class="flex flex-row gap-[10vmin] mt-[2%] ml-[-25%] text-[3.5vmin] items-center"> 
+<div class="flex flex-row gap-[10vmin] mt-[2%] ml-[0%] text-[3.5vmin] items-center"> 
   <h1>LOBBY</h1>
   <span>{actual} / {max}</span>
   <button type="button" class="btn btn-lg variant-filled w-[13vmin]" on:click={onSwitchPublic}>{publicString}</button>
   <h1>Code : {code}</h1>
   <button type="button" class="btn btn-lg variant-filled" on:click={onCopyCode}>Copy</button>
   <button type="button" class="btn btn-lg variant-filled">Share</button>
+  <div class="ml-[37vmin]">
+    <button type="button" class="btn btn-lg variant-filled"><ChatFill></ChatFill></button>
+  </div>
 </div>
 
 
@@ -116,7 +120,12 @@
 <!-- Leave / Start button -->
 {#if host}
   <div class="flex flex-row gap-[5vmin] mt-[1%] ml-[-47%]">
-  <button type="button" class="btn btn-lg variant-filled w-[40vmin] h-[7vmin] mt-[5%] ml-[5%]" on:click={onLeave}>Leave</button>
-  <button type="button" class="btn btn-lg variant-filled w-[40vmin] h-[7vmin] mt-[5%] ml-[5%]" on:click={onStart}>Start</button>
+    <button type="button" class="btn btn-lg variant-filled w-[40vmin] h-[7vmin] mt-[5%] ml-[5%]" on:click={onLeave}>Leave</button>
+    <button type="button" class="btn btn-lg variant-filled w-[40vmin] h-[7vmin] mt-[5%] ml-[5%]" on:click={onStart}>Start</button>
+  </div>
+{/if}
+{#if !host}
+  <div class="flex flex-row gap-[5vmin] mt-[1%] ml-[-66%]">
+    <button type="button" class="btn btn-lg variant-filled w-[40vmin] h-[7vmin] mt-[10%] ml-[3%]" on:click={onLeave}>Leave</button>
   </div>
 {/if}
