@@ -22,7 +22,7 @@
  
     // Function to create a lobby
     function onCreateLobby(){
-        goto("/");
+        goto("/lobbyHost");
         modalStore.close();
     }
 
@@ -48,7 +48,7 @@
 			<button style="font-size:112%"class="block btn {parent.buttonNeutral} w-full" on:click={parent.onClose}>Vs AI</button>
 			<button style="font-size:112%" class="block btn {parent.buttonPositive} w-full" on:click={parent.onClose}>Cancel</button>
         </div>
-        <button style="font-size:112%" class="block btn {parent.buttonNeutral} w-full" on:click={onCreateLobby}>Create</button>
+        <button style="font-size:112%" class="block btn {parent.buttonNeutral} w-full" type="button" on:click={onCreateLobby}>Create</button>
     </form>
     
 {/if}
