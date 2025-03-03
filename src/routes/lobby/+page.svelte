@@ -34,10 +34,6 @@
     console.log("Starting game");
   }
 
-  // Function to leave the lobby
-  function onLeave(){
-    goto(base+"/home");
-  }
 
   // Player type
   type Player = {
@@ -111,7 +107,7 @@
       {/if}
       {#if host}
         {#if index != 0}
-        <button class="btn btn-lg variant-filled mt-[30%]" on:click={() => onKickPlayer(index)}>Kick</button>
+          <button class="btn btn-lg variant-filled mt-[30%]" on:click={() => onKickPlayer(index)}>Kick</button>
         {/if}
       {/if}
     </div>
@@ -121,12 +117,12 @@
 <!-- Leave / Start button -->
 {#if host}
   <div class="flex flex-row gap-[5vmin] mt-[1%] ml-[-47%]">
-    <button type="button" class="btn btn-lg variant-filled w-[40vmin] h-[7vmin] mt-[5%] ml-[5%]" on:click={onLeave}>Leave</button>
+    <button type="button" class="btn btn-lg variant-filled w-[40vmin] h-[7vmin] mt-[5%] ml-[5%]" on:click={() => goto(base + "/home")}>Leave</button>
     <button type="button" class="btn btn-lg variant-filled w-[40vmin] h-[7vmin] mt-[5%] ml-[5%]" on:click={onStart}>Start</button>
   </div>
 {/if}
 {#if !host}
   <div class="flex flex-row gap-[5vmin] mt-[1%] ml-[-66%]">
-    <button type="button" class="btn btn-lg variant-filled w-[40vmin] h-[7vmin] mt-[10%] ml-[3%]" on:click={onLeave}>Leave</button>
+    <button type="button" class="btn btn-lg variant-filled w-[40vmin] h-[7vmin] mt-[10%] ml-[3%]" on:click={() => goto(base + "/home")}>Leave</button>
   </div>
 {/if}

@@ -1,6 +1,7 @@
 <script lang="ts">
   import { getModalStore, type ModalComponent, type ModalSettings } from '@skeletonlabs/skeleton';
   import { userDataStore } from '$lib/stores';
+  import { base } from '$app/paths';
 
   const modalStore = getModalStore();
   
@@ -54,7 +55,7 @@
     <div class="card flex p-3 gap-3">
       <!-- JOIN -->
       <button class="block card p-3 content-center text-[clamp(20px,3.5vmin,999px)] w-[clamp(100px,17vmin,999px)] break-words">
-        JOIN
+        <a href="{base}/lobbies">JOIN</a>
       </button>
 
       <!-- HOST -->
