@@ -36,7 +36,7 @@
 
 
 <!-- Game logo -->
-<img class='logo' src='nogler.png' alt="Nogler" style="margin-top: 2vh; height: 40vmin; width: auto"/>
+<img class='logo' src='nogler2.png' alt="Nogler" style="margin-top: 2vh; height: 40vmin; width: auto"/>
 <!-- Game description -->
 <p class='description' style="font-size: max(2vmin,15px); margin-top: 4%; margin-right: 10%; margin-left: 10%; ">
 	Card game... Lorem ipsum dolor sit amet, consectetur adipiscing elit, 

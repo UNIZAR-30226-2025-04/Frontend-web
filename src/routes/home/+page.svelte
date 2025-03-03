@@ -37,7 +37,7 @@
 
 
 <!-- Game logo -->
-<img class='mt-[2vh] h-[50vmin] w-auto' src='nogler.png' alt="Nogler" />
+<img class='mt-[2vh] h-[50vmin] w-auto' src='nogler2.png' alt="Nogler" />
 
   <!-- Button bar -->
   <div class="gap-[2vmin] mt-[4%] flex">
