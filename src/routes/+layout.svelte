@@ -15,6 +15,7 @@
 	import { storePopup, type ModalComponent } from '@skeletonlabs/skeleton';
   	import InformationChangeFormModal from '$lib/components/InformationChangeFormModal.svelte';
 	import CreateLobbyFormModal from '$lib/components/CreateLobbyFormModal.svelte';
+	import JoinLobbyCodeModal from '$lib/components/JoinLobbyCodeModal.svelte';
 	storePopup.set({ computePosition, autoUpdate, flip, shift, offset, arrow });
 
 	// Modal signleton setup, once per proyect
@@ -26,6 +27,7 @@
     infoChangeModal: { ref: InformationChangeFormModal },
 	createLobbyModal: { ref: CreateLobbyFormModal },
 	friendsModal: { ref : FriendsModal },
+	joinLobbyCodeModal: {ref: JoinLobbyCodeModal}
   };
 
   

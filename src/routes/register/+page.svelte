@@ -2,22 +2,19 @@
 	import { base } from '$app/paths';
 
 	const errorContainer = 'alert variant-ghost-error p-2';
-    const errorMessagePasswd = 'alert-message text-left'
+    const errorMessagePasswd = 'alert-message text-left text-black'
 
 	let email = '';
 	let username = '';
 	let passwd1 = '';
 	let passwd2 = '';
-	let errorMessage = "";
+	let errorMessage = false;
   
 	// Test handler function
 	function register(event: SubmitEvent): void {
 	  event.preventDefault();
 
-	  if(passwd1 != passwd2){
-			errorMessage = "Oops! Your passwords don't match. Please re-enter them.";
-			return;
-	  }
+	  errorMessage = true;
 
 	  console.log("Email:", email);
 	  console.log("Username:", username);

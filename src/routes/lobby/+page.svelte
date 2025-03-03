@@ -24,7 +24,7 @@
     console.log(publicValue);
   }
  
-  // Function copy code to clipboard
+  // Function to copy code to clipboard
   function onCopyCode(){
     navigator.clipboard.writeText(code);
   }
