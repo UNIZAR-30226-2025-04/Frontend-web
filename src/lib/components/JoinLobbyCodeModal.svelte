@@ -11,7 +11,7 @@
     let errorMessage = false;
 
     const errorContainer = 'alert variant-ghost-error p-2';
-    const errorMessagePasswd = 'alert-message text-left';
+    const errorMessageCode = 'alert-message text-left';
 
     const correctCode = "1234";
 
@@ -81,7 +81,7 @@
         <!-- Error message for non existent code -->
         {#if errorMessage}
             <aside class="{errorContainer}">
-                <div class="{errorMessagePasswd}">
+                <div class="{errorMessageCode}">
                     Code doesn't exist!
                 </div>
             </aside>
