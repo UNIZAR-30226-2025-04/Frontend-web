@@ -2,6 +2,7 @@
   import { getModalStore, type ModalComponent, type ModalSettings } from '@skeletonlabs/skeleton';
   import { userDataStore } from '$lib/stores';
   import { base } from '$app/paths';
+    import { goto } from '$app/navigation';
 
   const modalStore = getModalStore();
   
@@ -18,6 +19,10 @@
   const modalFriends: ModalSettings = {
     type: 'component',
     component: 'friendsModal'
+  }
+
+  function clickOnJoin(){
+    goto(base+"/lobbies");
   }
   
   function clickOnProfile(){
@@ -54,8 +59,8 @@
     <!-- Game buttons -->
     <div class="card flex p-3 gap-3">
       <!-- JOIN -->
-      <button class="block card p-3 content-center text-[clamp(20px,3.5vmin,999px)] w-[clamp(100px,17vmin,999px)] break-words">
-        <a href="{base}/lobbies">JOIN</a>
+      <button class="block card p-3 content-center text-[clamp(20px,3.5vmin,999px)] w-[clamp(100px,17vmin,999px)]" on:click={clickOnJoin}>
+        JOIN
       </button>
 
       <!-- HOST -->
