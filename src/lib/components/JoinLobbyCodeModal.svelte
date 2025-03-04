@@ -88,7 +88,7 @@
         {/if}
 
         <!-- Cancel button -->
-        <div class="mt-[5%] w-[37vmin] ml-[5%]">
+        <div class="mt-[5%] w-[36vmin] ml-[6%]">
             <button class="block btn {parent.buttonPositive} w-full text-lg" on:click={parent.onClose}>Cancel</button>
         </div>
     </div>
