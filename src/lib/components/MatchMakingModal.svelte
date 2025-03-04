@@ -16,7 +16,7 @@
     <div class="modal-form card p-4 w-[40vmin] h-[25vmin] shadow-xl">
         <h1 class="text-center text-[5vmin] font-bold p-5">MATCHMAKING</h1>
         
-        <!-- Cancel button -->
+        <!-- Loader -->
         <div class="flex justify-center items-center mt-[7%]">
             <div class="loader"></div>
         </div>
@@ -30,7 +30,6 @@
 
 
 <style>
-    /* HTML: <div class="loader"></div> */
     .loader {
     color: #ffffff;
     width: 4px;
