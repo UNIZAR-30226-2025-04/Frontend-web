@@ -59,11 +59,11 @@
 </script>
 
 {#if $modalStore[0]}
-    <div class="modal-form card p-4 w-[40vmin] shadow-xl space-y-4">
-        <h1 class="text-center text-xl font-bold">Join with code</h1>
+    <div class="modal-form card p-4 w-[44vmin] h-[25vmin] shadow-xl">
+        <h1 class="text-center text-[5vmin] font-bold mt-[3%]">Join with code</h1>
 
         <!-- Digit input fields --> 
-        <div class="flex gap-2 justify-center">
+        <div class="flex gap-2 justify-center mt-[5%]">
             {#each code as digit, index}
                 <input
                     id={"id-" + index}
@@ -88,7 +88,7 @@
         {/if}
 
         <!-- Cancel button -->
-        <div class="flex gap-6 justify-stretch mt-4">
+        <div class="mt-[5%] w-[37vmin] ml-[5%]">
             <button class="block btn {parent.buttonPositive} w-full text-lg" on:click={parent.onClose}>Cancel</button>
         </div>
     </div>

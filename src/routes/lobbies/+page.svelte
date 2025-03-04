@@ -42,8 +42,17 @@
       component: 'joinLobbyCodeModal'
   };
 
+  const modalMatchMaking: ModalSettings = {
+      type: 'component',
+      component: 'matchMakingModal'
+  };
+
   function clickOnInsertCode(){
     modalStore.trigger(modalJoinLobbyCode);
+  }
+
+  function clickOnMatchMaking(){
+    modalStore.trigger(modalMatchMaking);
   }
 
 </script>
@@ -54,7 +63,7 @@
 <!-- Buttons -->
 <div class="flex flex-row gap-[10vmin] mt-[3%] ml-[1%] text-[3.5vmin]"> 
   <button type="button" class="btn btn-lg variant-filled w-[18vmin]" on:click={clickOnInsertCode}>INSERT CODE</button>
-  <button type="button" class="btn btn-lg variant-filled">MATCHMAKING</button>
+  <button type="button" class="btn btn-lg variant-filled" on:click={clickOnMatchMaking}>MATCHMAKING</button>
   <div class="ml-[109vmin]">
     <button type="button" class="btn btn-lg variant-filled" on:click={() => goto(base + "/home")}>BACK</button>
   </div>
@@ -62,7 +71,7 @@
 
 
 <!-- Lobbies -->
-<div class="lobby-list-container ml-[2%] mt-[2%] overflow-y-auto h-[60vh]">
+<div class="lobby-list-container ml-[2%] mt-[2%] overflow-y-auto h-[60vh] rounded-lg">
   <nav>
     <ul>
       {#each lobbies as lobby, index (lobby.key)}
@@ -71,7 +80,7 @@
             <AvatarDisplay icon={lobby.icon} width={60}/>
             <span class="text-[4vmin] ml-4">{lobby.host}</span>
             <div class="ml-auto">
-                <button class={`badge text-[3vmin] px-9 py-4 ${lobby.players != 8 ? 'bg-primary-500' : 'bg-error-500'}`}> JOIN {lobby.players} / 8</button>
+                <button class={`badge text-[3vmin] px-9 py-4 rounded-lg ${lobby.players != 8 ? 'bg-primary-500' : 'bg-error-500'}`}> JOIN {lobby.players} / 8</button>
             </div>
           </div>
         </li>
