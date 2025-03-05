@@ -26,30 +26,32 @@
 
 
     /**
-     * Removes from the savedFriends list the index
+     * Removes from the savedFriends list the index that has the key
      * @param index
+     * @param key
      * @async
      */
-    async function removeFriend(index:number){
+    async function removeFriend(index:number, key:number){
         let auxUsername:string = savedFriends[index].username;
         savedFriends[index].username = "Removing..."
         savedFriends=savedFriends;
         await sleep(2000);
-        savedFriends.splice(index,1);
+        savedFriends = savedFriends.filter(request => request.key !== key);
         savedFriends = savedFriends;
     }
 
     /**
      * Removes from the pending list the index
      * @param index
+     * @param key
      * @async
      */
-    async function removeRequest(index:number){
+    async function removeRequest(index:number, key:number){
         let auxUsername:string = pendingRequests[index].username;
         pendingRequests[index].username = "Removing..."
         pendingRequests=pendingRequests;
         await sleep(2000);
-        pendingRequests.splice(index,1);
+        pendingRequests = pendingRequests.filter(request => request.key !== key);
         pendingRequests = pendingRequests;
     }
 
@@ -115,7 +117,7 @@
         {#each savedFriends as friend, index (friend.key)}
             <div animate:flip class="flex mb-2 gap-3">
                 <!--on:click funtions need to be anonimus so a landa function is necesary-->
-                <button class="btn-icon-sm rounded-md font-bold variant-filled text-[15px]" on:click={() => {removeFriend(index)}}>X</button>
+                <button class="btn-icon-sm rounded-md font-bold variant-filled text-[15px]" on:click={() => {removeFriend(index, friend.key)}}>X</button>
                 <div class="content-center"><AvatarDisplay icon={friend.icon} width={35}/></div>
                 <div class="content-center text-[22px]">{friend.username}</div>
             </div>
@@ -127,7 +129,7 @@
         {#each pendingRequests as request, index (request.key)}
             <div animate:flip class="flex mb-2 gap-3">
                 <!--on:click funtions need to be anonimus so a landa function is necesary-->
-                <button class="btn-icon-sm rounded-md font-bold variant-filled text-[15px]" on:click={() => {removeRequest(index)}}>X</button>
+                <button class="btn-icon-sm rounded-md font-bold variant-filled text-[15px]" on:click={() => {removeRequest(index, request.key)}}>X</button>
                 <div class="content-center"><AvatarDisplay icon={request.icon} width={35}/></div>
                 <div class="content-center text-[22px]">{request.username}</div>
             </div>
