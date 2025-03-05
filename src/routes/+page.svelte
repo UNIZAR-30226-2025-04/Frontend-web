@@ -93,9 +93,9 @@
 	</div>
  </div>
 <!-- Card Container: align cards in a row -->
-<div class="card-container">
+<div class="card-container" style="width: 50vw; display: flex; justify-content: space-between; margin-top: 10px">
      <!-- Card 3: Friends -->
-     <div class="card-hover" style="height: auto; width: 24.5vw">
+     <div class="card-hover" style="height: auto; width: 49%; margin: 0px">
          <h1 style="font-size: max(2vmin,15px);">Friends</h1>
          <p style="text-justify: inter-word; text-align: justify; font-size: max(1.5vmin,12px);">
              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
@@ -105,7 +105,7 @@
          </p>
      </div>
      <!-- Card 4: Compete -->
-     <div class="card-hover" style="height: auto; width: 24.5vw;">
+     <div class="card-hover" style="height: auto; width: 49%; margin: 0px">
          <h1 style="font-size: max(2vmin,15px);">Compete</h1>
          <p style="text-justify: inter-word; text-align: justify; font-size: max(1.5vmin,12px);">
              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
