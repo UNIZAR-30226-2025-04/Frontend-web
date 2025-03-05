@@ -1,30 +1,65 @@
 <script lang="ts">
     import { goto } from '$app/navigation';
 	import { base } from '$app/paths';
+	import { apiBase, loginPath } from '$lib/paths';
     import type { UserData } from '$lib/interfaces';
 	import { userDataStore } from '$lib/stores';
 
 	let email:string = '';
 	let passwd:string = '';
 	let remember:boolean = false;
+	let showError:boolean = false;
+	let error:string = '';
   
 	// Test handler function
-	function login(event: SubmitEvent): void {
+	async function login(event: SubmitEvent) {
 		event.preventDefault();
 		console.log("Email:", email);
 		console.log("Password:", passwd);
 		console.log("Remember me:", remember);
-		if(remember){
-			let userDataInput:UserData = {
-				email:email,
-				username:"RememberPlaceholder",
-				password:passwd,
-				icon:2,
-				token:1,
+		let success:boolean = false;
+
+		const formData = new URLSearchParams();
+		formData.append("email", email);
+		formData.append("password", passwd);
+
+
+		try {
+            const response = await fetch(loginPath, {
+                method: 'POST',
+                headers: {
+                    'accept': 'application/json',
+					'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: formData.toString()
+            });
+
+            if (!response.ok) {
+                throw new Error("Error en la autenticación");
+            }
+
+            const data = await response.json();
+            success = true;
+            console.log("Respuesta de la API:", data);
+        } catch (err:any) {
+            error = err.message;
+        }
+
+		if(success){
+			if(remember){
+				let userDataInput:UserData = {
+					email:email,
+					username:"RememberPlaceholder",
+					password:passwd,
+					icon:2,
+					token:1,
+				}
+				userDataStore.set(userDataInput);
 			}
-			userDataStore.set(userDataInput);
+			goto(base+"/home");
+		}else{
+			showError = true;
 		}
-		goto(base+"/home");
 	}
 
 </script>
@@ -67,7 +102,15 @@
         >
         <span>Remember me</span>
       </label>
-      
+
+	  {#if showError}
+	  	<aside class="alert variant-ghost-error p-2 mb-2 mt-2">
+			<div class="alert-message text-left text-black">
+				Incorrect email or password: {error}
+			</div>
+		</aside>
+      {/if}
+	  
       <button type="submit">Login</button>
     </form>
   </div>
