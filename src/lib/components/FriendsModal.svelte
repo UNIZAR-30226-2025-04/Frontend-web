@@ -110,7 +110,7 @@
         <button class="btn variant-filled" on:click={clickOnAdd}>{AddText}</button>
     </div>
     <!--Title and vertical scroll for saved friends-->
-    <div class="content-center text-[18px]">Save friends</div>
+    <div class="content-center text-[18px]">Saved friends</div>
     <div class="h-52 overflow-y-auto p-2">
         {#each savedFriends as friend, index (friend.key)}
             <div animate:flip class="flex mb-2 gap-3">
