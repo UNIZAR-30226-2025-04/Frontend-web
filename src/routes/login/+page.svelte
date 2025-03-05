@@ -31,7 +31,8 @@
                     'accept': 'application/json',
 					'Content-Type': 'application/x-www-form-urlencoded'
                 },
-                body: formData.toString()
+                body: formData.toString(),
+				credentials: "include"
             });
 
             if (!response.ok) {
