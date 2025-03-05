@@ -1,134 +1,203 @@
-<svelte:head>
-  <style>
-    @font-face {
-      font-family: 'Pixelify Sans';
-      src: url('/fonts/PixelifySans-Medium.otf') format('woff'),
-    }
-  </style>
-</svelte:head>
-
 <script lang="ts">
+	import { base } from '$app/paths';
+	import { goto } from '$app/navigation';
+	import { userDataStore } from '$lib/stores';
 
-	let email = '';
-	let passwd = '';
-	let remember = false;
-  
-	// Test handler function
-	function login(event: SubmitEvent): void {
-	  event.preventDefault();
-	  console.log("Email:", email);
-	  console.log("Password:", passwd);
-	  console.log("Remember me:", remember);
+	// If user is cached we boot it to home
+	if( $userDataStore.token !== 0){
+		goto(base+"/home");
 	}
 
-</script>
+
+	function scrollToBottom() {
+	  const targetPosition = document.body.scrollHeight;
+	  const startPosition = window.scrollY;
+	  const distance = targetPosition - startPosition;
+	  const duration = 1000;
+	  let startTime: number | null = null;
+  
+	  function scrollAnimation(currentTime: number) {
+		if (!startTime) startTime = currentTime;
+		const timeElapsed = currentTime - startTime;
+		const progress = Math.min(timeElapsed / duration, 1);
+		const ease = progress < 0.5
+		  ? 2 * progress * progress
+		  : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+		
+		window.scrollTo(0, startPosition + (distance * ease));
+		if (timeElapsed < duration) {
+		  requestAnimationFrame(scrollAnimation);
+		}
+	  }
+  
+	  requestAnimationFrame(scrollAnimation);
+	}
+  </script>
+
+
+<!-- Game logo -->
+<img class='logo' src='nogler2.png' alt="Nogler" style="margin-top: 2vh; height: 40vmin; width: auto"/>
+<!-- Game description -->
+<p class='description' style="font-size: max(2vmin,15px); margin-top: 4%; margin-right: 10%; margin-left: 10%; ">
+	Card game... Lorem ipsum dolor sit amet, consectetur adipiscing elit, 
+	sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
+	<br> Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris 
+	nisi ut aliquip ex ea commodo consequat. 
+</p>
+<!-- Button: Start playing-->
+<a href="{base}/login" class="btn variant-filled p-[1.5vmin]" style="margin-top: 2%; font-size: max(2vmin,15px);">
+	<span>Login page</span>
+</a>
+<a href="{base}/home" class="btn variant-filled p-[1.5vmin]" style="margin-top: 2%; font-size: max(2vmin,15px);">
+	<span>Home</span>
+</a>
+<!-- Scroll how to play	-->
+<button class='howToPlay' style="margin-top: 6%; font-size: max(1.5vmin,12px);" on:click={scrollToBottom}>
+	<p>How to play</p>
+	<i class="arrow down" style="margin-top: 0;"></i>
+</button>
+
+ 
+ <!-- Card 1: Cards -->
+ <div class="card-hover" style="height: auto; width: 50vw; margin-top: 10%; display: flex; flex-direction: row; flex-wrap: wrap; align-items: center;">
+    <div style="max-width: 85%; flex: 1;">
+		<h1 style="font-size: max(2vmin,15px);">Cards</h1>
+		<p style="text-justify: inter-word; text-align: justify; font-size: max(1.5vmin,12px);">
+			Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+			eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
+			ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
+			aliquip ex ea commodo consequat.
+			Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+			eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
+			ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
+			aliquip ex ea commodo consequat.
+		</p>
+	</div>
+	<img src='icons/pxArt.png' alt='icon' style="height: auto; width:125px; margin-right=2%">
+ </div>
+<!-- Card 2: Shop -->
+<div class="card-hover" style="height: auto; width: 50vw; display: flex; flex-direction: row; flex-wrap: wrap; align-items: center;">
+    <img src='icons/pxArt.png' alt='icon' style="height: auto; width:125px; margin-left=2%">
+	<div style="max-width: 85%; flex: 1;">
+		<h1 style="font-size: max(2vmin,15px);">Shop</h1>
+		<p style="text-justify: inter-word; text-align: justify; font-size: max(1.5vmin,12px);">
+			Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+			eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
+			ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
+			aliquip ex ea commodo consequat.
+			Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+			eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
+			ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
+			aliquip ex ea commodo consequat.
+		</p>
+	</div>
+ </div>
+<!-- Card Container: align cards in a row -->
+<div class="card-container" style="width: 50vw; display: flex; justify-content: space-between; margin-top: 10px">
+     <!-- Card 3: Friends -->
+     <div class="card-hover" style="height: auto; width: 49%; margin: 0px">
+         <h1 style="font-size: max(2vmin,15px);">Friends</h1>
+         <p style="text-justify: inter-word; text-align: justify; font-size: max(1.5vmin,12px);">
+             Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+             eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
+             ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
+             aliquip ex ea commodo consequat.
+         </p>
+     </div>
+     <!-- Card 4: Compete -->
+     <div class="card-hover" style="height: auto; width: 49%; margin: 0px">
+         <h1 style="font-size: max(2vmin,15px);">Compete</h1>
+         <p style="text-justify: inter-word; text-align: justify; font-size: max(1.5vmin,12px);">
+             Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+             eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
+             ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
+             aliquip ex ea commodo consequat.
+         </p>
+     </div>
+</div>
 
 <style>
-	:global(body) {
-	  display: flex;
-	  justify-content: center;
-	  align-items: center;
-	  height: 100vh;
-	  margin: 0;
-	  font-family: 'Pixelify Sans'
+    :global(body) {
+		background-image: url('/5.jpg') !important;
+		margin: 0;
+		width: 100%;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		flex-direction: column;
+		text-align: center;
+		color: black;
+		font-family: 'Pixelify Sans';
 	}
-  
-	.login {
-	  text-align: center;
-	  color: rgb(255, 255, 255);
-	  margin-bottom: 175px;
+
+	.btn:hover{
+		background-color:#007BFF
 	}
-  
-	.login h1 {
-	  margin-bottom: 10px;
+
+	.arrow {
+		border: solid rgb(255, 255, 255);
+		border-width: 0 3px 3px 0;
+		display: inline-block;
+		padding: 3px;
 	}
-  
-	.login a {
-	  text-decoration: underline;
+
+	.howToPlay {
+		cursor: pointer;
+		transition: transform 0.2s ease;
 	}
-  
-	.login-form {
-	  margin-top: 20px;
-	  background: rgb(56, 56, 56);
-	  padding: 30px;
-	  border-radius: 10px;
-	  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-	  text-align: center;
-	  width: 550px;
-	  display: flex;
-	  flex-direction: column;
+
+	.howToPlay:hover {
+		transform: scale(1.1);
+		color: #007BFF;
 	}
-  
-	.login-form label {
-	  text-align: left;
+
+	.howToPlay:hover p {
+		font-weight: bold;
 	}
-  
-	input[type="email"],
-	input[type="password"] {
-	  width: 100%;
-	  padding: 10px;
-	  margin-top: 5px;
-	  margin-bottom: 25px;
-	  border: 1px solid #ccc;
-	  border-radius: 15px;
-	  color: #000;
-	  box-sizing: border-box;
+
+	.howToPlay:hover .arrow {
+		border-color: #007BFF;
 	}
-  
-	button {
-	  background-color: #9f63ff;
-	  color: white;
-	  padding: 10px;
-	  border: none;
-	  border-radius: 15px;
-	  cursor: pointer;
-	  margin-top: 20px;
-	  width: 100%;
+
+	.down {
+		transform: rotate(45deg);
+		-webkit-transform: rotate(45deg);
 	}
-  
-	button:hover {
-	  background-color: rgb(95, 0, 173);
-	}
+
+	.card-hover {
+        width: 300px;
+        height: 300px;
+        margin: 10px;
+        background-color: #f0f0f0;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        padding: 20px;
+		border-radius: 10px;
+    }
+
+    .card-hover h1 {
+        text-align: left;
+        margin: 0;
+		font-size: 25px;
+		color: black;
+    }
+
+    .card-hover p {
+        text-align: left;
+        margin-top: 15px;
+        flex-grow: 1;
+		font-size: 18px;
+		color: rgb(83, 83, 83);
+    }
+
+    .card-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-around;
+		margin-bottom: 100px;
+    }
+
+
 </style>
 
-<div class="login"> 
-  <h1>Welcome back!</h1>
-  <p>Don't have an account yet? <a href="/">Create account</a></p>
-  
-  <div class="login-form">
-    <form id="login-form" on:submit={login}> 
-      <label for="email">Email</label>
-      <input 
-        type="email" 
-        id="email" 
-        bind:value={email} 
-        name="email" 
-        placeholder="your-email@example.com"
-        required
-      >
-      
-      <label for="passwd">Password</label>
-      <input 
-        type="password" 
-        id="passwd" 
-        bind:value={passwd} 
-        name="passwd" 
-        placeholder="Your password"
-        required
-      >
-      
-      <label class="flex items-center space-x-2">
-        <input 
-          class="checkbox" 
-          type="checkbox" 
-          id="remember" 
-          bind:checked={remember} 
-          name="remember"
-        >
-        <span>Remember me</span>
-      </label>
-      
-      <button type="submit">Login</button>
-    </form>
-  </div>
-</div>

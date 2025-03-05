@@ -1,6 +1,7 @@
 import adapter from '@sveltejs/adapter-static';
 import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 
+
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
 	extensions: ['.svelte'],
@@ -20,12 +21,21 @@ const config = {
 		}
 	}
 	*/
+
+	
+
 	kit: {
+		paths: {
+			base: process.env.DEPLOY_ENV === 'github-pages' ? '/Frontend-web' : ''
+		},
 		adapter: adapter({
 			pages: 'sveltekit-github-pages', // Carpeta de salida para GitHub Pages
 			assets: 'sveltekit-github-pages', // Carpeta de assets estáticos
-			fallback: 'index.html' // Necesario para SPA en GitHub Pages
-		})
+			fallback: 'indexFallback.html',
+		}),
+		prerender: {
+			entries: ['*'],
+		},
 	}
 
 };
