@@ -9,17 +9,23 @@
   const modalInfoChange: ModalSettings = {
     type: 'component',
     component: 'infoChangeModal'
-  };
+  }
 
   const modalCreateLobby: ModalSettings = {
     type: 'component',
     component: 'createLobbyModal'
-  };
+  }
+
+  const modalInbox: ModalSettings = {
+    type: 'component',
+    component: 'inboxModal'
+  }
 
   const modalFriends: ModalSettings = {
     type: 'component',
     component: 'friendsModal'
   }
+
 
   function clickOnJoin(){
     goto(base+"/lobbies");
@@ -31,6 +37,10 @@
 
   function clickOnHost(){
     modalStore.trigger(modalCreateLobby);
+  }
+
+  function clickOnInbox(){
+    modalStore.trigger(modalInbox);
   }
 
   function clickOnFriends(){
@@ -69,7 +79,7 @@
       </button>
 
       <!-- INBOX -->
-      <button class="block card p-3 content-center text-[clamp(20px,3.5vmin,999px)] w-[clamp(100px,17vmin,999px)]">
+      <button class="block card p-3 content-center text-[clamp(20px,3.5vmin,999px)] w-[clamp(100px,17vmin,999px)]" on:click={clickOnInbox}>
         INBOX
       </button>
 

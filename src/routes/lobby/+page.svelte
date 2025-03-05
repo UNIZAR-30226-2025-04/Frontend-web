@@ -4,7 +4,6 @@
   import { goto } from "$app/navigation";
   import { flip } from "svelte/animate";
   import { cubicOut } from "svelte/easing";
-  import { ChatFill } from "svelte-bootstrap-icons";
   import { base } from '$app/paths';
 
 
@@ -91,7 +90,7 @@
   <button type="button" class="btn btn-lg variant-filled" on:click={onCopyCode}>Copy</button>
   <button type="button" class="btn btn-lg variant-filled">Share</button>
   <div class="ml-[37vmin]">
-    <button type="button" class="btn btn-lg variant-filled"><ChatFill></ChatFill></button>
+    <button type="button" class="btn btn-lg variant-filled"><img src="icons/chat.png" alt="chat" class="w-[20px]"></button>
   </div>
 </div>
 
