@@ -83,13 +83,13 @@
 
 <!-- Lobby header -->
 <div class="flex flex-row gap-[10vmin] mt-[2%] ml-[0%] text-[3.5vmin] items-center"> 
-  <h1>LOBBY</h1>
+  <h1 class="text-[5vmin]">LOBBY</h1>
   <span>{actual} / {max}</span>
   <button type="button" class="btn btn-lg variant-filled w-[13vmin]" on:click={onSwitchPublic}>{publicString}</button>
   <h1>Code : {code}</h1>
   <button type="button" class="btn btn-lg variant-filled" on:click={onCopyCode}>Copy</button>
   <button type="button" class="btn btn-lg variant-filled">Share</button>
-  <div class="ml-[37vmin]">
+  <div class="ml-[32vmin]">
     <button type="button" class="btn btn-lg variant-filled"><img src="icons/chat.png" alt="chat" class="w-[20px]"></button>
   </div>
 </div>
