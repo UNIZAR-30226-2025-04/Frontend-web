@@ -1,5 +1,7 @@
 <script lang="ts">
+    import { goto } from '$app/navigation';
 	import { base } from '$app/paths';
+	import { apiBase, sigupPath } from '$lib/paths';
 
 	const errorContainer = 'alert variant-ghost-error p-2';
     const errorMessagePasswd = 'alert-message text-left text-black'
@@ -9,17 +11,62 @@
 	let passwd1 = '';
 	let passwd2 = '';
 	let errorMessage = false;
+	let error:string = '';
   
-	// Test handler function
-	function register(event: SubmitEvent): void {
-	  event.preventDefault();
+	/**
+	 * Registers the user with the form data
+	 * @param event
+	 * @async
+	 */
+	async function register(event: SubmitEvent) {
+		event.preventDefault();
 
-	  errorMessage = true;
+		errorMessage = passwd1 !== passwd2;
 
-	  console.log("Email:", email);
-	  console.log("Username:", username);
-	  console.log("Password:", passwd1);
-	  console.log("Password:", passwd2);
+		let success = false;
+
+		console.log("Email:", email);
+		console.log("Username:", username);
+		console.log("Password:", passwd1);
+		console.log("Password:", passwd2);
+
+		if(!errorMessage){
+			const formData = new URLSearchParams();
+			formData.append("username", username);
+			formData.append("email", email);
+			formData.append("password", passwd1);
+			formData.append("icon", "1");
+
+			errorMessage = false;
+
+			try {
+				const response = await fetch(sigupPath, {
+					method: 'POST',
+					headers: {
+						'accept': 'application/json',
+						'Content-Type': 'application/x-www-form-urlencoded'
+					},
+					body: formData.toString()
+				});
+
+				if (!response.ok) {
+					throw new Error("Error en la autenticación");
+				}
+
+				const data = await response.json();
+				success = true;
+				console.log("Respuesta de la API:", data);
+			} catch (err:any) {
+				error = err.message;
+			}
+
+			if(success){
+				goto(base+"/login");
+				// TODO make the user autologin when creating an account
+			}else{
+				errorMessage = true;
+			}
+		}
 	}
 
 </script>
@@ -71,7 +118,7 @@
 	  {#if errorMessage}
 		<aside class="{errorContainer}">
 			<div class="{errorMessagePasswd}">
-				Password doesn't match
+				Password doesn't match: {error}
 			</div>
 		</aside>
 	  {/if}
