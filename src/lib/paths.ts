@@ -1,5 +1,5 @@
 // Base url of the backend API
-export const apiBase:string = 'http://nogler.ddns.net:8080/';
+export const apiBase:string = 'https://nogler.ddns.net/';
 
 // AUTH
 // Login user
