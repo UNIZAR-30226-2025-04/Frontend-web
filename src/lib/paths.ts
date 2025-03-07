@@ -17,3 +17,5 @@ export const sigupPath:string = apiBase + 'signup';
 export const friendsPath:string = apiBase + 'auth/friends';
 export const requestsPath:string = apiBase + 'auth/received_friendship_requests';
 export const deleteFriendPath:string = apiBase + 'auth/deleteFriend/';
+export const sendFriendshipRequestPath:string = apiBase + 'auth/sendFriendshipRequest';
+export const addFriendPath:string = apiBase + 'auth/addFriend';

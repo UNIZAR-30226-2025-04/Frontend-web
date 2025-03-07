@@ -4,7 +4,7 @@
     import  AvatarDisplay  from "./AvatarDisplay.svelte";
     import { avatarDirectory } from "$lib/avatarsDirectory";
 	import { flip } from 'svelte/animate';
-    import { apiBase, friendsPath, requestsPath, deleteFriendPath } from '$lib/paths';
+    import { apiBase, friendsPath, requestsPath, deleteFriendPath, addFriendPath, sendFriendshipRequestPath } from '$lib/paths';
     import { get } from 'svelte/store';
 
     // Props
@@ -59,47 +59,47 @@
             console.log("API response (friends list):", data);
         } catch (err:any) {
             error = err.message;
-            console.error("Fetch error (friends list):", err);
         }
     }
 
     // Fetches the list of pending friend requests from the server using a GET request
-    async function fetchRequests() {
-        try {
-            const response = await fetch(requestsPath, {
-                method: 'GET',
-                headers: {
-                    'accept': 'application/json',
-                    'Authorization': 'Bearer ' + token,
-                }
-            });
+    //async function fetchRequests() {
+    //    try {
+    //        const response = await fetch(requestsPath, {
+    //            method: 'GET',
+    //            headers: {
+    //                'accept': 'application/json',
+    //                'Authorization': 'Bearer ' + token,
+    //            }
+    //        });
+//
+    //        if (!response.ok) {
+    //            throw new Error("Error getting friend request list");
+    //        }
+//
+    //        const data: { username: string; icon: number }[] = await response.json();
+    //        pendingRequests = data.map((request, index) => ({
+    //            key: count++,
+    //            username: request.username,
+    //            icon: request.icon
+    //        }));
+    //        count++;
+    //        success = true;
+    //        console.log("API response (friend request list):", data);
+    //    } catch (err:any) {
+    //        error = err.message;
+    //    }
+    //}
+//
+    //// Loads both the friends list and the pending friend requests in parallel
+    //async function loadData() {
+    //    await Promise.all([fetchFriends(), fetchRequests()]);
+    //}
+//
+    //loadData();
 
-            if (!response.ok) {
-                throw new Error("Error getting friend request list");
-            }
 
-            const data: { username: string; icon: number }[] = await response.json();
-            pendingRequests = data.map((request, index) => ({
-                key: count++,
-                username: request.username,
-                icon: request.icon
-            }));
-            count++;
-            success = true;
-            console.log("API response (friend request list):", data);
-        } catch (err:any) {
-            error = err.message;
-            console.error("Fetch error (friend request list):", err);
-        }
-    }
-
-    // Loads both the friends list and the pending friend requests in parallel
-    async function loadData() {
-        await Promise.all([fetchFriends(), fetchRequests()]);
-    }
-
-    loadData();
-
+    fetchFriends();
 
     /**
      * Removes from the savedFriends list the index that has the key
@@ -136,7 +136,6 @@
             console.log("API response (delete friend):", data);
         } catch (err:any) {
             error = err.message;
-            console.error("Fetch error (delete friend):", err);
         }
     }
 
@@ -166,6 +165,32 @@
         pendingRequests = [...pendingRequests, newFriendRequest];
         AddText = "Add";
     }
+
+    // Sends a POST request to the server to send a friendship request
+    //async function fetchSendFriendshipRequest() {
+    //    try {
+	//		const response = await fetch(sendFriendshipRequestPath, {
+	//			method: 'POST',
+	//			headers: {
+	//				'accept': 'application/json',
+	//				'Content-Type': 'application/x-www-form-urlencoded',
+    //                'Authorization': 'Bearer ' + token,
+	//			},
+	//			body: 
+	//		});
+//
+	//		if (!response.ok) {
+	//			throw new Error("Error sendig a friendship request");
+	//		}
+    //        
+    //        clickOnAdd();
+	//		const data = await response.json();
+	//		success = true;
+	//		console.log("API response (send a friendship request):", data);
+	//	} catch (err:any) {
+	//		error = err.message;
+	//	}
+    //}
 
     /**
      * Dummy function to sleep ms while we wait or backend to have the API ready
