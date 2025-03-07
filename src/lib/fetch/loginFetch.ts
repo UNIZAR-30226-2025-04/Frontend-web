@@ -25,11 +25,11 @@ export async function loginFetch(email:string, passwd:string, remember:boolean) 
     });
     
     if (!response.ok) {
-        throw new Error("Error en la autenticación");
+        throw new Error("Error on authentication");
     }
     
     const data = await response.json();
-    console.log("Respuesta de la API:", data);
+    console.log("API Response:", data);
     
     await meFetch(data.token)
     

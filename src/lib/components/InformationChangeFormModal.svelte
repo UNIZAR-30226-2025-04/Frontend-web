@@ -8,6 +8,7 @@
     import { goto } from '$app/navigation';
     import { base } from '$app/paths';
     import { get } from "svelte/store";
+    import { updateFetch } from "$lib/fetch/updateFetch";
 
 
     // Props
@@ -21,7 +22,7 @@
     let username: string = get(userDataStore).username;
     let avatar: number = get(userDataStore).icon || 1;
     // Not initalized, if they are empty when "Change" is pressed we don't change the password of user
-    let password1: string, password2: string;
+    let password1: string = '', password2: string = '';
 
     // Error code data, if error i is triggered errorCode[i] = true
     let errorCode:boolean[] = [];
@@ -41,15 +42,8 @@
 
         if (errorCode.every((v) => v === false)){
             ChangeButtonText = "...";
-            let formData: ProfileChangeFormData = {
-                image: avatar,name: username,password: null
-            }
-            if(password1 !== ""){
-                formData.password = password1;
-            }
-            await sleep(2000);
+            await updateFetch(username, password1, avatar);
             modalStore.close();
-            alert("TODO make the form submit the changes");
         }
         errorCode = errorCode;
     }
@@ -72,14 +66,6 @@
         await new Promise(resolve => setTimeout(resolve, 0));
         goto(base+"/");
         modalStore.close();
-    }
-
-    /**
-     * Dummy function to sleep ms while we wait or backend to have the API ready
-     * @param ms
-     */
-    function sleep(ms: number): Promise<void> {
-        return new Promise(resolve => setTimeout(resolve, ms));
     }
 
 

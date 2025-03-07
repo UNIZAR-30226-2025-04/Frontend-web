@@ -17,7 +17,7 @@ export async function meFetch(token:string) {
     });
 
     if (!response.ok) {
-        throw new Error("Error en la autenticación");
+        throw new Error("Error on get personal information");
     }
 
     const data = await response.json();

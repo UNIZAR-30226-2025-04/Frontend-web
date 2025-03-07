@@ -2,7 +2,10 @@
 export const apiBase:string = 'https://nogler.ddns.net/';
 
 // USERS
+// me, private information
 export const mePath:string = apiBase + 'auth/me';
+// update private information
+export const updatePath:string = apiBase + 'auth/update';
 
 
 // AUTH
