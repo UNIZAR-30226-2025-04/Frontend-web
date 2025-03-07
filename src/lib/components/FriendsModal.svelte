@@ -7,6 +7,12 @@
     import { apiBase, friendsPath, requestsPath, deleteFriendPath, addFriendPath, sendFriendshipRequestPath } from '$lib/paths';
     import { get } from 'svelte/store';
 
+    // Style classes for the error message and the containers that hold it
+    const errorContainer = 'alert variant-ghost-error p-2';
+    const errorMessage = 'alert-message text-left'
+
+    let sendRequestError = false;
+
     // Props
     /** Exposes parent props to this component. */
     export let parent: SvelteComponent;
@@ -27,7 +33,6 @@
     let AddText: string = "Add";
 
     let error= '';
-    let success= false;
 
     let count = 0;
 
@@ -55,7 +60,6 @@
                 username: friend.username,
                 icon: friend.icon
             }));
-            success = true;
             console.log("API response (friends list):", data);
         } catch (err:any) {
             error = err.message;
@@ -84,7 +88,6 @@
     //            icon: request.icon
     //        }));
     //        count++;
-    //        success = true;
     //        console.log("API response (friend request list):", data);
     //    } catch (err:any) {
     //        error = err.message;
@@ -132,7 +135,6 @@
             }
             removeFriend(index, key);
             const data = await response.json();
-            success = true;
             console.log("API response (delete friend):", data);
         } catch (err:any) {
             error = err.message;
@@ -176,7 +178,7 @@
 	//				'Content-Type': 'application/x-www-form-urlencoded',
     //                'Authorization': 'Bearer ' + token,
 	//			},
-	//			body: 
+	//			body: usernameSearch
 	//		});
 //
 	//		if (!response.ok) {
@@ -185,10 +187,10 @@
     //        
     //        clickOnAdd();
 	//		const data = await response.json();
-	//		success = true;
 	//		console.log("API response (send a friendship request):", data);
 	//	} catch (err:any) {
 	//		error = err.message;
+    //      sendRequestError = true;
 	//	}
     //}
 
@@ -236,6 +238,13 @@
         <input class="input" type="text" placeholder="Type username here" bind:value={usernameSearch}/>
         <button class="btn variant-filled" on:click={clickOnAdd}>{AddText}</button>
     </div>
+    {#if sendRequestError}
+        <aside class="{errorContainer}">
+            <div class="{errorMessage}">
+                User doesn't exist
+            </div>
+        </aside>
+    {/if}
     <!--Title and vertical scroll for saved friends-->
     <div class="content-center text-[18px]">Saved friends</div>
     <div class="h-52 overflow-y-auto p-2">
