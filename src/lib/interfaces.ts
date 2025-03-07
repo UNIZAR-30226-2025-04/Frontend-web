@@ -5,7 +5,8 @@ export interface UserData {
     email: string
     password: string
     icon: number
-    token: number
+    token: string
+    remember: boolean
 }
 
 // Form of profile information change

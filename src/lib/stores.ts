@@ -7,7 +7,8 @@ let userDataInitial: UserData = {
     email: "",
     password: "",
     icon: 1,
-    token: 0
+    token: "",
+    remember: false
 }
 
 export let userDataStore = persisted('userDataNogler',userDataInitial)

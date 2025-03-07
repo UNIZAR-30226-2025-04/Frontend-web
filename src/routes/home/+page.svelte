@@ -2,7 +2,7 @@
   import { getModalStore, type ModalComponent, type ModalSettings } from '@skeletonlabs/skeleton';
   import { userDataStore } from '$lib/stores';
   import { base } from '$app/paths';
-    import { goto } from '$app/navigation';
+  import { goto } from '$app/navigation';
 
   const modalStore = getModalStore();
   

@@ -1,12 +1,13 @@
 <script lang="ts">
     import type { SvelteComponent } from "svelte";
-    import type { ProfileChangeFormData } from "$lib/interfaces";
+    import type { ProfileChangeFormData, UserData } from "$lib/interfaces";
     import { getModalStore } from "@skeletonlabs/skeleton";
     import { userDataStore } from '$lib/stores';
     import  AvatarDisplay  from "./AvatarDisplay.svelte";
     import { avatarDirectory } from "$lib/avatarsDirectory";
     import { goto } from '$app/navigation';
     import { base } from '$app/paths';
+    import { get } from "svelte/store";
 
 
     // Props
@@ -16,8 +17,9 @@
     const modalStore = getModalStore();
 
     // Form data, it shows username and stored icon so it needs some initializing
-    let username: string = $userDataStore.username;
-    let avatar: number = $userDataStore.icon;
+    //let username: string = get(userDataStore).username;
+    let username: string = get(userDataStore).username;
+    let avatar: number = get(userDataStore).icon || 1;
     // Not initalized, if they are empty when "Change" is pressed we don't change the password of user
     let password1: string, password2: string;
 
@@ -56,11 +58,15 @@
      * Deletes all data saved on the user and boots it to the landing page (/)
      */
     function onLogOff(){
-        $userDataStore.username = "";
-        $userDataStore.email = "";
-        $userDataStore.password = "";
-        $userDataStore.icon = 1;
-        $userDataStore.token = 0;
+        const logOffData:UserData = {
+            username: "",
+            email: "",
+            password: "",
+            icon: 1,
+            token: "",
+            remember: false
+        };
+        userDataStore.set(logOffData);
         goto(base+"/");
         modalStore.close();
     }

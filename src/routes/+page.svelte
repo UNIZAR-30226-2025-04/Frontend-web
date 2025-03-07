@@ -4,7 +4,8 @@
 	import { userDataStore } from '$lib/stores';
 
 	// If user is cached we boot it to home
-	if( $userDataStore.token !== 0){
+	// TODO make it actually login
+	if( $userDataStore.token !== "" && $userDataStore.remember){
 		goto(base+"/home");
 	}
 

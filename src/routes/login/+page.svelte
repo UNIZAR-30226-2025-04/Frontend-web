@@ -1,9 +1,10 @@
 <script lang="ts">
     import { goto } from '$app/navigation';
 	import { base } from '$app/paths';
-	import { apiBase, loginPath } from '$lib/paths';
+	import { loginPath } from '$lib/paths';
     import type { UserData } from '$lib/interfaces';
 	import { userDataStore } from '$lib/stores';
+	import { meFetch } from '$lib/fetch/meFetch';
 
 	let email:string = '';
 	let passwd:string = '';
@@ -17,7 +18,6 @@
 		console.log("Email:", email);
 		console.log("Password:", passwd);
 		console.log("Remember me:", remember);
-		let success:boolean = false;
 
 		const formData = new URLSearchParams();
 		formData.append("email", email);
@@ -31,8 +31,7 @@
                     'accept': 'application/json',
 					'Content-Type': 'application/x-www-form-urlencoded'
                 },
-                body: formData.toString(),
-				credentials: "include"
+                body: formData.toString()
             });
 
             if (!response.ok) {
@@ -40,27 +39,21 @@
             }
 
             const data = await response.json();
-            success = true;
             console.log("Respuesta de la API:", data);
+
+			await meFetch(data.token)
+
+			userDataStore.update(user => ({
+				...user,
+				password:passwd,
+				remember:remember
+			}));
+
+			goto(base+"/home");
         } catch (err:any) {
             error = err.message;
-        }
-
-		if(success){
-			if(remember){
-				let userDataInput:UserData = {
-					email:email,
-					username:"RememberPlaceholder",
-					password:passwd,
-					icon:2,
-					token:1,
-				}
-				userDataStore.set(userDataInput);
-			}
-			goto(base+"/home");
-		}else{
 			showError = true;
-		}
+        }
 	}
 
 </script>
