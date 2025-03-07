@@ -56,8 +56,9 @@
 
     /**
      * Deletes all data saved on the user and boots it to the landing page (/)
+     * @async
      */
-    function onLogOff(){
+    async function onLogOff(){
         const logOffData:UserData = {
             username: "",
             email: "",
@@ -67,6 +68,8 @@
             remember: false
         };
         userDataStore.set(logOffData);
+        // Needs to wait to update the store , I don't know exactly why
+        await new Promise(resolve => setTimeout(resolve, 0));
         goto(base+"/");
         modalStore.close();
     }

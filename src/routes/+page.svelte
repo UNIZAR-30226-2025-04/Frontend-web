@@ -5,7 +5,7 @@
 
 	// If user is cached we boot it to home
 	// TODO make it actually login
-	if( $userDataStore.token !== "" && $userDataStore.remember === true){
+	if( $userDataStore.email !== "" && $userDataStore.remember === true){
 		goto(base+"/home");
 	}
 
