@@ -2,6 +2,11 @@ import type { UserData } from '$lib/interfaces';
 import { mePath } from '$lib/paths';
 import { userDataStore } from '$lib/stores';
 
+/**
+ * Attemps to get information about a loged in user, if succesfull saves it on the userDataStore, if not throws error
+ * @param token 
+ * @async
+ */
 export async function meFetch(token:string) {
     const response = await fetch(mePath, {
         method: 'GET',

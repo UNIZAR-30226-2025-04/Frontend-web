@@ -5,6 +5,7 @@
     import type { UserData } from '$lib/interfaces';
 	import { userDataStore } from '$lib/stores';
 	import { meFetch } from '$lib/fetch/meFetch';
+    import { loginFetch } from '$lib/fetch/loginFetch';
 
 	let email:string = '';
 	let passwd:string = '';
@@ -12,43 +13,19 @@
 	let showError:boolean = false;
 	let error:string = '';
   
-	// Test handler function
+	/**
+	 * Handler for login function, if an errors gets thrown its shows it in teh error variable
+	 * @param event
+	 * @async
+	 */
 	async function login(event: SubmitEvent) {
 		event.preventDefault();
 		console.log("Email:", email);
 		console.log("Password:", passwd);
 		console.log("Remember me:", remember);
 
-		const formData = new URLSearchParams();
-		formData.append("email", email);
-		formData.append("password", passwd);
-
-
 		try {
-            const response = await fetch(loginPath, {
-                method: 'POST',
-                headers: {
-                    'accept': 'application/json',
-					'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                body: formData.toString()
-            });
-
-            if (!response.ok) {
-                throw new Error("Error en la autenticación");
-            }
-
-            const data = await response.json();
-            console.log("Respuesta de la API:", data);
-
-			await meFetch(data.token)
-
-			userDataStore.update(user => ({
-				...user,
-				password:passwd,
-				remember:remember
-			}));
-
+            await loginFetch(email,passwd,remember);
 			goto(base+"/home");
         } catch (err:any) {
             error = err.message;

@@ -2,12 +2,26 @@
 	import { base } from '$app/paths';
 	import { goto } from '$app/navigation';
 	import { userDataStore } from '$lib/stores';
+    import { onMount } from 'svelte';
+    import { loginFetch } from '$lib/fetch/loginFetch';
 
-	// If user is cached we boot it to home
-	// TODO make it actually login
-	if( $userDataStore.email !== "" && $userDataStore.remember === true){
-		goto(base+"/home");
-	}
+	onMount(async () => {
+		// If user is cached and wants to be remembered we log in and get info
+		if( $userDataStore.token !== "" && $userDataStore.remember === true){
+			try{
+				await loginFetch($userDataStore.email,$userDataStore.password,true);
+				goto(base+"/home");
+			}catch(err:any){
+				console.log(err.message);
+				// If it fails we don't try again
+				userDataStore.update(user => ({
+					...user,
+					remember: false
+				}));
+			}
+		}
+	});
+		
 
 
 	function scrollToBottom() {
