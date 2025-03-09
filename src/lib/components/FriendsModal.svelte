@@ -157,7 +157,7 @@
     // Sends a DELETE request to the server to remove a friend request, then updates the local friend list if successful
     async function fetchDeleteFriendRequest(index:number, key:number) {
         try {
-            const response = await fetch(deleteSentRequestPath + savedFriends[index].username, {
+            const response = await fetch(deleteSentRequestPath + pendingRequests[index].username, {
                 method: 'DELETE',
                 headers: {
                     'accept': 'application/json',
@@ -191,14 +191,16 @@
     // Sends a POST request to the server to send a friendship request
     async function fetchSendFriendshipRequest() {
         try {
+            const formData = new FormData();
+            formData.append('friendUsername', usernameSearch);
+
 			const response = await fetch(sendFriendshipRequestPath, {
 				method: 'POST',
 				headers: {
 					'accept': 'application/json',
-					'Content-Type': 'application/x-www-form-urlencoded',
                     'Authorization': 'Bearer ' + token,
 				},
-				body: usernameSearch
+				body: formData
 			});
 
 			if (!response.ok) {

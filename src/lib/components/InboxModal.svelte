@@ -140,16 +140,18 @@
     }
 
     // Sends a POST request to the server to accept a friendship request
-    async function fetchSendFriendshipRequest(index:number, key:number) {
+    async function fetchAcceptFriendshipRequest(index:number, key:number) {
         try {
+            const formData = new FormData();
+            formData.append('friendUsername', pendingRequests[index].username);
+
 			const response = await fetch(addFriendPath, {
 				method: 'POST',
 				headers: {
 					'accept': 'application/json',
-					'Content-Type': 'application/x-www-form-urlencoded',
                     'Authorization': 'Bearer ' + token,
 				},
-				body: pendingRequests[index].username
+				body: formData
 			});
 
 			if (!response.ok) {
@@ -234,7 +236,7 @@
                     <button class="btn-icon-sm rounded-md font-bold variant-filled text-[15px]" on:click={() => {fetchDeleteFriendRequest(index, request.key)}}>X</button>
                     <div class="content-center text-[22px]">{request.username}</div>
                 </div>
-                <button class="btn variant-filled text-[16px] pt-1 pb-1 mr-[10px]" on:click={() => {fetchSendFriendshipRequest(index, request.key)}}>Accept</button>
+                <button class="btn variant-filled text-[16px] pt-1 pb-1 mr-[10px]" on:click={() => {fetchAcceptFriendshipRequest(index, request.key)}}>Accept</button>
             </div>
         {/each}
     </div>
