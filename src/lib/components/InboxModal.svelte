@@ -132,7 +132,7 @@
      */
      async function acceptRequest(index:number, key:number){
         let auxUsername:string = pendingRequests[index].username;
-        pendingRequests[index].username = "You are now firends!"
+        pendingRequests[index].username = "Now you are firends!"
         pendingRequests=pendingRequests;
         await sleep(2000);
         pendingRequests = pendingRequests.filter(request => request.key !== key);

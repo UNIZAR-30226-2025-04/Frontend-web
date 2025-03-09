@@ -183,7 +183,7 @@
     async function clickOnAdd() {
         AddText = "...";
         await sleep(2000);
-        let newFriendRequest: listItem = {username:usernameSearch,icon:1,key:pendingRequests.length};
+        let newFriendRequest: listItem = {username:usernameSearch,icon:1,key:pendingRequests.length + 1};
         pendingRequests = [...pendingRequests, newFriendRequest];
         AddText = "Add";
     }
