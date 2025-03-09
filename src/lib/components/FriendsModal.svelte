@@ -4,7 +4,7 @@
     import  AvatarDisplay  from "./AvatarDisplay.svelte";
     import { avatarDirectory } from "$lib/avatarsDirectory";
 	import { flip } from 'svelte/animate';
-    import { apiBase, friendsPath, requestsPath, deleteFriendPath, addFriendPath, sendFriendshipRequestPath } from '$lib/paths';
+    import { apiBase, friendsPath, sentRequestsPath, deleteFriendPath, deleteSentRequestPath } from '$lib/paths';
     import { get } from 'svelte/store';
 
     // Style classes for the error message and the containers that hold it
@@ -34,10 +34,7 @@
 
     let error= '';
 
-    let count = 0;
-
     let token = get(userDataStore).token;
-    console.log(token);
 
     // Fetches the list of friends from the server using a GET request
     async function fetchFriends() {
@@ -56,7 +53,7 @@
 
             const data: { username: string; icon: number }[] = await response.json();
             savedFriends = data.map((friend, index) => ({
-                key: count++,
+                key: index,
                 username: friend.username,
                 icon: friend.icon
             }));
@@ -66,43 +63,39 @@
         }
     }
 
-    // Fetches the list of pending friend requests from the server using a GET request
-    //async function fetchRequests() {
-    //    try {
-    //        const response = await fetch(requestsPath, {
-    //            method: 'GET',
-    //            headers: {
-    //                'accept': 'application/json',
-    //                'Authorization': 'Bearer ' + token,
-    //            }
-    //        });
-//
-    //        if (!response.ok) {
-    //            throw new Error("Error getting friend request list");
-    //        }
-//
-    //        const data: { username: string; icon: number }[] = await response.json();
-    //        pendingRequests = data.map((request, index) => ({
-    //            key: count++,
-    //            username: request.username,
-    //            icon: request.icon
-    //        }));
-    //        count++;
-    //        console.log("API response (friend request list):", data);
-    //    } catch (err:any) {
-    //        error = err.message;
-    //    }
-    //}
-//
-    //// Loads both the friends list and the pending friend requests in parallel
-    //async function loadData() {
-    //    await Promise.all([fetchFriends(), fetchRequests()]);
-    //}
-//
-    //loadData();
+    // Fetches the list of sent pending friend requests from the server using a GET request
+    async function fetchRequests() {
+        try {
+            const response = await fetch(sentRequestsPath, {
+                method: 'GET',
+                headers: {
+                    'accept': 'application/json',
+                    'Authorization': 'Bearer ' + token,
+                }
+            });
 
+            if (!response.ok) {
+                throw new Error("Error getting friend sent request list");
+            }
+            const data = await response.json();
+            pendingRequests = data.sent_friendship_requests.map((request: { username: string; icon: number }, index: number) => ({
+                key: index,
+                username: request.username,
+                icon: 2 // request.icon
+            }));
+            console.log("API response (friend request list):", data);
+        } catch (err:any) {
+            error = err.message;
+            console.log("API error (friend request list):", error);
+        }
+    }
 
-    fetchFriends();
+    // Loads both the friends list and the pending friend requests in parallel
+    async function loadData() {
+        await Promise.all([fetchFriends(), fetchRequests()]);
+    }
+
+    loadData();
 
     /**
      * Removes from the savedFriends list the index that has the key
@@ -156,6 +149,28 @@
         pendingRequests = pendingRequests;
     }
 
+    // Sends a DELETE request to the server to remove a friend request, then updates the local friend list if successful (TODO)
+    async function fetchDeleteFriendRequest(index:number, key:number) {
+        try {
+            const response = await fetch(deleteSentRequestPath + savedFriends[index].username, {
+                method: 'DELETE',
+                headers: {
+                    'accept': 'application/json',
+                    'Authorization': 'Bearer ' + token,
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error("Error removing friend from request list:");
+            }
+            removeRequest(index, key);
+            const data = await response.json();
+            console.log("API response (delete friend from request list):", data);
+        } catch (err:any) {
+            error = err.message;
+        }
+    }
+
     /**
      * Adds the username on the search bar to the pendingRequests list
      * @async
@@ -168,31 +183,6 @@
         AddText = "Add";
     }
 
-    // Sends a POST request to the server to send a friendship request
-    //async function fetchSendFriendshipRequest() {
-    //    try {
-	//		const response = await fetch(sendFriendshipRequestPath, {
-	//			method: 'POST',
-	//			headers: {
-	//				'accept': 'application/json',
-	//				'Content-Type': 'application/x-www-form-urlencoded',
-    //                'Authorization': 'Bearer ' + token,
-	//			},
-	//			body: usernameSearch
-	//		});
-//
-	//		if (!response.ok) {
-	//			throw new Error("Error sendig a friendship request");
-	//		}
-    //        
-    //        clickOnAdd();
-	//		const data = await response.json();
-	//		console.log("API response (send a friendship request):", data);
-	//	} catch (err:any) {
-	//		error = err.message;
-    //      sendRequestError = true;
-	//	}
-    //}
 
     /**
      * Dummy function to sleep ms while we wait or backend to have the API ready
@@ -214,14 +204,14 @@
     //    {username:"Nicolas",icon:4,key:7},
     //
     //]
-    pendingRequests = [
-        {username:"Solana",icon:5,key:0},
-        {username:"Diego",icon:6,key:1},
-        {username:"Elias",icon:7,key:2},
-        {username:"Zanos",icon:8,key:3},
-        {username:"Raul",icon:5,key:4},
-        {username:"Tristan",icon:6,key:5},
-    ]
+    //pendingRequests = [
+    //    {username:"Solana",icon:5,key:0},
+    //    {username:"Diego",icon:6,key:1},
+    //    {username:"Elias",icon:7,key:2},
+    //    {username:"Zanos",icon:8,key:3},
+    //    {username:"Raul",icon:5,key:4},
+    //    {username:"Tristan",icon:9,key:5},
+    //]
     
 
 </script>
@@ -263,7 +253,7 @@
         {#each pendingRequests as request, index (request.key)}
             <div animate:flip class="flex mb-2 gap-3">
                 <!--on:click funtions need to be anonimus so a landa function is necesary-->
-                <button class="btn-icon-sm rounded-md font-bold variant-filled text-[15px]" on:click={() => {removeRequest(index, request.key)}}>X</button>
+                <button class="btn-icon-sm rounded-md font-bold variant-filled text-[15px]" on:click={() => {fetchDeleteFriendRequest(index, request.key)}}>X</button>
                 <div class="content-center"><AvatarDisplay icon={request.icon} width={35}/></div>
                 <div class="content-center text-[22px]">{request.username}</div>
             </div>

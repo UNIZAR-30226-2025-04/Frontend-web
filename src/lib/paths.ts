@@ -15,7 +15,12 @@ export const sigupPath:string = apiBase + 'signup';
 // FRIENDS
 // List of a user firends
 export const friendsPath:string = apiBase + 'auth/friends';
-export const requestsPath:string = apiBase + 'auth/received_friendship_requests';
+// Delete friend
 export const deleteFriendPath:string = apiBase + 'auth/deleteFriend/';
+// List of sent friendship request
+export const sentRequestsPath:string = apiBase + 'auth/sent_friendship_requests';
+// Delete a sent friendship request
+export const deleteSentRequestPath:string = apiBase + 'auth/sent_friendship_requests/';
+export const receivedRequestsPath:string = apiBase + 'auth/received_friendship_requests';
 export const sendFriendshipRequestPath:string = apiBase + 'auth/sendFriendshipRequest';
 export const addFriendPath:string = apiBase + 'auth/addFriend';
