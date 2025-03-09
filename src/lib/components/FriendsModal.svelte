@@ -4,7 +4,7 @@
     import  AvatarDisplay  from "./AvatarDisplay.svelte";
     import { avatarDirectory } from "$lib/avatarsDirectory";
 	import { flip } from 'svelte/animate';
-    import { apiBase, friendsPath, sentRequestsPath, deleteFriendPath, deleteSentRequestPath } from '$lib/paths';
+    import { apiBase, friendsPath, sentRequestsPath, deleteFriendPath, deleteSentRequestPath, sendFriendshipRequestPath } from '$lib/paths';
     import { get } from 'svelte/store';
 
     // Style classes for the error message and the containers that hold it
@@ -57,9 +57,10 @@
                 username: friend.username,
                 icon: friend.icon
             }));
-            console.log("API response (friends list):", data);
+            console.log("API response (friend list):", data);
         } catch (err:any) {
             error = err.message;
+            console.log("API error (friend list):", error);
         }
     }
 
@@ -78,11 +79,15 @@
                 throw new Error("Error getting friend sent request list");
             }
             const data = await response.json();
-            pendingRequests = data.sent_friendship_requests.map((request: { username: string; icon: number }, index: number) => ({
-                key: index,
-                username: request.username,
-                icon: 2 // request.icon
-            }));
+            if (data.sent_friendship_requests) {
+                pendingRequests = data.sent_friendship_requests.map((request: { username: string; icon: number }, index: number) => ({
+                    key: index,
+                    username: request.username,
+                    icon: 2 // request.icon
+                }));
+            } else{
+                pendingRequests = [];
+            }
             console.log("API response (friend request list):", data);
         } catch (err:any) {
             error = err.message;
@@ -149,7 +154,7 @@
         pendingRequests = pendingRequests;
     }
 
-    // Sends a DELETE request to the server to remove a friend request, then updates the local friend list if successful (TODO)
+    // Sends a DELETE request to the server to remove a friend request, then updates the local friend list if successful
     async function fetchDeleteFriendRequest(index:number, key:number) {
         try {
             const response = await fetch(deleteSentRequestPath + savedFriends[index].username, {
@@ -183,6 +188,32 @@
         AddText = "Add";
     }
 
+    // Sends a POST request to the server to send a friendship request
+    async function fetchSendFriendshipRequest() {
+        try {
+			const response = await fetch(sendFriendshipRequestPath, {
+				method: 'POST',
+				headers: {
+					'accept': 'application/json',
+					'Content-Type': 'application/x-www-form-urlencoded',
+                    'Authorization': 'Bearer ' + token,
+				},
+				body: usernameSearch
+			});
+
+			if (!response.ok) {
+				throw new Error("Error sendig a friendship request");
+			}
+            
+            clickOnAdd();
+			const data = await response.json();
+			console.log("API response (send a friendship request):", data);
+		} catch (err:any) {
+			error = err.message;
+            console.log("API error (send a friendship request):", error);
+            sendRequestError = true;
+		}
+    }
 
     /**
      * Dummy function to sleep ms while we wait or backend to have the API ready
@@ -226,7 +257,7 @@
     <!--Search box and Add button-->
     <div class="flex gap-[15px] justify-between">
         <input class="input" type="text" placeholder="Type username here" bind:value={usernameSearch}/>
-        <button class="btn variant-filled" on:click={clickOnAdd}>{AddText}</button>
+        <button class="btn variant-filled" on:click={fetchSendFriendshipRequest}>{AddText}</button>
     </div>
     {#if sendRequestError}
         <aside class="{errorContainer}">
