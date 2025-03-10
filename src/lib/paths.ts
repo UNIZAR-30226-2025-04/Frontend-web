@@ -32,3 +32,11 @@ export const receivedFriendshipRequestsPath:string = apiBase + 'auth/received_fr
 export const deleteReceivedRequestsPath:string = apiBase + 'auth/received_friendship_requests/';
 // Accept a friendship request
 export const addFriendPath:string = apiBase + 'auth/addFriend';
+
+// LOBBY INVITATIONS
+// List of sent lobby invitations
+export const sentLobbyInvitationsPath:string = apiBase + 'auth/sent_lobby_invitations';
+// Invite a friend to the lobby
+//export const sendLobbyInvitationsPath:string = apiBase + 'auth/send_lobby_invitations';
+// Delete a sent lobby invitation
+export const deleteSentLobbyInvitationsPath:string = apiBase + 'auth/sent_lobby_invitations/';

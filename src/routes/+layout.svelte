@@ -23,6 +23,7 @@
     import InboxModal from '$lib/components/InboxModal.svelte';
   	import InformationChangeFormModal from '$lib/components/InformationChangeFormModal.svelte';
 	import MatchMakingModal from '$lib/components/MatchMakingModal.svelte';
+	import InviteFriendsLobbyModal from '$lib/components/InviteFriendsLobbyModal.svelte';
 	
 	initializeStores();
 
@@ -32,7 +33,8 @@
 		friendsModal: { ref : FriendsModal },
 		inboxModal: { ref : InboxModal },
 		joinLobbyCodeModal: {ref: JoinLobbyCodeModal},
-		matchMakingModal: {ref: MatchMakingModal}
+		matchMakingModal: {ref: MatchMakingModal},
+		inviteFriendsLobbyModal: {ref: InviteFriendsLobbyModal}
 	};
 
   

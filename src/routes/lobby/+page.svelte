@@ -1,12 +1,13 @@
 <script lang="ts">
   import  AvatarDisplay  from "../../lib/components/AvatarDisplay.svelte";
+  import { getModalStore, type ModalComponent, type ModalSettings } from '@skeletonlabs/skeleton';
   import { userDataStore } from '$lib/stores';
   import { goto } from "$app/navigation";
   import { flip } from "svelte/animate";
   import { cubicOut } from "svelte/easing";
   import { base } from '$app/paths';
 
-
+  const modalStore = getModalStore();
 
   let actual = 8; // Actual number of players
   let max = 8; // Maximum number of players
@@ -33,6 +34,14 @@
     console.log("Starting game");
   }
 
+  const modalInviteFriendsLobby: ModalSettings = {
+    type: 'component',
+    component: 'inviteFriendsLobbyModal'
+  }
+
+  function onShare(){
+    modalStore.trigger(modalInviteFriendsLobby);
+  }
 
   // Player type
   type Player = {
@@ -86,9 +95,9 @@
   <h1 class="text-[5vmin]">LOBBY</h1>
   <span>{actual} / {max}</span>
   <button type="button" class="btn btn-lg variant-filled w-[13vmin]" on:click={onSwitchPublic}>{publicString}</button>
-  <h1>Code : {code}</h1>
+  <h1>Code: {code}</h1>
   <button type="button" class="btn btn-lg variant-filled" on:click={onCopyCode}>Copy</button>
-  <button type="button" class="btn btn-lg variant-filled">Share</button>
+  <button type="button" class="btn btn-lg variant-filled" on:click={onShare}>Share</button>
   <div class="ml-[32vmin]">
     <button type="button" class="btn btn-lg variant-filled"><img src="icons/chat.png" alt="chat" class="w-[20px]"></button>
   </div>
