@@ -4,6 +4,9 @@
     import { SlideToggle } from '@skeletonlabs/skeleton';
     import { goto } from '$app/navigation';
     import { base } from '$app/paths';
+    import { apiBase, createLobbyPath } from '$lib/paths';
+    import { get } from 'svelte/store';
+    import { userDataStore } from '$lib/stores';
     
 
     // Props
@@ -12,8 +15,11 @@
 
     const modalStore = getModalStore();
 
-
     let publicValue = true;
+
+    let token = get(userDataStore).token;
+
+    let error= '';
 
     // Function to switch the public value
     function onSwitchPublic(){
@@ -22,9 +28,35 @@
     }
  
     // Function to create a lobby
-    function onCreateLobby(){
-        goto(base+"/lobby");
+    function onCreateLobby(id : string){
+        goto(base+"/lobby?id=" + id);
         modalStore.close();
+    }
+
+    // Sends a POST request to the server to create a lobby
+    async function createLobbyFetch() {
+        try {
+
+			const response = await fetch(createLobbyPath, {
+				method: 'POST',
+				headers: {
+					'accept': 'application/json',
+                    'Authorization': 'Bearer ' + token,
+				}
+			});
+
+			if (!response.ok) {
+				throw new Error("Error creating a lobby");
+			}
+            
+            const data = await response.json();
+            console.log(Object.keys(data)[0])
+            onCreateLobby(Object.keys(data)[0]);
+			console.log("API response (create a lobby):", data);
+		} catch (err:any) {
+			error = err.message;
+            console.log("API error (create a lobby):", error);
+		}
     }
 
 
@@ -49,7 +81,7 @@
 			<button style="font-size:112%"class="block btn {parent.buttonNeutral} w-full" on:click={parent.onClose}>Vs AI</button>
 			<button style="font-size:112%" class="block btn {parent.buttonPositive} w-full" on:click={parent.onClose}>Cancel</button>
         </div>
-        <button style="font-size:112%" class="block btn {parent.buttonNeutral} w-full" type="button" on:click={onCreateLobby}>Create</button>
+        <button style="font-size:112%" class="block btn {parent.buttonNeutral} w-full" type="button" on:click={createLobbyFetch}>Create</button>
     </div>
     
 {/if}
