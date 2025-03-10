@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type { SvelteComponent } from "svelte";
+    import { onMount, type SvelteComponent } from "svelte";
     import { userDataStore } from '$lib/stores';
     import  AvatarDisplay  from "./AvatarDisplay.svelte";
     import { avatarDirectory } from "$lib/avatarsDirectory";
@@ -7,6 +7,7 @@
     import { apiBase, receivedFriendshipRequestsPath, deleteReceivedRequestsPath, addFriendPath } from '$lib/paths';
     import { get } from 'svelte/store';
     import type { invitation, request } from '$lib/interfaces'
+    import { getInbox } from "$lib/fetch/inboxFetch";
 
     // Props
     /** Exposes parent props to this component. */
@@ -28,10 +29,12 @@
 
     // Loads both the lobby invitations and the pending friend requests in parallel
     async function loadData() {
-        await Promise.all([fetchReceivedFriendshipRequests()]); //TODO: fetchLobbyInvitations()
+        await getInbox(invitations,pendingRequests);
     }
 
-    loadData();
+    onMount(() => {
+        loadData();
+    })
 
     /**
      * Removes from the invitations list the index that has the key
