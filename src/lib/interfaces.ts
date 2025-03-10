@@ -26,3 +26,8 @@ export interface publicInformationUser {
     username: string
     icon: number
 }
+
+export interface Lobby {
+    code: string
+    host: boolean
+}

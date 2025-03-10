@@ -1,6 +1,6 @@
 <script lang="ts">
   import  AvatarDisplay  from "../../lib/components/AvatarDisplay.svelte";
-  import { userDataStore } from '$lib/stores';
+  import { userDataStore, lobbyStore } from '$lib/stores';
   import { goto } from "$app/navigation";
   import { flip } from "svelte/animate";
   import { cubicOut } from "svelte/easing";
@@ -13,8 +13,8 @@
   let max = 8; // Maximum number of players
   let publicString = "PUBLIC"; // String to show if the lobby is public or private
   let publicValue = true; // Boolean to know if the lobby is public or private
-  let code = $page.url.searchParams.get('id') || "1234"; // Code of the lobby
-  let host = false; // Boolean to know if the player is the host
+  let code = $lobbyStore.code; // Code of the lobby
+  let host = $lobbyStore.host; // Boolean to know if the player is the host
   
   // Function to switch the public value
   function onSwitchPublic(){

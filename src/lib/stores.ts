@@ -1,5 +1,5 @@
 import { writable } from 'svelte/store';
-import type { UserData } from '$lib/interfaces';
+import type { UserData, Lobby } from '$lib/interfaces';
 import { persisted } from 'svelte-persisted-store'
 
 let userDataInitial: UserData = {
@@ -11,5 +11,12 @@ let userDataInitial: UserData = {
     remember: false
 }
 
+
 export let userDataStore = persisted('userDataNogler',userDataInitial)
 
+let lobbyInitial: Lobby = {
+    code: "code",
+    host: false
+}
+
+export let lobbyStore = writable<Lobby>(lobbyInitial)

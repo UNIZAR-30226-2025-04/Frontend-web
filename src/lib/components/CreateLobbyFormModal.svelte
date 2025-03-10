@@ -6,7 +6,7 @@
     import { base } from '$app/paths';
     import { apiBase, createLobbyPath } from '$lib/paths';
     import { get } from 'svelte/store';
-    import { userDataStore } from '$lib/stores';
+    import { userDataStore, lobbyStore } from '$lib/stores';
     
 
     // Props
@@ -28,8 +28,8 @@
     }
  
     // Function to create a lobby
-    function onCreateLobby(id : string){
-        goto(base+"/lobby?id=" + id);
+    function onCreateLobby(){
+        goto(base+"/lobby");
         modalStore.close();
     }
 
@@ -50,8 +50,12 @@
 			}
             
             const data = await response.json();
-            console.log(Object.keys(data)[0])
-            onCreateLobby(Object.keys(data)[0]);
+            const lobbyCode = data["lobby_id"];
+            lobbyStore.update(() => ({
+                code: lobbyCode,
+                host: true
+            }));
+            onCreateLobby();
 			console.log("API response (create a lobby):", data);
 		} catch (err:any) {
 			error = err.message;
