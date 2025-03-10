@@ -6,21 +6,11 @@
 	import { flip } from 'svelte/animate';
     import { apiBase, receivedFriendshipRequestsPath, deleteReceivedRequestsPath, addFriendPath } from '$lib/paths';
     import { get } from 'svelte/store';
+    import type { invitation, request } from '$lib/interfaces'
 
     // Props
     /** Exposes parent props to this component. */
     export let parent: SvelteComponent;
-
-    interface invitation {
-        key: number
-        username: string
-        players: number
-    }
-
-    interface request {
-        key: number
-        username: string
-    }
 
     // Array of invitations, name and players in the lobby
     let invitations: invitation[] = [];
@@ -34,35 +24,7 @@
 
 
     // Fetches the list of friend requests from the server using a GET request
-    async function fetchReceivedFriendshipRequests() {
-        try {
-            const response = await fetch(receivedFriendshipRequestsPath, {
-                method: 'GET',
-                headers: {
-                    'accept': 'application/json',
-                    'Authorization': 'Bearer ' + token,
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error("Error getting friends list");
-            }
-
-            const data = await response.json();
-            if (data.received_friendship_requests) {
-                pendingRequests = data.received_friendship_requests.map((request: { username: string }, index: number) => ({
-                    key: index,
-                    username: request.username,
-                }));
-            } else {
-                pendingRequests = [];
-            }
-            console.log("API response (friend request list):", data);
-        } catch (err:any) {
-            error = err.message;
-            console.log("API error (friend request list):", error);
-        }
-    }
+    
 
     // Loads both the lobby invitations and the pending friend requests in parallel
     async function loadData() {

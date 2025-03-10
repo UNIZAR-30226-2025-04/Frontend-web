@@ -26,3 +26,15 @@ export interface publicInformationUser {
     username: string
     icon: number
 }
+
+
+// INBOX interfaces
+export interface invitation {
+    key: number
+    username: string
+    players: number
+}
+export interface request {
+    key: number
+    username: string
+}
