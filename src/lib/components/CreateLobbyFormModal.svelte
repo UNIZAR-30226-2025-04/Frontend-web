@@ -53,6 +53,7 @@
             const lobbyCode = data["lobby_id"];
             lobbyStore.update(() => ({
                 code: lobbyCode,
+                public: publicValue,
                 host: true
             }));
             onCreateLobby();

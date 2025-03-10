@@ -29,5 +29,6 @@ export interface publicInformationUser {
 
 export interface Lobby {
     code: string
+    public: boolean
     host: boolean
 }

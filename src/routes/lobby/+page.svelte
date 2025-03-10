@@ -11,17 +11,19 @@
 
   let actual = 8; // Actual number of players
   let max = 8; // Maximum number of players
-  let publicString = "PUBLIC"; // String to show if the lobby is public or private
-  let publicValue = true; // Boolean to know if the lobby is public or private
+  let publicString = $lobbyStore.public ? "PUBLIC" : "PRIVATE"; // String to show if the lobby is public or private
   let code = $lobbyStore.code; // Code of the lobby
   let host = $lobbyStore.host; // Boolean to know if the player is the host
   
   // Function to switch the public value
   function onSwitchPublic(){
     if(host)
-    publicString = publicValue ? "PRIVATE" : "PUBLIC";
-    publicValue = !publicValue;
-    console.log(publicValue);
+    publicString = $lobbyStore.public ? "PRIVATE" : "PUBLIC";
+    lobbyStore.update((currentLobby) => ({
+        ...currentLobby,
+        public: !$lobbyStore.public
+    }));
+    console.log($lobbyStore.public);
   }
  
   // Function to copy code to clipboard
