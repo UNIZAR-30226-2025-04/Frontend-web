@@ -6,7 +6,7 @@
     // How big is the image
     export let width:number = 100;
 
-    if (icon <= 0 || icon >= avatarDirectory.length){
+    if (icon <= 0 || icon > avatarDirectory.length){
         icon = 1;
     }
 
