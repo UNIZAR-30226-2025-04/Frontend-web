@@ -81,7 +81,7 @@
             });
 
             if (!response.ok) {
-                throw new Error("Error getting friend sent request list");
+                throw new Error("Error getting friend invitation list");
             }
             const data = await response.json();
             if (data.sent_invitations) {
@@ -92,97 +92,29 @@
             } else{
                 sentInvitations = [];
             }
-            console.log("API response (friend request list):", data);
+            console.log("API response (friend invitation list):", data);
         } catch (err:any) {
             error = err.message;
-            console.log("API error (friend request list):", error);
+            console.log("API error (friend invitation list):", error);
         }
     }
 
-    // Loads both the friends list and the sent invitations in parallel
-    //async function loadData() {
-    //    await Promise.all([fetchFriends(), fetchSentInvitations()]);
-    //}
-//
-    //loadData();
-
-    /**
-     * Removes from the savedFriends list the index that has the key
-     * @param index
-     * @param key
-     * @async
-     */
-    async function removeFriend(index:number, key:number){
-        let auxUsername:string = savedFriends[index].username;
-        savedFriends[index].username = "Removing..."
-        savedFriends=savedFriends;
-        await sleep(2000);
-        savedFriends = savedFriends.filter(request => request.key !== key);
-        savedFriends = savedFriends;
+    //Loads both the friends list and the sent invitations in parallel
+    async function loadData() {
+        await Promise.all([fetchFriends(), fetchSentInvitations()]);
     }
 
-    // Sends a DELETE request to the server to remove a invitation
-    //async function fetchDeleteFriend(index:number, key:number) {
-    //    try {
-    //        const response = await fetch(deleteFriendPath + savedFriends[index].username, {
-    //            method: 'DELETE',
-    //            headers: {
-    //                'accept': 'application/json',
-    //                'Authorization': 'Bearer ' + token,
-    //            }
-    //        });
-//
-    //        if (!response.ok) {
-    //            throw new Error("Error removing friend from list:");
-    //        }
-    //        removeFriend(index, key);
-    //        const data = await response.json();
-    //        console.log("API response (delete friend):", data);
-    //    } catch (err:any) {
-    //        error = err.message;
-    //    }
-    //}
+    loadData();
 
-
-    /**
-     * Adds the username on the search bar to the pendingRequests list
-     * @async
-     */
-    async function clickOnAdd() {
-        AddText = "...";
-        await sleep(2000);
-        let newFriendRequest: listItem = {username:usernameSearch,icon:1,key:sentInvitations.length + 1};
-        sentInvitations = [...sentInvitations, newFriendRequest];
-        AddText = "Add";
+    // Removes from the sent invitation list the user
+    function onCancel(username : string){
+        sentInvitations = sentInvitations.filter(invitation => invitation.username !== username);
     }
 
-    // Sends a POST request to the server to send a lobby invitation
-    async function fetchSendFriendshipRequest() {
-        try {
-            const formData = new FormData();
-            formData.append('friendUsername', usernameSearch);
-
-			const response = await fetch(sendFriendshipRequestPath, {
-				method: 'POST',
-				headers: {
-					'accept': 'application/json',
-                    'Authorization': 'Bearer ' + token,
-				},
-				body: formData
-			});
-
-			if (!response.ok) {
-				throw new Error("Error sendig a friendship request");
-			}
-            
-            clickOnAdd();
-			const data = await response.json();
-			console.log("API response (send a friendship request):", data);
-		} catch (err:any) {
-			error = err.message;
-            console.log("API error (send a friendship request):", error);
-            sendRequestError = true;
-		}
+    // Add to the sent invitation list the user
+    function onInvite(username : string){
+        let newUser:listInvitations = {username:username,key:sentInvitations.length};
+        sentInvitations = [...sentInvitations, newUser];
     }
 
     /**
@@ -194,41 +126,35 @@
     }
 
     // Test data while we wait for endpoints
-    savedFriends = [
-        {username:"Victor",icon:1,key:0},
-        {username:"Emilliano",icon:2,key:1},
-        {username:"Jogue",icon:3,key:2},
-        {username:"Ruben",icon:4,key:3},
-        {username:"Jota",icon:1,key:4},
-        {username:"Josemi",icon:2,key:5},
-        {username:"Yago",icon:3,key:6},
-        {username:"Nicolas",icon:4,key:7},
-        {username:"Jota",icon:1,key:8},
-        {username:"Josemi",icon:2,key:9},
-        {username:"Yago",icon:3,key:10},
-        {username:"Nicolas",icon:4,key:11},
-        {username:"Josemi",icon:2,key:12},
-        {username:"Yago",icon:3,key:13},
-        {username:"Nicolas",icon:4,key:14},
-    
-    ]
+    //savedFriends = [
+    //    {username:"Victor",icon:1,key:0},
+    //    {username:"Emilliano",icon:2,key:1},
+    //    {username:"Jogue",icon:3,key:2},
+    //    {username:"Ruben",icon:4,key:3},
+    //    {username:"Jota",icon:1,key:4},
+    //    {username:"Josemi",icon:2,key:5},
+    //    {username:"Yago",icon:3,key:6},
+    //    {username:"Nicolas",icon:4,key:7},
+    //    {username:"Jota",icon:1,key:8},
+    //    {username:"Josemi",icon:2,key:9},
+    //    {username:"Yago",icon:3,key:10},
+    //    {username:"Nicolas",icon:4,key:11},
+    //    {username:"Josemi",icon:2,key:12},
+    //    {username:"Yago",icon:3,key:13},
+    //    {username:"Nicolas",icon:4,key:14},
+    //
+    //]
 
-    sentInvitations = [
-        {username:"Victor",key:0},
-        {username:"Emilliano",key:1},
-        {username:"Jogue",key:2},
-        {username:"Ruben",key:3},
-        {username:"Jota",key:4},
-    ]
+    //sentInvitations = [
+    //    {username:"Victor",key:0},
+    //    {username:"Emilliano",key:1},
+    //    {username:"Jogue",key:2},
+    //    {username:"Ruben",key:3},
+    //    {username:"Jota",key:4},
+    //]
     
-    function onCancel(){
-        cancel = cancel === 'Cancel' ? 'Invite' : 'Cancel';
-    }
+    
 
-    function onInvite(){
-        invite = invite === 'Invite' ? 'Cancel' : 'Invite';
-    }
-    
 
 </script>
 
@@ -242,11 +168,11 @@
     <!--Search box and Add button-->
     <div class="flex gap-[15px] justify-between">
         <input class="input" type="text" placeholder="Type username here" bind:value={usernameSearch}/>
-        <button class="btn variant-filled" on:click={fetchSendFriendshipRequest}>
+        <button class="btn variant-filled">
             <svg class="w-6 h-6 text-gray-800 dark:text-black" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
                 <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 8v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8m18 0-8.029-4.46a2 2 0 0 0-1.942 0L3 8m18 0-9 6.5L3 8"/>
             </svg>
-          </button>
+        </button>
     </div>
     <!--Title and vertical scroll for saved friends-->
     <div class="max-h-[490px] overflow-y-auto p-2">
@@ -255,11 +181,11 @@
                 <div class="content-center"><AvatarDisplay icon={friend.icon} width={35}/></div>
                 <div class="content-center text-[22px]">{friend.username}</div>
                 {#if sentInvitations.find(invite => invite.username === friend.username)}
-                    <button class="btn rounded-md font-bold variant-filled  w-20 h-10 ml-auto mr-[2vmin]" on:click={onCancel}>
+                    <button class="btn rounded-md font-bold variant-filled  w-20 h-10 ml-auto mr-[2vmin]" on:click={() => onCancel(friend.username)}>
                         {cancel}
                     </button>
                 {:else}
-                    <button class="btn rounded-md font-bold variant-filled  w-20 h-10 ml-auto mr-[2vmin]" on:click={onInvite}>
+                    <button class="btn rounded-md font-bold variant-filled  w-20 h-10 ml-auto mr-[2vmin]" on:click={() => onInvite(friend.username)}>
                         {invite}
                     </button>
                 {/if}
