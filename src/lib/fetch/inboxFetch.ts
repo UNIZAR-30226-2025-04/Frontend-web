@@ -1,4 +1,4 @@
-import { receivedFriendshipRequestsPath, recievedGameInvitations } from "$lib/paths";
+import { addFriendPath, deleteReceivedRequestsPath, receivedFriendshipRequestsPath, recievedGameInvitations } from "$lib/paths";
 import { userDataStore } from "$lib/stores";
 import { get } from "svelte/store";
 import type { invitation, request } from '$lib/interfaces'
@@ -34,6 +34,61 @@ async function fetchReceivedFriendshipRequests(pendingRequests:request[]) {
         console.log("API response (friend request list):", data);
     } catch (err:any) {
         console.log("API error (friend request list):", err);
+    }
+}
+
+/**
+ * Deletes the friend request sent to the user by another user with the username 'posibleFriend'
+ * @posibleFriend Username of the user who sent the friend invitation
+ * @async
+ */
+export async function fetchDeleteFriendRequest(posibleFriend:string) {
+    try {
+        const response = await fetch(deleteReceivedRequestsPath + posibleFriend, {
+            method: 'DELETE',
+            headers: {
+                'accept': 'application/json',
+                'Authorization': 'Bearer ' + get(userDataStore).token,
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error("Error removing friend from request list:");
+        }
+        const data = await response.json();
+        console.log("API response (delete friend from request list):", data);
+    } catch (err:any) {
+        console.log("API error (delete friend from request list):", err.message);
+    }
+}
+
+/**
+ * Accepts the friend request sent to the user by another user with the username 'posibleFriend'
+ * @posibleFriend Username of the user who sent the friend invitation
+ * @async
+ */
+export async function fetchAcceptFriendshipRequest(posibleFriend:string) {
+    try {
+        const formData = new FormData();
+        formData.append('friendUsername', posibleFriend);
+
+        const response = await fetch(addFriendPath, {
+            method: 'POST',
+            headers: {
+                'accept': 'application/json',
+                'Authorization': 'Bearer ' + get(userDataStore).token,
+            },
+            body: formData
+        });
+
+        if (!response.ok) {
+            throw new Error("Error accepting the friendship request");
+        }
+        
+        const data = await response.json();
+        console.log("API response (accept a friendship request):", data);
+    } catch (err:any) {
+        console.log("API error (accept a friendship request):", err.message);
     }
 }
 

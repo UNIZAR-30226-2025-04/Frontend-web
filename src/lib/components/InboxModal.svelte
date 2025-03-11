@@ -4,10 +4,9 @@
     import  AvatarDisplay  from "./AvatarDisplay.svelte";
     import { avatarDirectory } from "$lib/avatarsDirectory";
 	import { flip } from 'svelte/animate';
-    import { apiBase, receivedFriendshipRequestsPath, deleteReceivedRequestsPath, addFriendPath } from '$lib/paths';
     import { get } from 'svelte/store';
     import type { invitation, request } from '$lib/interfaces'
-    import { getInbox } from "$lib/fetch/inboxFetch";
+    import { getInbox, fetchDeleteFriendRequest, fetchAcceptFriendshipRequest } from "$lib/fetch/inboxFetch";
 
     // Props
     /** Exposes parent props to this component. */
@@ -61,33 +60,12 @@
         let auxUsername:string = pendingRequests[index].username;
         pendingRequests[index].username = "Removing..."
         pendingRequests=pendingRequests;
-        await sleep(2000);
+        await fetchDeleteFriendRequest(pendingRequests[index].username);
         pendingRequests = pendingRequests.filter(request => request.key !== key);
         pendingRequests = pendingRequests;
     }
 
-    // Sends a DELETE request to the server to remove a friend request, then updates the local friend list if successful
-    async function fetchDeleteFriendRequest(index:number, key:number) {
-        try {
-            const response = await fetch(deleteReceivedRequestsPath + pendingRequests[index].username, {
-                method: 'DELETE',
-                headers: {
-                    'accept': 'application/json',
-                    'Authorization': 'Bearer ' + token,
-                }
-            });
-
-            if (!response.ok) {
-                throw new Error("Error removing friend from request list:");
-            }
-            removeRequest(index, key);
-            const data = await response.json();
-            console.log("API response (delete friend from request list):", data);
-        } catch (err:any) {
-            error = err.message;
-            console.log("API error (delete friend from request list):", error);
-        }
-    }
+    
 
     /**
      * Accepts from the pending list the index
@@ -99,38 +77,13 @@
         let auxUsername:string = pendingRequests[index].username;
         pendingRequests[index].username = "Now you are firends!"
         pendingRequests=pendingRequests;
-        await sleep(2000);
+        await fetchAcceptFriendshipRequest(pendingRequests[index].username);
+        await fetchDeleteFriendRequest(pendingRequests[index].username);
         pendingRequests = pendingRequests.filter(request => request.key !== key);
         pendingRequests = pendingRequests;
     }
 
-    // Sends a POST request to the server to accept a friendship request
-    async function fetchAcceptFriendshipRequest(index:number, key:number) {
-        try {
-            const formData = new FormData();
-            formData.append('friendUsername', pendingRequests[index].username);
-
-			const response = await fetch(addFriendPath, {
-				method: 'POST',
-				headers: {
-					'accept': 'application/json',
-                    'Authorization': 'Bearer ' + token,
-				},
-				body: formData
-			});
-
-			if (!response.ok) {
-				throw new Error("Error accepting the friendship request");
-			}
-            
-            acceptRequest(index, key);
-			const data = await response.json();
-			console.log("API response (accept a friendship request):", data);
-		} catch (err:any) {
-			error = err.message;
-            console.log("API error (accept a friendship request):", error);
-		}
-    }
+    
 
 
 
@@ -198,10 +151,10 @@
             <div animate:flip class="flex mb-2 justify-between">
                 <!--on:click funtions need to be anonimus so a landa function is necesary-->
                 <div class="flex gap-3">
-                    <button class="btn-icon-sm rounded-md font-bold variant-filled text-[15px]" on:click={() => {fetchDeleteFriendRequest(index, request.key)}}>X</button>
+                    <button class="btn-icon-sm rounded-md font-bold variant-filled text-[15px]" on:click={() => {removeRequest(index, request.key)}}>X</button>
                     <div class="content-center text-[22px]">{request.username}</div>
                 </div>
-                <button class="btn variant-filled text-[16px] pt-1 pb-1 mr-[10px]" on:click={() => {fetchAcceptFriendshipRequest(index, request.key)}}>Accept</button>
+                <button class="btn variant-filled text-[16px] pt-1 pb-1 mr-[10px]" on:click={() => {acceptRequest(index, request.key)}}>Accept</button>
             </div>
         {/each}
     </div>
