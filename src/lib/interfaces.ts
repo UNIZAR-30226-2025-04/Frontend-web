@@ -31,3 +31,14 @@ export interface Lobby {
     code: string
     host: boolean
 }
+
+// INBOX interfaces
+export interface invitation {
+    key: number
+    username: string
+    players: number
+}
+export interface request {
+    key: number
+    username: string
+}
