@@ -57,26 +57,30 @@
 
 </script>
 
-<!-- Title -->
-<h1 class="ml-[-66%]  mt-[4%] text-[5vmin]">PUBLIC LOBBIES</h1>
+<!-- Headers -->
+<div class="w-[85vw] mt-[8vh]">
+  <!-- Title -->
+  <h1 class="ml-[2vw] text-[5vmin] text-left">PUBLIC LOBBIES</h1>
 
-<!-- Buttons -->
-<div class="flex flex-row gap-[10vmin] mt-[3%] ml-[1%] text-[3.5vmin]"> 
-  <button type="button" class="btn btn-lg variant-filled w-[18vmin]" on:click={clickOnInsertCode}>INSERT CODE</button>
-  <button type="button" class="btn btn-lg variant-filled" on:click={clickOnMatchMaking}>MATCHMAKING</button>
-  <div class="ml-[109vmin]">
-    <button type="button" class="btn btn-lg variant-filled" on:click={() => goto(base + "/home")}>BACK</button>
+  <!-- Buttons -->
+  <div class="flex justify-between mt-[3%] ml-[1%] ">
+    <div class="flex gap-[10vmin]"> 
+      <button type="button" class="btn btn-lg variant-filled text-2" on:click={clickOnInsertCode}>INSERT CODE</button>
+      <button type="button" class="btn btn-lg variant-filled text-2" on:click={clickOnMatchMaking}>MATCHMAKING</button>
+    </div>  
+    <button type="button" class="btn btn-lg variant-filled text-2" on:click={() => goto(base + "/home")}>BACK</button>
   </div>
+  
 </div>
 
 
 <!-- Lobbies -->
-<div class="lobby-list-container ml-[2%] mt-[2%] overflow-y-auto h-[60vh] rounded-lg">
+<div class="w-[85vw] mt-[8vh] overflow-y-auto h-[60vh] rounded-lg">
   <nav>
     <ul>
       {#each lobbies as lobby, index (lobby.key)}
         <li>
-          <div class={`flex flex-row items-center h-[10vmin] w-[176vmin] p-4 ${index % 2 == 0 ? 'bg-surface-700' : 'bg-surface-800'}`}>
+          <div class={`flex flex-row items-center h-[10vmin] w-full p-4 ${index % 2 == 0 ? 'bg-surface-700' : 'bg-surface-800'}`}>
             <AvatarDisplay icon={lobby.icon} width={60}/>
             <span class="text-[4vmin] ml-4">{lobby.host}</span>
             <div class="ml-auto">

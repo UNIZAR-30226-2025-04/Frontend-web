@@ -59,7 +59,7 @@
 </script>
 
 {#if $modalStore[0]}
-    <div class="modal-form card p-4 w-[44vmin] h-[25vmin] shadow-xl">
+    <div class="modal-form card p-4  shadow-xl">
         <h1 class="text-center text-[5vmin] font-bold mt-[3%]">Join with code</h1>
 
         <!-- Digit input fields --> 
@@ -88,7 +88,7 @@
         {/if}
 
         <!-- Cancel button -->
-        <div class="mt-[5%] w-[36vmin] ml-[6%]">
+        <div class="mt-[5%] w-full">
             <button class="block btn {parent.buttonPositive} w-full text-lg" on:click={parent.onClose}>Cancel</button>
         </div>
     </div>

@@ -13,7 +13,7 @@
 
 {#if $modalStore[0]}
     
-    <div class="modal-form card p-4 w-[40vmin] h-[25vmin] shadow-xl">
+    <div class="modal-form card p-4 shadow-xl">
         <h1 class="text-center text-[5vmin] font-bold p-5">MATCHMAKING</h1>
         
         <!-- Loader -->
