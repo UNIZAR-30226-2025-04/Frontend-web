@@ -81,48 +81,44 @@
 
 </script>
 
-
-<!-- Lobby header -->
-<div class="flex flex-row gap-[10vmin] mt-[2%] ml-[0%] text-[3.5vmin] items-center"> 
-  <h1 class="text-[5vmin]">LOBBY</h1>
-  <span>{actual} / {max}</span>
-  <button type="button" class="btn btn-lg variant-filled w-[13vmin]" on:click={onSwitchPublic}>{publicString}</button>
-  <h1>Code : {code}</h1>
-  <button type="button" class="btn btn-lg variant-filled" on:click={onCopyCode}>Copy</button>
-  <button type="button" class="btn btn-lg variant-filled">Share</button>
-  <div class="ml-[32vmin]">
+<div class="w-[95vw] mt-[5vmin]">
+  <!-- Lobby header -->
+  <div class="flex w-full justify-between">
+    <div class="flex gap-[2vw] text-[clamp(15px,3.5vmin,9999px)] items-center"> 
+      <h1 class="text-[clamp(15px,5vmin,9999px)]">LOBBY</h1>
+      <div>{actual} / {max}</div>
+      <button type="button" class="btn btn-lg variant-filled" on:click={onSwitchPublic}>{publicString}</button>
+      <h2>Code : {code}</h2>
+      <button type="button" class="btn btn-lg variant-filled" on:click={onCopyCode}>Copy</button>
+      <button type="button" class="btn btn-lg variant-filled">Share</button>    
+    </div>
     <button type="button" class="btn btn-lg variant-filled"><img src="icons/chat.png" alt="chat" class="w-[20px]"></button>
   </div>
-</div>
 
 
-<!-- Players -->
-<div class="mt-[4%] gap-[5vmin] ml-[5%] mr-[5%] grid grid-cols-2 md:grid-cols-4">
-  {#each players as player, index (player.key)}
-    <div animate:flip={{ duration: 500, easing: cubicOut }} class="block card card-hover p-4 h-[28vmin] w-[40vmin] shadow-xl space-y-6  text-left" style="flex: 0 0 40vmin;"> 
-      <AvatarDisplay icon={player.icon} width={100}/>
-      <h1 class="text-[3vmin]">{player.username}</h1>
-      {#if player.host}
-        <h1 class="text-green-500 text-[5vmin]">HOST</h1>
-      {/if}
-      {#if host}
-        {#if index != 0}
-          <button class="btn btn-lg variant-filled mt-[30%]" on:click={() => onKickPlayer(index)}>Kick</button>
+  <!-- Players -->
+  <div class="mt-[4%] gap-[5vmin] grid grid-cols-2 md:grid-cols-4">
+    {#each players as player, index (player.key)}
+      <div animate:flip={{ duration: 500, easing: cubicOut }} class="block card card-hover shadow-xl space-y-6  text-left p-6" style="flex: 0 0 40vmin;"> 
+        <AvatarDisplay icon={player.icon} width={100}/>
+        <div class="text-2xl">{player.username}</div>
+        {#if player.host}
+          <h1 class="text-green-500 text-3xl">HOST</h1>
         {/if}
-      {/if}
-    </div>
-  {/each}
-</div>
+        {#if host}
+          {#if index != 0}
+            <button class="btn btn-lg variant-filled mt-[30%]" on:click={() => onKickPlayer(index)}>Kick</button>
+          {/if}
+        {/if}
+      </div>
+    {/each}
+  </div>
 
-<!-- Leave / Start button -->
-{#if host}
-  <div class="flex flex-row gap-[5vmin] mt-[1%] ml-[-47%]">
-    <button type="button" class="btn btn-lg variant-filled w-[40vmin] h-[7vmin] mt-[5%] ml-[5%]" on:click={() => goto(base + "/home")}>Leave</button>
-    <button type="button" class="btn btn-lg variant-filled w-[40vmin] h-[7vmin] mt-[5%] ml-[5%]" on:click={onStart}>Start</button>
+  <!-- Leave / Start button -->
+  <div class="flex gap-[3.5vw] mt-[3%] mb-[3%]">
+    <button type="button" class="btn btn-lg variant-filled text-2xl w-[21vw]" on:click={() => goto(base + "/home")}>Leave</button>
+    {#if host}
+      <button type="button" class="btn btn-lg variant-filled text-2xl w-[21vw]" on:click={onStart}>Start</button>
+    {/if}
   </div>
-{/if}
-{#if !host}
-  <div class="flex flex-row gap-[5vmin] mt-[1%] ml-[-66%]">
-    <button type="button" class="btn btn-lg variant-filled w-[40vmin] h-[7vmin] mt-[10%] ml-[3%]" on:click={() => goto(base + "/home")}>Leave</button>
-  </div>
-{/if}
+</div>
