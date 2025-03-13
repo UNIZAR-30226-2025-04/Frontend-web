@@ -5,9 +5,11 @@
   import { flip } from "svelte/animate";
   import { cubicOut } from "svelte/easing";
   import { base } from '$app/paths';
+  import { apiBase, joinLobbyPath, exitLobbyPath } from '$lib/paths';
   import { page } from '$app/stores';
+  import { get } from 'svelte/store';
 
-
+  let token = get(userDataStore).token;
 
   let actual = 8; // Actual number of players
   let max = 8; // Maximum number of players
@@ -15,6 +17,8 @@
   let publicValue = true; // Boolean to know if the lobby is public or private
   let code = $lobbyStore.code; // Code of the lobby
   let host = $lobbyStore.host; // Boolean to know if the player is the host
+
+  let error= '';
   
   // Function to switch the public value
   function onSwitchPublic(){
@@ -69,6 +73,29 @@
     actual = players.length;
   }
 
+  // Sends a POST request to the server to remove the user from the lobby
+  async function fetchExitLobby() {
+    try {
+      const response = await fetch(exitLobbyPath + code , {
+        method: 'POST',
+        headers: {
+          'accept': 'application/json',
+          'Authorization': 'Bearer ' + token,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Error leaving the lobby");
+      }
+            
+      const data = await response.json();
+      console.log("API response (leave the lobby):", data);
+    } catch (err:any) {
+        error = err.message;
+        console.log("API error (leave the lobby):", error);
+    }
+  }
+
   /**
    * Adds user to the list
    * @param username
@@ -117,12 +144,12 @@
 <!-- Leave / Start button -->
 {#if host}
   <div class="flex flex-row gap-[5vmin] mt-[1%] ml-[-47%]">
-    <button type="button" class="btn btn-lg variant-filled w-[40vmin] h-[7vmin] mt-[5%] ml-[5%]" on:click={() => goto(base + "/home")}>Leave</button>
+    <button type="button" class="btn btn-lg variant-filled w-[40vmin] h-[7vmin] mt-[5%] ml-[5%]" on:click={() => { fetchExitLobby(); goto(base + "/home"); }}>Leave</button>
     <button type="button" class="btn btn-lg variant-filled w-[40vmin] h-[7vmin] mt-[5%] ml-[5%]" on:click={onStart}>Start</button>
   </div>
 {/if}
 {#if !host}
   <div class="flex flex-row gap-[5vmin] mt-[1%] ml-[-66%]">
-    <button type="button" class="btn btn-lg variant-filled w-[40vmin] h-[7vmin] mt-[10%] ml-[3%]" on:click={() => goto(base + "/home")}>Leave</button>
+    <button type="button" class="btn btn-lg variant-filled w-[40vmin] h-[7vmin] mt-[10%] ml-[3%]" on:click={() => { fetchExitLobby(); goto(base + "/home")}}>Leave</button>
   </div>
 {/if}

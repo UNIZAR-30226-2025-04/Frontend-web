@@ -4,7 +4,7 @@
     import { SlideToggle } from '@skeletonlabs/skeleton';
     import { goto } from '$app/navigation';
     import { base } from '$app/paths';
-    import { apiBase, createLobbyPath } from '$lib/paths';
+    import { apiBase, createLobbyPath, joinLobbyPath } from '$lib/paths';
     import { get } from 'svelte/store';
     import { userDataStore, lobbyStore } from '$lib/stores';
     
@@ -55,6 +55,7 @@
                 code: lobbyCode,
                 host: true
             }));
+            joinLobbyFetch(lobbyCode);
             onCreateLobby();
 			console.log("API response (create a lobby):", data);
 		} catch (err:any) {
@@ -63,6 +64,29 @@
 		}
     }
 
+    // Sends a POST request to the server to insert a user into a lobby
+    async function joinLobbyFetch(lobbyCode : string) {
+        try {
+
+			const response = await fetch(joinLobbyPath + lobbyCode, {
+				method: 'POST',
+				headers: {
+					'accept': 'application/json',
+                    'Authorization': 'Bearer ' + token,
+				}
+			});
+
+			if (!response.ok) {
+				throw new Error("Error inserting the user into the lobby");
+			}
+            
+            const data = await response.json();
+			console.log("API response (insert the user into the lobby):", data);
+		} catch (err:any) {
+			error = err.message;
+            console.log("API error (insert the user into the lobby):", error);
+		}
+    }
 
 
 </script>
