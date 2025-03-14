@@ -28,12 +28,18 @@
 
     // Loads both the lobby invitations and the pending friend requests in parallel
     async function loadData() {
+        console.log("A");
+        console.log(pendingRequests);
         await getInbox(invitations,pendingRequests);
+        console.log("B");
+        console.log(pendingRequests);
+        pendingRequests = pendingRequests;
+        invitations = invitations;
+        console.log("C");
+        console.log(pendingRequests);
     }
 
-    onMount(() => {
-        loadData();
-    })
+    loadData();
 
     /**
      * Removes from the invitations list the index that has the key
@@ -60,7 +66,7 @@
         let auxUsername:string = pendingRequests[index].username;
         pendingRequests[index].username = "Removing..."
         pendingRequests=pendingRequests;
-        await fetchDeleteFriendRequest(pendingRequests[index].username);
+        await fetchDeleteFriendRequest(auxUsername);
         pendingRequests = pendingRequests.filter(request => request.key !== key);
         pendingRequests = pendingRequests;
     }
@@ -77,8 +83,8 @@
         let auxUsername:string = pendingRequests[index].username;
         pendingRequests[index].username = "Now you are firends!"
         pendingRequests=pendingRequests;
-        await fetchAcceptFriendshipRequest(pendingRequests[index].username);
-        await fetchDeleteFriendRequest(pendingRequests[index].username);
+        await fetchAcceptFriendshipRequest(auxUsername);
+        await fetchDeleteFriendRequest(auxUsername);
         pendingRequests = pendingRequests.filter(request => request.key !== key);
         pendingRequests = pendingRequests;
     }

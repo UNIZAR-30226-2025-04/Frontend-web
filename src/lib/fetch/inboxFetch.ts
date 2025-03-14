@@ -24,10 +24,21 @@ async function fetchReceivedFriendshipRequests(pendingRequests:request[]) {
 
         const data = await response.json();
         if (data.received_friendship_requests) {
+            /**
             pendingRequests = data.received_friendship_requests.map((request: { username: string }, index: number) => ({
                 key: index,
                 username: request.username,
             }));
+            */
+            pendingRequests.splice(0, pendingRequests.length, // Elimina los elementos actuales
+                ...data.received_friendship_requests.map((request: { username: string }, index: number) => ({
+                    key: index,
+                    username: request.username,
+                }))
+            );
+        
+            console.log("API");
+            console.log(pendingRequests)
         } else {
             pendingRequests = [];
         }
@@ -98,6 +109,7 @@ export async function fetchAcceptFriendshipRequest(posibleFriend:string) {
  * @async
  */
 async function fetchReceivedGameInvitations(invitations:invitation[]) {
+    return;
     try {
         const response = await fetch(recievedGameInvitations, {
             method: 'GET',
@@ -134,7 +146,7 @@ async function fetchReceivedGameInvitations(invitations:invitation[]) {
  */
 export async function getInbox(invitations:invitation[], pendingRequests:request[]) {
 
-    await fetchReceivedGameInvitations(invitations);
+    //await fetchReceivedGameInvitations(invitations);
     await fetchReceivedFriendshipRequests(pendingRequests);
     
 }

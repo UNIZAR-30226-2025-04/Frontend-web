@@ -29,7 +29,7 @@ export const sendFriendshipRequestPath:string = apiBase + 'auth/sendFriendshipRe
 // List of received friendship request
 export const receivedFriendshipRequestsPath:string = apiBase + 'auth/received_friendship_requests';
 // Delete a received friendship request
-export const deleteReceivedRequestsPath:string = apiBase + 'auth/received_friendship_requests/';
+export const deleteReceivedRequestsPath:string = apiBase + 'auth/received_friendship_request/';
 // Accept a friendship request
 export const addFriendPath:string = apiBase + 'auth/addFriend';
 
