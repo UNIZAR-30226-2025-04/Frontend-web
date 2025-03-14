@@ -4,7 +4,7 @@
     import  AvatarDisplay  from "./AvatarDisplay.svelte";
     import { avatarDirectory } from "$lib/avatarsDirectory";
 	import { flip } from 'svelte/animate';
-    import { apiBase, friendsPath, sentRequestsPath, deleteFriendPath, deleteSentRequestPath, sendFriendshipRequestPath } from '$lib/paths';
+    import { apiBase, friendsPath, sentRequestsPath, deleteFriendPath, deleteSentRequestPath, sendFriendshipRequestPath, userInfoPath } from '$lib/paths';
     import { get } from 'svelte/store';
 
     // Style classes for the error message and the containers that hold it
@@ -83,7 +83,7 @@
                 pendingRequests = data.sent_friendship_requests.map((request: { username: string; icon: number }, index: number) => ({
                     key: index,
                     username: request.username,
-                    icon: 2 // request.icon
+                    icon: request.icon
                 }));
             } else{
                 pendingRequests = [];
@@ -183,9 +183,32 @@
     async function clickOnAdd() {
         AddText = "...";
         await sleep(2000);
-        let newFriendRequest: listItem = {username:usernameSearch,icon:1,key:pendingRequests.length + 1};
-        pendingRequests = [...pendingRequests, newFriendRequest];
+        fetchUserInfo()
         AddText = "Add";
+    }
+
+    // Fetches the list of sent pending friend requests from the server using a GET request
+    async function fetchUserInfo() {
+        try {
+            const response = await fetch(userInfoPath + usernameSearch, {
+                method: 'GET',
+                headers: {
+                    'accept': 'application/json',
+                    'Authorization': 'Bearer ' + token,
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error("Error getting user info");
+            }
+            const data: { username: string; icon: number } = await response.json();
+            let newFriendRequest: listItem = {username:usernameSearch,icon:data.icon,key:pendingRequests.length + 1};
+            pendingRequests = [...pendingRequests, newFriendRequest];
+            console.log("API response (user info):", data);
+        } catch (err:any) {
+            error = err.message;
+            console.log("API error (user info):", error);
+        }
     }
 
     // Sends a POST request to the server to send a friendship request
@@ -209,6 +232,7 @@
             
             clickOnAdd();
 			const data = await response.json();
+            sendRequestError = false;
 			console.log("API response (send a friendship request):", data);
 		} catch (err:any) {
 			error = err.message;
