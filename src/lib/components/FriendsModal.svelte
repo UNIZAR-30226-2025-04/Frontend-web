@@ -187,7 +187,7 @@
         AddText = "Add";
     }
 
-    // Fetches the list of sent pending friend requests from the server using a GET request
+    // Fetches the user info from the server using a GET request
     async function fetchUserInfo() {
         try {
             const response = await fetch(userInfoPath + usernameSearch, {
