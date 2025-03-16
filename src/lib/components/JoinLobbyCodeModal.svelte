@@ -22,6 +22,19 @@
     const errorContainer = 'alert variant-ghost-error p-2 flex justify-center items-center text-center mt-[5%] w-[35vmin] ml-[7%]';
     const errorMessageCode = 'alert-message text-center';
 
+    // Function to handle paste event
+    document.addEventListener('paste', handlePaste);
+    function handlePaste(event: ClipboardEvent) {
+        const clipboardData = event.clipboardData || (window as any).clipboardData;
+        const pastedData = clipboardData.getData('Text');
+
+        if (pastedData.length === 4) {
+            for (let i = 0; i < 4; i++) {
+                code[i] = pastedData[i];
+            }
+        }
+    }
+
     // Function to write a digit and go ahead
     function handleInput(event: Event, index: number) {
         const target = event.target as HTMLInputElement | null;
