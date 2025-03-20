@@ -5,9 +5,12 @@
   import { flip } from "svelte/animate";
   import { cubicOut } from "svelte/easing";
   import { base } from '$app/paths';
+  import { apiBase, joinLobbyPath, exitLobbyPath } from '$lib/paths';
   import { page } from '$app/stores';
+  import { get } from 'svelte/store';
+    import { fetchExitLobby } from "$lib/fetch/lobbyFetch";
 
-
+  let token = get(userDataStore).token;
 
   let actual = 8; // Actual number of players
   let max = 8; // Maximum number of players
@@ -15,6 +18,8 @@
   let publicValue = true; // Boolean to know if the lobby is public or private
   let code = $lobbyStore.code; // Code of the lobby
   let host = $lobbyStore.host; // Boolean to know if the player is the host
+
+  let error= '';
   
   // Function to switch the public value
   function onSwitchPublic(){
@@ -70,6 +75,17 @@
   }
 
   /**
+   * Function to leave lobby
+   * @number index
+   * @async
+   * */ 
+  async function onLeave(){
+    await fetchExitLobby();
+    goto(base + "/home");
+  }
+  
+
+  /**
    * Adds user to the list
    * @param username
    * @param icon
@@ -116,7 +132,7 @@
 
   <!-- Leave / Start button -->
   <div class="flex gap-[3.5vw] mt-[3%] mb-[3%]">
-    <button type="button" class="btn btn-lg variant-filled text-2xl w-[21vw]" on:click={() => goto(base + "/home")}>Leave</button>
+    <button type="button" class="btn btn-lg variant-filled text-2xl w-[21vw]" on:click={onLeave}>Leave</button>
     {#if host}
       <button type="button" class="btn btn-lg variant-filled text-2xl w-[21vw]" on:click={onStart}>Start</button>
     {/if}

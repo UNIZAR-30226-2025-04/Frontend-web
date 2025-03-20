@@ -11,8 +11,8 @@ let userDataInitial: UserData = {
     remember: false
 }
 
-
 export let userDataStore = persisted('userDataNogler',userDataInitial)
+
 
 let lobbyInitial: Lobby = {
     code: "code",

@@ -1,19 +1,39 @@
 <script lang="ts">
     import type { SvelteComponent } from "svelte";
     import { getModalStore } from "@skeletonlabs/skeleton";
+    import { apiBase, joinLobbyPath } from '$lib/paths';
+    import { get } from 'svelte/store';
+    import { base } from '$app/paths';
+    import { userDataStore, lobbyStore } from '$lib/stores';
+    import { goto } from '$app/navigation';
 
     // Props
     export let parent: SvelteComponent;
 
     const modalStore = getModalStore();
 
+    let token = get(userDataStore).token;
+
     let code = ["", "", "", ""];
     let errorMessage = false;
 
-    const errorContainer = 'alert variant-ghost-error p-2';
-    const errorMessageCode = 'alert-message text-left';
+    let error= '';
 
-    const correctCode = "1234";
+    const errorContainer = 'alert variant-ghost-error p-2 flex justify-center items-center text-center mt-[5%] w-[35vmin] ml-[7%]';
+    const errorMessageCode = 'alert-message text-center';
+
+    // Function to handle paste event
+    document.addEventListener('paste', handlePaste);
+    function handlePaste(event: ClipboardEvent) {
+        const clipboardData = event.clipboardData || (window as any).clipboardData;
+        const pastedData = clipboardData.getData('Text');
+
+        if (pastedData.length === 4) {
+            for (let i = 0; i < 4; i++) {
+                code[i] = pastedData[i];
+            }
+        }
+    }
 
     // Function to write a digit and go ahead
     function handleInput(event: Event, index: number) {
@@ -43,18 +63,47 @@
         }
     }
 
+    // Sends a POST request to the server to insert a user into a lobby
+    async function joinLobbyFetch(enteredCode : string) {
+        try {
+
+			const response = await fetch(joinLobbyPath + enteredCode, {
+				method: 'POST',
+				headers: {
+					'accept': 'application/json',
+                    'Authorization': 'Bearer ' + token,
+				}
+			});
+
+			if (!response.ok) {
+				throw new Error("Error inserting the user into the lobby");
+			}
+            
+            const data = await response.json();
+			console.log("API response (insert the user into the lobby):", data);
+            errorMessage = false;
+		} catch (err:any) {
+            errorMessage = true;
+			error = err.message;
+            console.log("API error (insert the user into the lobby):", error);
+		}
+    }
 
     // Function to check the inserted coide
-    function checkCode() {
+    async function checkCode() {
         const enteredCode = code.join("");
-        if (enteredCode === correctCode) {
-            errorMessage = false;
-            
+        await joinLobbyFetch(enteredCode);
+        if (errorMessage == false) {
+            lobbyStore.update(() => ({
+                code: enteredCode,
+                host: false
+            }));
+            goto(base+"/lobby");
             parent.onClose();
-        } else {
-            errorMessage = true;
         }
     }
+
+    
 
 </script>
 
