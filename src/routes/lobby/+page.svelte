@@ -75,8 +75,14 @@
   }
 
   /**
+  * Opens the InviteFriends modal
+  */
+  function onShare(){
+    
+  }
+
+  /**
    * Function to leave lobby
-   * @number index
    * @async
    * */ 
   async function onLeave(){
@@ -106,7 +112,7 @@
       <button type="button" class="btn btn-lg variant-filled" on:click={onSwitchPublic}>{publicString}</button>
       <h2>Code : {code}</h2>
       <button type="button" class="btn btn-lg variant-filled" on:click={onCopyCode}>Copy</button>
-      <button type="button" class="btn btn-lg variant-filled">Share</button>    
+      <button type="button" class="btn btn-lg variant-filled" on:click={onShare}>Share</button>    
     </div>
     <button type="button" class="btn btn-lg variant-filled"><img src="icons/chat.png" alt="chat" class="w-[20px]"></button>
   </div>

@@ -32,7 +32,7 @@ export interface Lobby {
     host: boolean
 }
 
-// INBOX interfaces
+// INBOX AND FRIENDS interfaces
 export interface invitation {
     key: number
     username: string
@@ -41,4 +41,10 @@ export interface invitation {
 export interface request {
     key: number
     username: string
+}
+
+export interface userItem {
+    key: number
+    username: string
+    icon: number
 }

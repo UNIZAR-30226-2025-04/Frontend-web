@@ -28,15 +28,9 @@
 
     // Loads both the lobby invitations and the pending friend requests in parallel
     async function loadData() {
-        console.log("A");
-        console.log(pendingRequests);
         await getInbox(invitations,pendingRequests);
-        console.log("B");
-        console.log(pendingRequests);
         pendingRequests = pendingRequests;
         invitations = invitations;
-        console.log("C");
-        console.log(pendingRequests);
     }
 
     loadData();

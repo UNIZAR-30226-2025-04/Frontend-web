@@ -24,13 +24,7 @@ async function fetchReceivedFriendshipRequests(pendingRequests:request[]) {
 
         const data = await response.json();
         if (data.received_friendship_requests) {
-            /**
-            pendingRequests = data.received_friendship_requests.map((request: { username: string }, index: number) => ({
-                key: index,
-                username: request.username,
-            }));
-            */
-            pendingRequests.splice(0, pendingRequests.length, // Elimina los elementos actuales
+            pendingRequests.splice(0, pendingRequests.length, // Deletes previous items and adds the new ones
                 ...data.received_friendship_requests.map((request: { username: string }, index: number) => ({
                     key: index,
                     username: request.username,

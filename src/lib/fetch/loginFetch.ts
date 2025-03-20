@@ -1,6 +1,6 @@
 import { loginPath } from "$lib/paths";
 import { userDataStore } from "$lib/stores";
-import { meFetch } from "./meFetch";
+import { meFetch } from "./usersFetch";
 
 /**
  * Attemps to login the user, if succesfull saves it on the userDataStore, if not throws error

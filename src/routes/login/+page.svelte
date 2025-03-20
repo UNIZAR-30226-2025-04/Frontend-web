@@ -4,7 +4,6 @@
 	import { loginPath } from '$lib/paths';
     import type { UserData } from '$lib/interfaces';
 	import { userDataStore } from '$lib/stores';
-	import { meFetch } from '$lib/fetch/meFetch';
     import { loginFetch } from '$lib/fetch/loginFetch';
 
 	let email:string = '';

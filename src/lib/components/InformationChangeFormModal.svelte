@@ -8,7 +8,7 @@
     import { goto } from '$app/navigation';
     import { base } from '$app/paths';
     import { get } from "svelte/store";
-    import { updateFetch } from "$lib/fetch/updateFetch";
+    import { updateFetch } from "$lib/fetch/usersFetch";
 
 
     // Props

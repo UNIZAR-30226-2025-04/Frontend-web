@@ -3,7 +3,10 @@ import { lobbyStore, userDataStore } from "$lib/stores";
 import { get } from "svelte/store";
 
 
-// Sends a POST request to the server to create a lobby
+/**
+ * Sends a POST request to the server to create a lobby
+ * @async
+ */
 export async function createLobbyFetch() {
     try {
 
@@ -32,7 +35,10 @@ export async function createLobbyFetch() {
     }
 }
 
-// Sends a POST request to the server to insert a user into a lobby
+/**
+ * Sends a POST request to the server to insert a user into a lobby
+ * @async
+ */
 export async function joinLobbyFetch(lobbyCode : string) {
     try {
 
@@ -55,7 +61,10 @@ export async function joinLobbyFetch(lobbyCode : string) {
     }
 }
 
-// Sends a POST request to the server to remove the user from the lobby
+/**
+ * Sends a POST request to the server to remove the user from the lobby
+ * @async
+ */
 export async function fetchExitLobby() {
   try {
     const response = await fetch(exitLobbyPath + get(lobbyStore).code , {
