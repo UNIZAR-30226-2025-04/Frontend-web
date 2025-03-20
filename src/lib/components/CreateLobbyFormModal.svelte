@@ -7,6 +7,7 @@
     import { apiBase, createLobbyPath, joinLobbyPath } from '$lib/paths';
     import { get } from 'svelte/store';
     import { userDataStore, lobbyStore } from '$lib/stores';
+    import { createLobbyFetch } from "$lib/fetch/lobbyFetch";
     
 
     // Props
@@ -17,76 +18,25 @@
 
     let publicValue = true;
 
-    let token = get(userDataStore).token;
-
-    let error= '';
-
-    // Function to switch the public value
+    /**
+     * Function to switch the public value
+     */
     function onSwitchPublic(){
         publicValue = !publicValue;
         console.log(publicValue);
     }
  
-    // Function to create a lobby
-    function onCreateLobby(){
+    /**
+     * Function to create a lobby
+     * @async
+     */
+    async function onCreateLobby(){
+        await createLobbyFetch();
         goto(base+"/lobby");
         modalStore.close();
     }
 
-    // Sends a POST request to the server to create a lobby
-    async function createLobbyFetch() {
-        try {
-
-			const response = await fetch(createLobbyPath, {
-				method: 'POST',
-				headers: {
-					'accept': 'application/json',
-                    'Authorization': 'Bearer ' + token,
-				}
-			});
-
-			if (!response.ok) {
-				throw new Error("Error creating a lobby");
-			}
-            
-            const data = await response.json();
-            const lobbyCode = data["lobby_id"];
-            lobbyStore.update(() => ({
-                code: lobbyCode,
-                host: true
-            }));
-            joinLobbyFetch(lobbyCode);
-            onCreateLobby();
-			console.log("API response (create a lobby):", data);
-		} catch (err:any) {
-			error = err.message;
-            console.log("API error (create a lobby):", error);
-		}
-    }
-
-    // Sends a POST request to the server to insert a user into a lobby
-    async function joinLobbyFetch(lobbyCode : string) {
-        try {
-
-			const response = await fetch(joinLobbyPath + lobbyCode, {
-				method: 'POST',
-				headers: {
-					'accept': 'application/json',
-                    'Authorization': 'Bearer ' + token,
-				}
-			});
-
-			if (!response.ok) {
-				throw new Error("Error inserting the user into the lobby");
-			}
-            
-            const data = await response.json();
-			console.log("API response (insert the user into the lobby):", data);
-		} catch (err:any) {
-			error = err.message;
-            console.log("API error (insert the user into the lobby):", error);
-		}
-    }
+    
 
 
 </script>
@@ -109,7 +59,7 @@
 			<button style="font-size:112%"class="block btn {parent.buttonNeutral} w-full" on:click={parent.onClose}>Vs AI</button>
 			<button style="font-size:112%" class="block btn {parent.buttonPositive} w-full" on:click={parent.onClose}>Cancel</button>
         </div>
-        <button style="font-size:112%" class="block btn {parent.buttonNeutral} w-full" type="button" on:click={createLobbyFetch}>Create</button>
+        <button style="font-size:112%" class="block btn {parent.buttonNeutral} w-full" type="button" on:click={onCreateLobby}>Create</button>
     </div>
     
 {/if}
