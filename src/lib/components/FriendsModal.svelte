@@ -33,8 +33,10 @@
 
     // Loads both the friends list and the pending friend requests in parallel
     async function loadData() {
-        await fetchFriends(savedFriends);
-        await fetchSentRequests(pendingRequests);
+        await Promise.all([
+            fetchFriends(savedFriends),
+            fetchSentRequests(pendingRequests)
+        ]);
         savedFriends = savedFriends;
         pendingRequests = pendingRequests;
     }
@@ -52,10 +54,7 @@
         savedFriends[index].username = "Removing..."
         savedFriends=savedFriends;
         
-        let success:boolean = false;
-        success = await fetchDeleteFriend(auxUsername);
-
-        if(success){
+        if(await fetchDeleteFriend(auxUsername)){
             savedFriends = savedFriends.filter(request => request.key !== key);
         }else{
             savedFriends[index].username = auxUsername;
@@ -75,11 +74,8 @@
         let auxUsername:string = pendingRequests[index].username;
         pendingRequests[index].username = "Removing..."
         pendingRequests=pendingRequests;
-        
-        let success:boolean = false;
-        success = await fetchDeleteSentFriendRequest(auxUsername);
 
-        if(success){
+        if(await fetchDeleteSentFriendRequest(auxUsername)){
             pendingRequests = pendingRequests.filter(request => request.key !== key);
         }else{
             pendingRequests[index].username = auxUsername;
@@ -93,12 +89,8 @@
      */
     async function clickOnAdd() {
         AddText = "...";
-
-        let success:boolean =  false;
-        success = await fetchSendFriendshipRequest(usernameSearch);
-        console.log("SUCESS:"+success);
         
-        if(success){
+        if(await fetchSendFriendshipRequest(usernameSearch)){
             let response: any;
             response = await fetchUserInfo(usernameSearch);
             if(response !== null && usernameSearch === response.username){

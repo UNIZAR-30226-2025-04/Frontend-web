@@ -6,7 +6,7 @@
 	import { flip } from 'svelte/animate';
     import { get } from 'svelte/store';
     import type { invitation, request } from '$lib/interfaces'
-    import { getInbox, fetchDeleteFriendRequest, fetchAcceptFriendshipRequest } from "$lib/fetch/inboxFetch";
+    import { fetchDeleteFriendRequest, fetchAcceptFriendshipRequest, fetchReceivedFriendshipRequests, fetchReceivedGameInvitations } from "$lib/fetch/inboxFetch";
 
     // Props
     /** Exposes parent props to this component. */
@@ -17,18 +17,16 @@
     // Array of pending friend requests, name
     let pendingRequests: request[] = [];
 
-    let error= '';
-
-
-    let token = get(userDataStore).token;
-
 
     // Fetches the list of friend requests from the server using a GET request
     
 
     // Loads both the lobby invitations and the pending friend requests in parallel
     async function loadData() {
-        await getInbox(invitations,pendingRequests);
+        await Promise.all([
+            fetchReceivedGameInvitations(invitations),
+            fetchReceivedFriendshipRequests(pendingRequests)
+        ]);
         pendingRequests = pendingRequests;
         invitations = invitations;
     }
@@ -45,9 +43,11 @@
         let auxUsername:string = invitations[index].username;
         invitations[index].username = "Removing..."
         invitations=invitations;
-        await sleep(2000);
+        //await sleep(2000);
         invitations = invitations.filter(request => request.key !== key);
         invitations = invitations;
+
+        
     }
 
     /**
@@ -60,8 +60,11 @@
         let auxUsername:string = pendingRequests[index].username;
         pendingRequests[index].username = "Removing..."
         pendingRequests=pendingRequests;
-        await fetchDeleteFriendRequest(auxUsername);
-        pendingRequests = pendingRequests.filter(request => request.key !== key);
+        if(await fetchDeleteFriendRequest(auxUsername)){
+            pendingRequests = pendingRequests.filter(request => request.key !== key);
+        }else{
+            pendingRequests[index].username = auxUsername;
+        }
         pendingRequests = pendingRequests;
     }
 
@@ -75,47 +78,16 @@
      */
      async function acceptRequest(index:number, key:number){
         let auxUsername:string = pendingRequests[index].username;
-        pendingRequests[index].username = "Now you are firends!"
-        pendingRequests=pendingRequests;
-        await fetchAcceptFriendshipRequest(auxUsername);
-        await fetchDeleteFriendRequest(auxUsername);
-        pendingRequests = pendingRequests.filter(request => request.key !== key);
+
+        if(await fetchAcceptFriendshipRequest(auxUsername)){
+            pendingRequests[index].username = "Now you are firends!"
+            pendingRequests=pendingRequests;
+            fetchDeleteFriendRequest(auxUsername);
+            pendingRequests = pendingRequests.filter(request => request.key !== key);
+        }
+
         pendingRequests = pendingRequests;
     }
-
-    
-
-
-
-    /**
-     * Dummy function to sleep ms while we wait or backend to have the API ready
-     * @param ms
-     */
-     function sleep(ms: number): Promise<void> {
-        return new Promise(resolve => setTimeout(resolve, ms));
-    }
-
-    // Test data while we wait for endpoints
-    invitations = [
-        {username:"Victor",key:0,players:1},
-        {username:"Emilliano",key:1,players:2},
-        {username:"Jogue",key:2,players:3},
-        {username:"Ruben",key:3,players:4},
-        {username:"Jota",key:4,players:5},
-        {username:"Josemi",key:5,players:6},
-        {username:"Yago",key:6,players:7},
-        {username:"Nicolas",key:7,players:8},
-    ]
-
-    //pendingRequests = [
-    //    {username:"Solana",key:0},
-    //    {username:"Diego",key:1},
-    //    {username:"Elias",key:2},
-    //    {username:"Zanos",key:3},
-    //    {username:"Raul",key:4},
-    //    {username:"Tristan",key:5},
-    //]
-    
 
 </script>
 

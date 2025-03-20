@@ -31,8 +31,9 @@
      * @async
      */
     async function onCreateLobby(){
-        await createLobbyFetch();
-        goto(base+"/lobby");
+        if(await createLobbyFetch()){
+            goto(base+"/lobby");
+        }
         modalStore.close();
     }
 

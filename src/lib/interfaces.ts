@@ -27,6 +27,8 @@ export interface publicInformationUser {
     icon: number
 }
 
+// LOBBY
+
 export interface Lobby {
     code: string
     host: boolean
@@ -47,4 +49,13 @@ export interface userItem {
     key: number
     username: string
     icon: number
+}
+
+// SHARE modal
+
+export interface inviteItem{
+    key: number
+    username: string
+    icon: number
+    sent: boolean
 }

@@ -6,6 +6,7 @@
     import { base } from '$app/paths';
     import { userDataStore, lobbyStore } from '$lib/stores';
     import { goto } from '$app/navigation';
+    import { joinLobbyFetch } from "$lib/fetch/lobbyFetch";
 
     // Props
     export let parent: SvelteComponent;
@@ -63,37 +64,12 @@
         }
     }
 
-    // Sends a POST request to the server to insert a user into a lobby
-    async function joinLobbyFetch(enteredCode : string) {
-        try {
-
-			const response = await fetch(joinLobbyPath + enteredCode, {
-				method: 'POST',
-				headers: {
-					'accept': 'application/json',
-                    'Authorization': 'Bearer ' + token,
-				}
-			});
-
-			if (!response.ok) {
-				throw new Error("Error inserting the user into the lobby");
-			}
-            
-            const data = await response.json();
-			console.log("API response (insert the user into the lobby):", data);
-            errorMessage = false;
-		} catch (err:any) {
-            errorMessage = true;
-			error = err.message;
-            console.log("API error (insert the user into the lobby):", error);
-		}
-    }
+    
 
     // Function to check the inserted coide
     async function checkCode() {
         const enteredCode = code.join("");
-        await joinLobbyFetch(enteredCode);
-        if (errorMessage == false) {
+        if (await joinLobbyFetch(enteredCode)) {
             lobbyStore.update(() => ({
                 code: enteredCode,
                 host: false
