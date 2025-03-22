@@ -48,6 +48,9 @@ export const sentLobbyInvitationsPath:string = apiBase + 'auth/sent_lobby_invita
 export const sendLobbyInvitationsPath:string = apiBase + 'auth/send_lobby_invitations';
 // Delete a sent lobby invitation
 export const deleteSentLobbyInvitationsPath:string = apiBase + 'auth/sent_lobby_invitations/';
+// List of all of the lobbies
+export const allLobbiesPath:string = apiBase + 'auth/getAllLobbies';
+
 
 // GAMELOBBY
 // Get all game lobby invitations for the authenticated user
