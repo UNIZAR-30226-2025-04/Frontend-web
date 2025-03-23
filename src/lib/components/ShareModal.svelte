@@ -1,12 +1,8 @@
 <script lang="ts">
     import { onMount, type SvelteComponent } from "svelte";
-    import { userDataStore } from '$lib/stores';
     import  AvatarDisplay  from "./AvatarDisplay.svelte";
-    import { avatarDirectory } from "$lib/avatarsDirectory";
 	import { flip } from 'svelte/animate';
-    import { get } from 'svelte/store';
     import type { inviteItem, userItem } from '$lib/interfaces'
-    import { fetchDeleteFriendRequest, fetchAcceptFriendshipRequest } from "$lib/fetch/inboxFetch";
     import { fetchSentInvitations } from "$lib/fetch/lobbyFetch";
     import { fetchFriends } from "$lib/fetch/friendsFetch";
 
@@ -16,8 +12,6 @@
 
     // Array of invitations, name and players in the lobby
     let invitations: inviteItem[] = [];
-    
-    
 
     // Loads both the sent invitations and friends and merges both in one list
     async function loadData() {
@@ -27,10 +21,12 @@
             fetchFriends(friends)
         ]);
 
-        // Filters off the friends that the user has already sent invitations to
-        friends = friends.filter((friend:userItem) => {
-            invitations.find((inv:inviteItem) => {inv.username === friend.username}) !== undefined
-        });
+        if(invitations.length > 0){
+            // Filters off the friends that the user has already sent invitations to
+            friends = friends.filter((friend:userItem) => 
+                invitations.find((inv:inviteItem) => inv.username === friend.username) === undefined
+            );
+        }
 
         // Adds friends still to be sent invitation to
         friends.forEach((friend:userItem) => {

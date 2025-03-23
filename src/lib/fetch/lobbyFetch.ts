@@ -127,6 +127,6 @@ export async function fetchSentInvitations(invitation:inviteItem[]) {
         );
 
     } catch (err:any) {
-        console.log("API error (leave the lobby):", err);
+        console.log("API error (sent invitations):", err);
     }
 }
