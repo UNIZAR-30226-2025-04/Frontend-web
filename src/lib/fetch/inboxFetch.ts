@@ -102,8 +102,8 @@ export async function fetchAcceptFriendshipRequest(posibleFriend:string): Promis
 }
 
 /**
- * Gets all the friendship invitations sent to the user
- * @pendingRequests List of the game invitations to update 
+ * Gets all the game invitations sent to the user
+ * @invitations List of the game invitations to update 
  * @async
  */
 export async function fetchReceivedGameInvitations(invitations:invitation[]) {
@@ -121,15 +121,26 @@ export async function fetchReceivedGameInvitations(invitations:invitation[]) {
         }
 
         const data = await response.json();
+
+        if (data.received_game_lobby_invitations) {
+            invitations.splice(0, invitations.length, // Deletes previous items and adds the new ones
+                ...data.received_game_lobby_invitations.map((inv:{icon:number, lobby_id:number, username:string}, index: number) => ({
+                    key: index,
+                    username: inv.username,
+                    players:0
+                }))
+            );
         
-        data.received_game_lobby_invitations.array.forEach((inv:{icon:number, lobby_id:number, username:string}) => {
-            
-        });
+            console.log("API");
+            console.log(invitations)
+        } else {
+            invitations = [];
+        }
 
 
-        console.log("API response (friend request list):", data);
+        console.log("API response (recieved invitations list):", data);
     } catch (err:any) {
-        console.log("API error (friend request list):", err);
+        console.log("API error (recieved invitations list):", err);
     }
 }
 
