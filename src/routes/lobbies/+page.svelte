@@ -10,17 +10,28 @@
 
   const modalStore = getModalStore();
 
-  // Lista de lobbies
+  // Modal settings
+  const modalJoinLobbyCode: ModalSettings = {
+    type: 'component',
+    component: 'joinLobbyCodeModal'
+  };
+
+  const modalMatchMaking: ModalSettings = {
+    type: 'component',
+    component: 'matchMakingModal'
+  };
+
+  // List of lobbies
   let lobbies: LobbyDisplay[] = [];
   let isLoading = true;
   let error = '';
 
-  // Cargar lobbies al montar el componente
+  // Load lobbies when mounting the component
   onMount(async () => {
     await refreshLobbies();
   });
 
-  // Función para refrescar la lista de lobbies
+  // Function to refresh the list of lobbies
   async function refreshLobbies() {
     try {
       isLoading = true;
@@ -32,34 +43,19 @@
     }
   }
 
-  // Función para unirse a un lobby
+  // Function to join a lobby
   async function handleJoinLobby(lobbyId: string) {
-    try {
-      await joinLobbyFetch(lobbyId);
-      
-      // Actualizar el store con el código del lobby
-      lobbyStore.update(() => ({
-        code: lobbyId,
-        host: false
-      }));
-      
-      // Redirigir a la página del lobby
-      goto(base + "/lobby");
-    } catch (err: any) {
-      console.error("Error al unirse al lobby:", err);
-      alert("No se pudo unir al lobby");
-    }
+    await joinLobbyFetch(lobbyId);
+    
+    // Update the store with the lobby code
+    lobbyStore.update(() => ({
+      code: lobbyId,
+      host: false
+    }));
+    
+    // Redirect to the lobby page
+    goto(base + "/lobby");
   }
-
-  const modalJoinLobbyCode: ModalSettings = {
-    type: 'component',
-    component: 'joinLobbyCodeModal'
-  };
-
-  const modalMatchMaking: ModalSettings = {
-    type: 'component',
-    component: 'matchMakingModal'
-  };
 
   function clickOnInsertCode() {
     modalStore.trigger(modalJoinLobbyCode);

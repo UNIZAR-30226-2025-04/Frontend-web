@@ -88,12 +88,11 @@ export async function fetchExitLobby() {
 }
 
 /**
- * Obtiene todos los lobbies disponibles
- * @returns Lista de lobbies
+ * Obtains all lobbies available
+ * @returns List of lobbies
  * @async
  */
 export async function getAllLobbiesFetch(): Promise<LobbyDisplay[]> {
-  try {
     const token = get(userDataStore).token;
     console.log("Token para pruebas:", token);
     
@@ -112,18 +111,14 @@ export async function getAllLobbiesFetch(): Promise<LobbyDisplay[]> {
     const data: LobbyInfo[] = await response.json();
     console.log("API response (get all lobbies):", data);
     
-    // Convertir los datos a nuestro formato de visualización
+    // Convert the data to our display format
     return data.map((lobby: LobbyInfo) => ({
       key: lobby.lobby_id,
       host: lobby.creator_username,
-      icon: 1, // Valor por defecto, podríamos obtenerlo de alguna manera
-      players: 1, // Por defecto asumimos que al menos el creador está en el lobby
-      maxPlayers: 8, // Valor por defecto
+      icon: 1, // All users have an icon, default is 1
+      players: 1, // By default we assume at least the creator is in the lobby
+      maxPlayers: 8, // Default value
       rounds: lobby.number_rounds,
       points: lobby.total_points
     }));
-  } catch (err: any) {
-    console.log("API error (get all lobbies):", err);
-    return [];
-  }
 }

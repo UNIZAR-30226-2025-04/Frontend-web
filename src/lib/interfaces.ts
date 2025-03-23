@@ -62,7 +62,7 @@ export interface LobbyInfo {
 export interface LobbyDisplay {
     key: string;
     host: string;
-    icon?: number; // We could not have this information
+    icon: number; // We could not have this information
     players?: number; // We could not have this information
     maxPlayers?: number;
     rounds?: number;
