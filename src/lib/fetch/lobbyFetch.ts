@@ -115,7 +115,7 @@ export async function getAllLobbiesFetch(): Promise<LobbyDisplay[]> {
     return data.map((lobby: LobbyInfo) => ({
       key: lobby.lobby_id,
       host: lobby.creator_username,
-      icon: 1, // All users have an icon, default is 1
+      icon: lobby.host_icon, // All users have an icon, default is 1
       players: 1, // By default we assume at least the creator is in the lobby
       maxPlayers: 8, // Default value
       rounds: lobby.number_rounds,

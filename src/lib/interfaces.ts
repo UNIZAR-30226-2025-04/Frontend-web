@@ -53,6 +53,7 @@ export interface userItem {
 export interface LobbyInfo {
     lobby_id: string;
     creator_username: string;
+    host_icon: number;
     number_rounds: number;
     total_points: number;
     created_at: string;
@@ -62,7 +63,7 @@ export interface LobbyInfo {
 export interface LobbyDisplay {
     key: string;
     host: string;
-    icon: number; // We could not have this information
+    icon: number;
     players?: number; // We could not have this information
     maxPlayers?: number;
     rounds?: number;
