@@ -1,6 +1,7 @@
-import { createLobbyPath, exitLobbyPath, joinLobbyPath } from "$lib/paths";
+import { createLobbyPath, exitLobbyPath, joinLobbyPath, allLobbiesPath } from "$lib/paths";
 import { lobbyStore, userDataStore } from "$lib/stores";
 import { get } from "svelte/store";
+import type { LobbyInfo, LobbyDisplay } from "$lib/interfaces";
 
 
 /**
@@ -84,4 +85,40 @@ export async function fetchExitLobby() {
   } catch (err:any) {
       console.log("API error (leave the lobby):", err);
   }
+}
+
+/**
+ * Obtains all lobbies available
+ * @returns List of lobbies
+ * @async
+ */
+export async function getAllLobbiesFetch(): Promise<LobbyDisplay[]> {
+    const token = get(userDataStore).token;
+    console.log("Token para pruebas:", token);
+    
+    const response = await fetch(allLobbiesPath, {
+      method: 'GET',
+      headers: {
+        'accept': 'application/json',
+        'Authorization': 'Bearer ' + token,
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error("Error obteniendo la lista de lobbies");
+    }
+    
+    const data: LobbyInfo[] = await response.json();
+    console.log("API response (get all lobbies):", data);
+    
+    // Convert the data to our display format
+    return data.map((lobby: LobbyInfo) => ({
+      key: lobby.lobby_id,
+      host: lobby.creator_username,
+      icon: lobby.host_icon, // All users have an icon, default is 1
+      players: 1, // By default we assume at least the creator is in the lobby
+      maxPlayers: 8, // Default value
+      rounds: lobby.number_rounds,
+      points: lobby.total_points
+    }));
 }
