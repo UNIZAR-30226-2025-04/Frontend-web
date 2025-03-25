@@ -45,9 +45,9 @@ export const exitLobbyPath:string = apiBase + 'auth/exitLobby/';
 // List of sent lobby invitations
 export const sentLobbyInvitationsPath:string = apiBase + 'auth/sent_lobby_invitations';
 // Invite a friend to the lobby
-export const sendLobbyInvitationsPath:string = apiBase + 'auth/send_lobby_invitations';
+export const sendLobbyInvitationsPath:string = apiBase + 'auth/sendLobbyInvitation';
 // Delete a sent lobby invitation
-export const deleteSentLobbyInvitationsPath:string = apiBase + 'auth/sent_lobby_invitations/';
+export const deleteSentLobbyInvitationsPath:string = apiBase + 'auth/sent_lobby_invitation/';
 
 // GAMELOBBY
 // Get all game lobby invitations for the authenticated user

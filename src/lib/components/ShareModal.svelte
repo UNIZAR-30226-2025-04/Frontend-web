@@ -3,7 +3,7 @@
     import  AvatarDisplay  from "./AvatarDisplay.svelte";
 	import { flip } from 'svelte/animate';
     import type { inviteItem, userItem } from '$lib/interfaces'
-    import { fetchSentInvitations } from "$lib/fetch/lobbyFetch";
+    import { fetchDeleteSentInvitation, fetchSendInvitation, fetchSentInvitations } from "$lib/fetch/lobbyFetch";
     import { fetchFriends } from "$lib/fetch/friendsFetch";
 
     // Props
@@ -38,8 +38,17 @@
 
     loadData();
 
-    function onClick(index:number){
-        invitations[index].sent = !invitations[index].sent;
+    async function onClick(index:number){
+        let success:boolean = false;
+        if(invitations[index].sent){
+            success = await fetchDeleteSentInvitation(invitations[index].username);
+        }else{
+            success = await fetchSendInvitation(invitations[index].username);
+        }
+
+        if(success){
+            invitations[index].sent = !invitations[index].sent;
+        }
     }
 
     
