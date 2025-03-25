@@ -60,3 +60,25 @@ export interface inviteItem{
     icon: number
     sent: boolean
 }
+
+// LOBBY
+// Information regarding lobbies
+export interface LobbyInfo {
+    lobby_id: string;
+    creator_username: string;
+    host_icon: number;
+    number_rounds: number;
+    total_points: number;
+    created_at: string;
+  }
+
+// Interface to display in the lobbies list
+export interface LobbyDisplay {
+    key: string;
+    host: string;
+    icon: number;
+    players?: number; // We could not have this information
+    maxPlayers?: number;
+    rounds?: number;
+    points?: number;
+  }
