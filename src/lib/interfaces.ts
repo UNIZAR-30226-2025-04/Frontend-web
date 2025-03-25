@@ -38,6 +38,7 @@ export interface Lobby {
 export interface invitation {
     key: number
     username: string
+    code: string
     players: number
 }
 export interface request {

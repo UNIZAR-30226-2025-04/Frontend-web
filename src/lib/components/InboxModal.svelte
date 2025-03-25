@@ -1,12 +1,15 @@
 <script lang="ts">
     import { onMount, type SvelteComponent } from "svelte";
-    import { userDataStore } from '$lib/stores';
+    import { lobbyStore, userDataStore } from '$lib/stores';
     import  AvatarDisplay  from "./AvatarDisplay.svelte";
     import { avatarDirectory } from "$lib/avatarsDirectory";
 	import { flip } from 'svelte/animate';
     import { get } from 'svelte/store';
     import type { invitation, request } from '$lib/interfaces'
-    import { fetchDeleteFriendRequest, fetchAcceptFriendshipRequest, fetchReceivedFriendshipRequests, fetchReceivedGameInvitations } from "$lib/fetch/inboxFetch";
+    import { fetchDeleteFriendRequest, fetchAcceptFriendshipRequest, fetchReceivedFriendshipRequests, fetchReceivedGameInvitations, fetchDeleteGameInvitation } from "$lib/fetch/inboxFetch";
+    import { joinLobbyFetch } from "$lib/fetch/lobbyFetch";
+    import { goto } from "$app/navigation";
+    import { base } from "$app/paths";
 
     // Props
     /** Exposes parent props to this component. */
@@ -43,11 +46,28 @@
         let auxUsername:string = invitations[index].username;
         invitations[index].username = "Removing..."
         invitations=invitations;
-        //await sleep(2000);
-        invitations = invitations.filter(request => request.key !== key);
+        if(await fetchDeleteGameInvitation(invitations[index].code,auxUsername)){
+            invitations = invitations.filter(request => request.key !== key);
+        }else{
+            invitations[index].username = auxUsername;
+        }
         invitations = invitations;
+    }
 
-        
+    /**
+     * Accepts the invitation on the list with the index and key. If success auto joins the lobby
+     * @param index
+     * @param key
+     */
+    async function acceptInvitation(index:number, key:number) {
+        if (await joinLobbyFetch(invitations[index].code)) {
+            lobbyStore.update(() => ({
+                code: invitations[index].code,
+                host: false
+            }));
+            goto(base+"/lobby");
+            parent.onClose();
+        }
     }
 
     /**
@@ -109,7 +129,7 @@
                     <div class="content-center text-[22px]">{inv.username}</div>
                 </div>
                 {#if inv.players<8}
-                    <button class="btn variant-filled text-[16px] pt-1 pb-1 mr-[10px]">JOIN {inv.players}/8</button>
+                    <button class="btn variant-filled text-[16px] pt-1 pb-1 mr-[10px]" on:click={() => {acceptInvitation(index, inv.key)}}>JOIN {inv.players}/8</button>
                 {:else}
                     <button class="btn bg-error-500 text-[16px] pt-1 pb-1 mr-[10px]">JOIN {inv.players}/8</button>
                 {/if}

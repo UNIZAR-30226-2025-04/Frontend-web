@@ -1,4 +1,4 @@
-import { addFriendPath, deleteReceivedRequestsPath, receivedFriendshipRequestsPath, recievedGameInvitations } from "$lib/paths";
+import { addFriendPath, deleteReceivedInvitationPath, deleteReceivedRequestsPath, receivedFriendshipRequestsPath, recievedGameInvitations } from "$lib/paths";
 import { userDataStore } from "$lib/stores";
 import { get } from "svelte/store";
 import type { invitation, request } from '$lib/interfaces'
@@ -127,6 +127,7 @@ export async function fetchReceivedGameInvitations(invitations:invitation[]) {
                 ...data.received_game_lobby_invitations.map((inv:{icon:number, lobby_id:number, username:string}, index: number) => ({
                     key: index,
                     username: inv.username,
+                    code: inv.lobby_id,
                     players:0
                 }))
             );
@@ -144,4 +145,33 @@ export async function fetchReceivedGameInvitations(invitations:invitation[]) {
     }
 }
 
+/**
+ * Deletes a recieved invitation to a lobby from a username
+ * @param username of the user that sent the invitation
+ * @returns true if success
+ * @async
+ */
+export async function fetchDeleteGameInvitation(code:string, username: string): Promise<boolean> {
+    try {
 
+        const response = await fetch(deleteReceivedInvitationPath + code + "/" + username, {
+            method: 'DELETE',
+            headers: {
+                'accept': 'application/json',
+                'Authorization': 'Bearer ' + get(userDataStore).token,
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error("Error deleting invitation");
+        }
+
+        const data = await response.json();
+        console.log("API response (delete invitation):", data);
+
+        return true;
+    } catch (err: any) {
+        console.log("API error (delete invitation):", err);
+        return false;
+    }
+}
