@@ -8,9 +8,17 @@
   import { apiBase, joinLobbyPath, exitLobbyPath } from "$lib/paths";
   import { get } from "svelte/store";
   import { fetchExitLobby } from "$lib/fetch/lobbyFetch";
-  import { getModalStore, type ModalSettings } from "@skeletonlabs/skeleton";
+  import { getDrawerStore, getModalStore, type DrawerSettings, type ModalSettings } from "@skeletonlabs/skeleton";
 
   const modalStore = getModalStore();
+  const drawerStore = getDrawerStore();
+  
+  const settingsChat: DrawerSettings = { 
+    id: 'chat', 
+    position: 'right',
+    width: 'w-[40%]',
+    padding: 'p-4',
+  };
   
   const modalShare: ModalSettings = {
     type: 'component',
@@ -107,6 +115,11 @@
     };
     players = [...players, newUser];
   }
+
+	function openDrawer(){
+		drawerStore.open(settingsChat);
+	}
+
 </script>
 
 <div class="w-[95vw] mt-[5vmin]">
@@ -130,7 +143,7 @@
         >Share</button
       >
     </div>
-    <button type="button" class="btn btn-lg variant-filled"
+    <button type="button" class="btn btn-lg variant-filled" on:click={openDrawer}
       ><img src="icons/chat.png" alt="chat" class="w-[20px]" /></button
     >
   </div>

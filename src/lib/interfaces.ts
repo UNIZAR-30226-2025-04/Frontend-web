@@ -81,4 +81,15 @@ export interface LobbyDisplay {
     maxPlayers?: number;
     rounds?: number;
     points?: number;
-  }
+}
+
+
+//CHAT
+export interface ChatBuble{
+    id: number,
+    isMe: boolean,
+    avatar: number,
+    username: string,
+    timestamp: string,
+    message: string,
+}

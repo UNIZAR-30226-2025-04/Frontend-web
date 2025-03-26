@@ -1,5 +1,5 @@
 import { writable } from 'svelte/store';
-import type { UserData, Lobby } from '$lib/interfaces';
+import type { UserData, Lobby, ChatBuble } from '$lib/interfaces';
 import { persisted } from 'svelte-persisted-store'
 
 let userDataInitial: UserData = {
@@ -20,3 +20,7 @@ let lobbyInitial: Lobby = {
 }
 
 export let lobbyStore = writable<Lobby>(lobbyInitial)
+
+let chatInitial: ChatBuble[] = []
+
+export let chatStore = writable<ChatBuble[]>(chatInitial)
