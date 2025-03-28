@@ -58,6 +58,14 @@
         currentMessage = '';
     }
 
+    function handleKeyDown(event:any) {
+        if (event.key === "Enter" && !event.shiftKey) {
+        event.preventDefault();
+        sendMessage();
+        }
+    }
+
+
     onMount(() => {
         socket = get(socketStore);
 
@@ -111,11 +119,12 @@
         >
             <textarea
                 bind:value={currentMessage}
-                class="bg-transparent border-0 ring-0"
+                class="bg-transparent border-0 ring-0 resize-none"
                 name="prompt"
                 id="prompt"
                 placeholder="Write a message..."
                 rows="1"
+                on:keydown={handleKeyDown}
             />
             <button class="variant-filled-primary" on:click={sendMessage}>Send</button>
         </div>
