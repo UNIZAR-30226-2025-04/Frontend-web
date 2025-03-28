@@ -26,7 +26,7 @@
         elemChat.scrollTo({ top: elemChat.scrollHeight, behavior });
     }
 
-    function addMessage(username:string, message:string): void {
+    function addMessage(username:string, icon:number,  message:string): void {
         // Gets the time and formats it
         const now = new Date();
         const timeString = now.toLocaleTimeString("es-ES", {
@@ -38,7 +38,7 @@
         const newMessage: ChatBuble = {
             id: chatLength,
             isMe: username === get(userDataStore).username, 
-            avatar: 1,
+            avatar: icon,
             username: username,
             timestamp: timeString,
             message: message,
@@ -60,8 +60,8 @@
 
     function handleKeyDown(event:any) {
         if (event.key === "Enter" && !event.shiftKey) {
-        event.preventDefault();
-        sendMessage();
+            event.preventDefault();
+            sendMessage();
         }
     }
 
@@ -71,7 +71,8 @@
 
         socket.on("new_lobby_message", (args:any) => {
             console.log("-> new_lobby_message", args)
-            addMessage(get(userDataStore).username,args.message);
+            console.log(args.username, args.user_icon, args.message);
+            addMessage(args.username, args.user_icon, args.message);
         });
 
     });

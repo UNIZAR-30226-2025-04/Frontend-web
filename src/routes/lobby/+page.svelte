@@ -154,9 +154,11 @@
       console.error('-> Error:', error);
     });
 
+    /*
     socket.onAny((event:any, ...args:any) => {
       console.log(`-> Event recieved: ${event}`, args);
     });
+    */
 
     // Sending an event to let know the lobby that the user just joined
     console.log("<- Sending join_lobby:", get(lobbyStore).code);
