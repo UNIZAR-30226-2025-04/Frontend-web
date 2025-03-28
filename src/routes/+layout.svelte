@@ -42,3 +42,19 @@
 
 <Modal components={modalRegistry}/>
 <slot />
+
+
+<style>
+	:global(body) {
+		background-image: url('/5.jpg') !important;
+		margin: 0;
+		width: 100%;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		flex-direction: column;
+		text-align: center;
+		color: black;
+		font-family: 'Pixelify Sans';
+	}
+</style>
