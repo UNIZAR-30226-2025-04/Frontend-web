@@ -1,14 +1,16 @@
 <script lang="ts">
   import AvatarDisplay from "../../lib/components/AvatarDisplay.svelte";
-  import { userDataStore, lobbyStore } from "$lib/stores";
+  import { userDataStore, lobbyStore, socketStore } from "$lib/stores";
   import { goto } from "$app/navigation";
   import { flip } from "svelte/animate";
   import { cubicOut } from "svelte/easing";
   import { base } from "$app/paths";
-  import { apiBase, joinLobbyPath, exitLobbyPath } from "$lib/paths";
+  import {  wsBase } from "$lib/paths";
   import { get } from "svelte/store";
   import { fetchExitLobby } from "$lib/fetch/lobbyFetch";
   import { getDrawerStore, getModalStore, type DrawerSettings, type ModalSettings } from "@skeletonlabs/skeleton";
+  import { onDestroy, onMount } from "svelte";
+  import { io } from "socket.io-client";
 
   const modalStore = getModalStore();
   const drawerStore = getDrawerStore();
@@ -119,6 +121,42 @@
 	function openDrawer(){
 		drawerStore.open(settingsChat);
 	}
+
+
+  // Websocket code
+
+  let socket: any;
+  onMount(() => {
+    console.log("Trying to connect to ws")
+    socket = io(wsBase, {
+      auth: {
+        username: get(userDataStore).username,
+        authorization: "Bearer "+get(userDataStore).token,
+      },
+      transports: ["websocket"],
+    });
+
+    // Connection events
+    socket.on("connect", () => {
+      console.log("WS Connected:", socket.id);
+      socketStore.set(socket);
+    });
+
+    socket.on("disconnect", () => {
+      console.log("WS Disconnected");
+    });
+
+    socket.on("broadcast_to_lobby", (...args:any) => {
+      console.log("WS broadcast_to_lobby" + args)
+    });
+
+  });
+
+  onDestroy(() => {
+    if (socket) socket.disconnect();
+  });
+
+  
 
 </script>
 
