@@ -138,25 +138,35 @@
 
     // Connection events
     socket.on("connect", () => {
-      console.log("WS Connected:", socket.id);
+      console.log("-> connect:", socket.id);
       socketStore.set(socket);
     });
 
     socket.on("disconnect", () => {
-      console.log("WS Disconnected");
+      console.log("-> disconnect");
     });
 
-    socket.on("broadcast_to_lobby", (...args:any) => {
-      console.log("WS broadcast_to_lobby" + args)
+    socket.on("joined_lobby", (args:any) => {
+      console.log("-> joined_lobby", args)
     });
+
+    socket.on('error', function(error:any) {
+      console.error('-> Error:', error);
+    });
+
+    socket.onAny((event:any, ...args:any) => {
+      console.log(`-> Event recieved: ${event}`, args);
+    });
+
+    // Sending an event to let know the lobby that the user just joined
+    console.log("<- Sending join_lobby:", get(lobbyStore).code);
+    socket.emit("join_lobby",get(lobbyStore).code);
 
   });
 
   onDestroy(() => {
     if (socket) socket.disconnect();
   });
-
-  
 
 </script>
 

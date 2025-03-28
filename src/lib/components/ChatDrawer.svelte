@@ -1,13 +1,18 @@
 <script lang="ts">
     import type { ChatBuble } from "$lib/interfaces";
     import AvatarDisplay from "./AvatarDisplay.svelte";
-    import { chatStore } from "$lib/stores";
+    import { chatStore, lobbyStore, socketStore, userDataStore } from "$lib/stores";
+    import { get } from "svelte/store";
+    import type { Socket } from "socket.io-client";
+    import { onMount } from "svelte";
+    
 
     let elemChat: HTMLElement;
 
     let currentMessage = "";
     let chatLength = 0;
     let messageFeed: ChatBuble[] = [];
+    let socket:Socket;
 
     // Reactive variables
     chatStore.subscribe(chats => {
@@ -21,7 +26,7 @@
         elemChat.scrollTo({ top: elemChat.scrollHeight, behavior });
     }
 
-    function addMessage(): void {
+    function addMessage(username:string, message:string): void {
         // Gets the time and formats it
         const now = new Date();
         const timeString = now.toLocaleTimeString("es-ES", {
@@ -29,22 +34,39 @@
         minute: "2-digit",
         hour12: false,
         });
-        // Create dummy message, implement later
+        // Create bubble
         const newMessage: ChatBuble = {
             id: chatLength,
-            isMe: Math.random() < 0.5, 
+            isMe: username === get(userDataStore).username, 
             avatar: 1,
-            username: 'Jane',
+            username: username,
             timestamp: timeString,
-            message: currentMessage,
+            message: message,
         };
         // Append the new message to the message feed
         chatStore.update(chats => [...chats, newMessage]);
-        // Clear the textarea message
-        currentMessage = '';
         // Smoothly scroll to the bottom of the feed
         setTimeout(() => { scrollChatBottom('smooth'); }, 0);
     }
+
+    function sendMessage(): void {
+
+        console.log("<- Sending broadcast_to_lobby:", get(lobbyStore).code, currentMessage);
+        socket.emit("broadcast_to_lobby", get(lobbyStore).code, currentMessage);
+
+        // Clear the textarea message
+        currentMessage = '';
+    }
+
+    onMount(() => {
+        socket = get(socketStore);
+
+        socket.on("new_lobby_message", (args:any) => {
+            console.log("-> new_lobby_message", args)
+            addMessage(get(userDataStore).username,args.message);
+        });
+
+    });
 
 </script>
 
@@ -95,7 +117,7 @@
                 placeholder="Write a message..."
                 rows="1"
             />
-            <button class="variant-filled-primary" on:click={addMessage}>Send</button>
+            <button class="variant-filled-primary" on:click={sendMessage}>Send</button>
         </div>
     </div>
 </div>
