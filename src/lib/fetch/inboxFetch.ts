@@ -124,11 +124,11 @@ export async function fetchReceivedGameInvitations(invitations:invitation[]) {
 
         if (data.received_game_lobby_invitations) {
             invitations.splice(0, invitations.length, // Deletes previous items and adds the new ones
-                ...data.received_game_lobby_invitations.map((inv:{icon:number, lobby_id:number, username:string}, index: number) => ({
+                ...data.received_game_lobby_invitations.map((inv:{icon:number, lobby_id:number, player_count:number, username:string}, index: number) => ({
                     key: index,
                     username: inv.username,
                     code: inv.lobby_id,
-                    players:0
+                    players: inv.player_count,
                 }))
             );
         
