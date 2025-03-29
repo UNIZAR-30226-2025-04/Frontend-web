@@ -5,27 +5,33 @@
   import { flip } from "svelte/animate";
   import { cubicOut } from "svelte/easing";
   import { base } from "$app/paths";
-  import {  wsBase } from "$lib/paths";
+  import { wsBase } from "$lib/paths";
   import { get } from "svelte/store";
   import { fetchExitLobby } from "$lib/fetch/lobbyFetch";
-  import { getDrawerStore, getModalStore, type DrawerSettings, type ModalSettings } from "@skeletonlabs/skeleton";
+  import {
+    getDrawerStore,
+    getModalStore,
+    type DrawerSettings,
+    type ModalSettings,
+  } from "@skeletonlabs/skeleton";
   import { onDestroy, onMount } from "svelte";
   import { io } from "socket.io-client";
+  import { addMessage } from "$lib/sockets/chatAddMessage";
 
   const modalStore = getModalStore();
   const drawerStore = getDrawerStore();
-  
-  const settingsChat: DrawerSettings = { 
-    id: 'chat', 
-    position: 'right',
-    width: 'w-[40%]',
-    padding: 'p-4',
+
+  const settingsChat: DrawerSettings = {
+    id: "chat",
+    position: "right",
+    width: "w-[40%]",
+    padding: "p-4",
   };
-  
+
   const modalShare: ModalSettings = {
-    type: 'component',
-    component: 'shareModal'
-  }
+    type: "component",
+    component: "shareModal",
+  };
 
   let actual = 8; // Actual number of players
   let max = 8; // Maximum number of players
@@ -33,8 +39,6 @@
   let publicValue = true; // Boolean to know if the lobby is public or private
   let code = $lobbyStore.code; // Code of the lobby
   let host = $lobbyStore.host; // Boolean to know if the player is the host
-
-  let error = "";
 
   // Function to switch the public value
   function onSwitchPublic() {
@@ -118,20 +122,20 @@
     players = [...players, newUser];
   }
 
-	function openDrawer(){
-		drawerStore.open(settingsChat);
-	}
-
+  function openDrawer() {
+    drawerStore.open(settingsChat);
+  }
 
   // Websocket code
 
   let socket: any;
+
   onMount(() => {
-    console.log("Trying to connect to ws")
+    console.log("Trying to connect to ws");
     socket = io(wsBase, {
       auth: {
         username: get(userDataStore).username,
-        authorization: "Bearer "+get(userDataStore).token,
+        authorization: "Bearer " + get(userDataStore).token,
       },
       transports: ["websocket"],
     });
@@ -146,30 +150,32 @@
       console.log("-> disconnect");
     });
 
-    socket.on("joined_lobby", (args:any) => {
-      console.log("-> joined_lobby", args)
+    socket.on("joined_lobby", (args: any) => {
+      console.log("-> joined_lobby", args);
     });
 
-    socket.on('error', function(error:any) {
-      console.error('-> Error:', error);
+    socket.on("error", function (error: any) {
+      console.error("-> Error:", error);
     });
 
-    /*
-    socket.onAny((event:any, ...args:any) => {
+    socket.on("new_lobby_message", (args: any) => {
+      console.log("-> new_lobby_message", args);
+      console.log(args.username, args.user_icon, args.message);
+      addMessage(args.username, args.user_icon, args.message);
+    });
+
+    socket.onAny((event: any, ...args: any) => {
       console.log(`-> Event recieved: ${event}`, args);
     });
-    */
 
     // Sending an event to let know the lobby that the user just joined
     console.log("<- Sending join_lobby:", get(lobbyStore).code);
-    socket.emit("join_lobby",get(lobbyStore).code);
-
+    socket.emit("join_lobby", get(lobbyStore).code);
   });
 
   onDestroy(() => {
     if (socket) socket.disconnect();
   });
-
 </script>
 
 <div class="w-[95vw] mt-[5vmin]">
@@ -193,7 +199,10 @@
         >Share</button
       >
     </div>
-    <button type="button" class="btn btn-lg variant-filled" on:click={openDrawer}
+    <button
+      type="button"
+      class="btn btn-lg variant-filled"
+      on:click={openDrawer}
       ><img src="icons/chat.png" alt="chat" class="w-[20px]" /></button
     >
   </div>

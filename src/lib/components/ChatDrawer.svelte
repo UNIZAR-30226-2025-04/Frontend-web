@@ -5,6 +5,7 @@
     import { get } from "svelte/store";
     import type { Socket } from "socket.io-client";
     import { onMount } from "svelte";
+    import { addMessage } from "$lib/sockets/chatAddMessage";
     
 
     let elemChat: HTMLElement;
@@ -26,28 +27,12 @@
         elemChat.scrollTo({ top: elemChat.scrollHeight, behavior });
     }
 
-    function addMessage(username:string, icon:number,  message:string): void {
-        // Gets the time and formats it
-        const now = new Date();
-        const timeString = now.toLocaleTimeString("es-ES", {
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false,
-        });
-        // Create bubble
-        const newMessage: ChatBuble = {
-            id: chatLength,
-            isMe: username === get(userDataStore).username, 
-            avatar: icon,
-            username: username,
-            timestamp: timeString,
-            message: message,
-        };
-        // Append the new message to the message feed
-        chatStore.update(chats => [...chats, newMessage]);
+    function addMessageHost(username:string, icon:number,  message:string): void {
+        addMessage(username,icon,message);
         // Smoothly scroll to the bottom of the feed
         setTimeout(() => { scrollChatBottom('smooth'); }, 0);
     }
+
 
     function sendMessage(): void {
 
@@ -68,13 +53,6 @@
 
     onMount(() => {
         socket = get(socketStore);
-
-        socket.on("new_lobby_message", (args:any) => {
-            console.log("-> new_lobby_message", args)
-            console.log(args.username, args.user_icon, args.message);
-            addMessage(args.username, args.user_icon, args.message);
-        });
-
     });
 
 </script>
