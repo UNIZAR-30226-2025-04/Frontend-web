@@ -16,12 +16,14 @@
     multiplier: 8
   };
 
-  // Consumibles usados
+  // Consumibles usados con imágenes de mock
   const usedConsumables = [
-    { name: "Mod", description: "Modificador de cartas" },
-    { name: "Mod", description: "Modificador de cartas" },
-    { name: "Mod", description: "Modificador de cartas" },
-    { name: "Mod", description: "Modificador de cartas" }
+    { name: "Mod 1", description: "Modificador de cartas", icon: "/icons/pxArt(1).png" },
+    { name: "Mod 2", description: "Modificador de cartas", icon: "/icons/pxArt(2).png" },
+    { name: "Mod 3", description: "Modificador de cartas", icon: "/icons/pxArt(3).png" },
+    { name: "Mod 4", description: "Modificador de cartas", icon: "/icons/pxArt(4).png" },
+    { name: "Mod 5", description: "Modificador de cartas", icon: "/icons/pxArt(5).png" },
+    { name: "Mod 6", description: "Modificador de cartas", icon: "/icons/pxArt(6).png" }
   ];
 
   // Progreso de la barra de consumibles (15%)
@@ -47,13 +49,16 @@
     "/icons/pxArt(8).png"
   ];
 
-  // Jokers en la parte superior
+  // Jokers en la parte superior con imagen
   const jokers = [
-    { name: "Joker", description: "Comodín que puede sustituir cualquier carta" },
-    { name: "Joker", description: "Comodín que puede sustituir cualquier carta" },
-    { name: "Joker", description: "Comodín que puede sustituir cualquier carta" },
-    { name: "Joker", description: "Comodín que puede sustituir cualquier carta" }
+    { name: "Joker", description: "Comodín que puede sustituir cualquier carta", image: "/icons/pxArt(1).png" },
+    { name: "Joker", description: "Comodín que puede sustituir cualquier carta", image: "/icons/pxArt(2).png" },
+    { name: "Joker", description: "Comodín que puede sustituir cualquier carta", image: "/icons/pxArt(3).png" },
+    { name: "Joker", description: "Comodín que puede sustituir cualquier carta", image: "/icons/pxArt(4).png" }
   ];
+  
+  // Total de jokers disponibles en el juego
+  let totalJokers = 8;
 
   const tableCards = [
     { name: "J", value: 11, suit: "♠", image: artImages[0] },
@@ -62,12 +67,16 @@
     { name: "A", value: 14, suit: "♣", image: artImages[3] },
   ];
 
+  // Añadimos más cartas para el jugador para demostrar el desplazamiento
   const playerCards = [
     { name: "7", value: 7, suit: "♠", image: artImages[4] },
     { name: "8", value: 8, suit: "♥", image: artImages[5] },
     { name: "9", value: 9, suit: "♦", image: artImages[6] },
     { name: "10", value: 10, suit: "♣", image: artImages[7] },
     { name: "J", value: 11, suit: "♠", image: artImages[0] },
+    { name: "Q", value: 12, suit: "♥", image: artImages[1] },
+    { name: "K", value: 13, suit: "♦", image: artImages[2] },
+    { name: "A", value: 14, suit: "♣", image: artImages[3] },
   ];
 
   // Contador de cartas
@@ -109,28 +118,28 @@
   }
 </script>
 
-<div class="h-screen flex bg-[#1E213F80]">
+<div class="h-screen flex">
   <!-- Panel lateral blanco - con margen a la izquierda -->
-  <div class="w-[250px] min-w-[350px] bg-white p-4 flex flex-col left-8 absolute h-full z-10 rounded-lg shadow-lg">
-    <h2 class="text-xl mb-4 font-pixelify text-black font-bold">Round {round}/{totalRounds}</h2>
+  <div class="w-[250px] min-w-[350px] bg-white p-6 flex flex-col left-8 absolute h-full z-10 rounded-lg shadow-lg">
+    <h2 class="text-xl mb-8 font-pixelify text-black font-bold">Round {round}/{totalRounds}</h2>
     
-    <div class="mb-6">
-      <h3 class="mb-2 font-pixelify text-black font-bold">Active consumables</h3>
-      <div class="grid grid-cols-2 gap-2">
-        {#each usedConsumables as consumable}
-          <div class="aspect-[3/4] border-2 border-black rounded-lg flex items-center justify-center bg-white">
-            <span class="font-pixelify text-black font-medium">{consumable.name}</span>
-          </div>
-        {/each}
-      </div>
-      <!-- Barra de progreso con el 15% completado -->
-      <div class="w-full h-2 bg-white border border-black rounded mt-2 overflow-hidden">
-        <div class="h-full bg-black" style="width: {progressPercentage}%"></div>
+    <div class="mb-12">
+      <h3 class="mb-3 font-pixelify text-black font-bold">Active consumables</h3>
+      <!-- Contenedor con desplazamiento horizontal -->
+      <div class="overflow-x-auto pb-2">
+        <div class="flex gap-3 min-w-max">
+          {#each usedConsumables as consumable}
+            <div class="w-24 h-32 border-2 border-black rounded-lg flex flex-col items-center justify-center bg-white shrink-0">
+              <img src={consumable.icon} alt={consumable.name} class="w-10 h-10 object-contain mb-1" />
+              <span class="font-pixelify text-black text-xs font-medium">{consumable.name}</span>
+            </div>
+          {/each}
+        </div>
       </div>
     </div>
 
-    <div class="border-2 border-black rounded-lg p-3 mb-6">
-      <h4 class="font-pixelify text-center mb-2 text-black font-bold">{fullHouse.name} lvl {fullHouse.level}</h4>
+    <div class="border-2 border-black rounded-lg p-4 mb-14">
+      <h4 class="font-pixelify text-center mb-4 text-black font-bold">{fullHouse.name} lvl {fullHouse.level}</h4>
       <div class="flex justify-between font-pixelify">
         <div class="border-2 border-black rounded-lg py-1 px-3 text-center w-[45%]">
           <span class="text-xl text-black font-bold">{fullHouse.value}</span>
@@ -144,10 +153,20 @@
       </div>
     </div>
 
-    <div class="grid grid-cols-2 gap-3">
+    <div class="grid grid-cols-2 gap-5">
       {#each [
         ['Discards', discards], 
-        ['Your money', `$${money}`], 
+        ['Your money', `$${money}`]
+      ] as [label, value], i}
+        <div class="border-2 border-black rounded-lg p-2">
+          <div class="font-pixelify text-sm text-black font-medium">{label}</div>
+          <div class="font-pixelify text-lg border-t border-black pt-1 text-center text-black font-bold">{value}</div>
+        </div>
+      {/each}
+    </div>
+    
+    <div class="grid grid-cols-2 gap-5 mt-8">
+      {#each [
         ['Buy-in', `$${buyIn}`], 
         ['Round\'s pot', `$${roundPot}`]
       ] as [label, value], i}
@@ -189,13 +208,31 @@
 
     <!-- Estructura de tres secciones para el área de juego -->
     <div class="h-full flex flex-col">
-      <!-- Jokers en la parte superior - Movidos más arriba -->
-      <div class="flex justify-center gap-3 mt-4">
-        {#each jokers as joker, i}
-          <div class="w-[145px] h-[193px] bg-white rounded-lg border-2 border-black flex items-center justify-center">
-            <span class="font-pixelify text-black font-bold text-xl">Joker</span>
+      <!-- Jokers en la parte superior con contador - alineados a la izquierda -->
+      <div class="mt-4 relative">
+        <!-- Contenedor con el mismo ancho que las cartas del jugador -->
+        <div class="mx-auto" style="width: calc(145px * 5 + 16px * 4);">
+          <div class="flex gap-4 justify-start">
+            {#each jokers as joker, i}
+              <div class="w-[145px] h-[193px] bg-white rounded-lg border-2 border-black relative overflow-hidden shrink-0">
+                <div class="absolute top-2 left-2 text-base font-bold z-10 text-purple-700">
+                  Joker
+                </div>
+                <div class="flex items-center justify-center h-full">
+                  <img src={joker.image} alt="Joker" class="w-16 h-16 object-contain" />
+                </div>
+                <div class="absolute bottom-2 right-2 text-base font-bold rotate-180 z-10 text-purple-700">
+                  Joker
+                </div>
+              </div>
+            {/each}
           </div>
-        {/each}
+          
+          <!-- Contador de jokers debajo a la izquierda del primer joker -->
+          <div class="absolute -bottom-6 left-0">
+            <span class="text-white font-pixelify font-bold">{jokers.length}/{totalJokers}</span>
+          </div>
+        </div>
       </div>
       
       <!-- Cartas de la mesa (tableCards) - CENTRADAS HORIZONTALMENTE Y MOVIDAS HACIA ARRIBA -->
@@ -217,31 +254,29 @@
       
       <!-- Espacio inferior con las cartas del jugador -->
       <div class="flex-1 flex flex-col justify-end">
-        <!-- Cartas del jugador - en la parte inferior -->
+        <!-- Cartas del jugador - en la parte inferior con desplazamiento horizontal -->
         <div class="mt-auto">
-          <div class="flex justify-center gap-4">
-            {#each playerCards as card, i}
-              <div class="w-[145px] h-[193px] bg-white rounded-lg border-2 border-black relative overflow-hidden">
-                <div class="absolute top-2 left-2 text-base font-bold z-10" class:text-red-500={card.suit === "♥" || card.suit === "♦"} class:text-black={card.suit === "♠" || card.suit === "♣"}>
-                  {card.name}{card.suit}
+          <!-- Contenedor con desplazamiento horizontal para las cartas del jugador - limitado a 5 cartas visibles -->
+          <div class="overflow-x-auto pb-2 mx-auto" style="width: calc(145px * 5 + 16px * 4);">
+            <div class="flex gap-4 min-w-max">
+              {#each playerCards as card, i}
+                <div class="w-[145px] h-[193px] bg-white rounded-lg border-2 border-black relative overflow-hidden shrink-0">
+                  <div class="absolute top-2 left-2 text-base font-bold z-10" class:text-red-500={card.suit === "♥" || card.suit === "♦"} class:text-black={card.suit === "♠" || card.suit === "♣"}>
+                    {card.name}{card.suit}
+                  </div>
+                  <div class="flex items-center justify-center h-full">
+                    <img src={card.image} alt={card.suit} class="w-16 h-16 object-contain" />
+                  </div>
+                  <div class="absolute bottom-2 right-2 text-base font-bold rotate-180 z-10" class:text-red-500={card.suit === "♥" || card.suit === "♦"} class:text-black={card.suit === "♠" || card.suit === "♣"}>
+                    {card.name}{card.suit}
+                  </div>
                 </div>
-                <div class="flex items-center justify-center h-full">
-                  <img src={card.image} alt={card.suit} class="w-16 h-16 object-contain" />
-                </div>
-                <div class="absolute bottom-2 right-2 text-base font-bold rotate-180 z-10" class:text-red-500={card.suit === "♥" || card.suit === "♦"} class:text-black={card.suit === "♠" || card.suit === "♣"}>
-                  {card.name}{card.suit}
-                </div>
-              </div>
-            {/each}
-          </div>
-          
-          <!-- Barra de progreso debajo de las cartas -->
-          <div class="w-full h-2 bg-white border border-black rounded mt-4 mb-4 overflow-hidden">
-            <div class="h-full bg-black" style="width: 15%"></div>
+              {/each}
+            </div>
           </div>
           
           <!-- Controles de juego estilo pixelado -->
-          <div class="flex justify-center items-center gap-2 mt-2 mb-8">
+          <div class="flex justify-center items-center gap-2 mt-6 mb-8">
             <button 
               class="bg-white rounded-full py-2 px-10 font-pixelify text-black font-bold text-base border-2 border-black hover:bg-gray-100"
               on:click={playCards}
@@ -325,5 +360,24 @@
   .font-pixelify {
     font-family: 'Pixelify Sans', sans-serif;
     text-shadow: 0px 0px 1px rgba(0,0,0,0.5);
+  }
+  
+  /* Estilo para la barra de desplazamiento horizontal */
+  .overflow-x-auto::-webkit-scrollbar {
+    height: 6px;
+  }
+  
+  .overflow-x-auto::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+  }
+  
+  .overflow-x-auto::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 3px;
+  }
+  
+  .overflow-x-auto::-webkit-scrollbar-thumb:hover {
+    background: #555;
   }
 </style>
