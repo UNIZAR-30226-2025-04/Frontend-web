@@ -68,6 +68,18 @@
   let inputValue = "";
   let selectedOption = "";
   const options = ["Opción 1", "Opción 2", "Opción 3"];
+  
+  // Funciones para los botones de chat y salir
+  function openChat() {
+    alert("Abriendo chat");
+  }
+  
+  function exitGame() {
+    if (confirm("¿Estás seguro de que quieres abandonar la partida?")) {
+      // Lógica para salir del juego
+      window.location.href = "/lobbies";
+    }
+  }
 </script>
 
 <div class="h-screen flex bg-[#1E213F80]">
@@ -138,9 +150,30 @@
 
   <!-- Área de juego - expandida y centrada -->
   <div class="ml-[350px] flex-1 p-8 relative flex flex-col items-center justify-center">
-    <!-- Timer -->
-    <div class="absolute top-4 right-4 bg-white rounded-lg px-6 py-2 font-pixelify z-10">
-      <span class="text-black font-bold">{timeLeft}s</span>
+    <!-- Controles superiores: Chat, Timer y Exit - Posicionados a la derecha del todo de la pantalla -->
+    <div class="fixed top-4 right-4 flex flex-col items-end gap-2 z-20">
+      <div class="flex gap-2">
+        <!-- Botón de chat con imagen -->
+        <button 
+          class="bg-white rounded-lg p-2 font-pixelify flex items-center justify-center w-12 h-12 border-2 border-black"
+          on:click={openChat}
+        >
+          <img src="/icons/chat.png" alt="Chat" class="w-8 h-8" />
+        </button>
+        
+        <!-- Botón de salir (X) -->
+        <button 
+          class="bg-white rounded-lg p-2 font-pixelify flex items-center justify-center w-12 h-12 border-2 border-black"
+          on:click={exitGame}
+        >
+          <span class="text-black font-bold text-2xl">X</span>
+        </button>
+      </div>
+      
+      <!-- Timer - Debajo de los botones -->
+      <div class="bg-white rounded-lg px-6 py-2 font-pixelify border-2 border-black w-full text-center">
+        <span class="text-black font-bold text-xl">{timeLeft} s</span>
+      </div>
     </div>
 
     <!-- Jokers - centrados -->
@@ -179,9 +212,43 @@
       </div>
     </div>
 
-    <!-- Contador de cartas -->
-    <div class="absolute bottom-4 right-4 bg-black bg-opacity-50 px-3 py-1 rounded-lg z-10">
-      <span class="text-white font-pixelify font-bold">{cardsRemaining}/{totalCards}</span>
+    <!-- Mazo de cartas apiladas en la esquina inferior derecha de la pantalla -->
+    <div class="fixed bottom-8 right-8 z-20">
+      <div class="relative">
+        <!-- Carta 3 (la de más atrás) -->
+        <div class="absolute -right-4 -bottom-4 w-32 h-44 bg-white rounded-lg border-2 border-black">
+          <!-- Patrón de cruces azules en los bordes -->
+          <div class="absolute inset-0 p-1">
+            <div class="border-2 border-dashed border-blue-400 h-full w-full rounded-md flex items-center justify-center">
+              <!-- Círculo verde en el centro -->
+              <div class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center">
+                <span class="text-white font-bold text-xl">×</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Carta 2 (en medio) -->
+        <div class="absolute -right-2 -bottom-2 w-32 h-44 bg-white rounded-lg border-2 border-black">
+          <!-- Patrón de cruces azules en los bordes -->
+          <div class="absolute inset-0 p-1">
+            <div class="border-2 border-dashed border-blue-400 h-full w-full rounded-md"></div>
+          </div>
+        </div>
+        
+        <!-- Carta 1 (la de más adelante) -->
+        <div class="relative w-32 h-44 bg-white rounded-lg border-2 border-black">
+          <!-- Patrón de cruces azules en los bordes -->
+          <div class="absolute inset-0 p-1">
+            <div class="border-2 border-dashed border-blue-400 h-full w-full rounded-md"></div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Contador de cartas debajo del mazo -->
+      <div class="mt-2 text-center bg-transparent">
+        <span class="text-white font-pixelify font-bold">{cardsRemaining}/{totalCards}</span>
+      </div>
     </div>
   </div>
 </div>
