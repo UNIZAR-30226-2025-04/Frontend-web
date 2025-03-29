@@ -16,6 +16,9 @@
     multiplier: 8
   };
 
+  // Estado para el modal de salida
+  let showExitModal = false;
+
   // Consumibles usados con imágenes de mock
   const usedConsumables = [
     { name: "Mod 1", description: "Modificador de cartas", icon: "/icons/pxArt(1).png" },
@@ -94,10 +97,15 @@
   }
   
   function exitGame() {
-    if (confirm("¿Estás seguro de que quieres abandonar la partida?")) {
-      // Lógica para salir del juego
-      window.location.href = "/lobbies";
-    }
+    showExitModal = true;
+  }
+  
+  function confirmExit() {
+    window.location.href = "/lobbies";
+  }
+  
+  function cancelExit() {
+    showExitModal = false;
   }
   
   // Funciones para los botones de acción
@@ -350,6 +358,35 @@
     </div>
   </div>
 </div>
+
+<!-- Modal de confirmación para salir -->
+{#if showExitModal}
+  <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-xl w-80 overflow-hidden border-2 border-black">
+      <!-- Título del modal -->
+      <div class="border-b-2 border-black p-3">
+        <h2 class="font-pixelify text-center text-2xl font-bold tracking-wider text-black">EXIT</h2>
+      </div>
+      
+      <!-- Botones de confirmación -->
+      <div class="flex justify-center gap-6 p-4">
+        <button 
+          class="bg-white rounded-full py-2 px-8 font-pixelify text-black font-bold text-lg border-2 border-black hover:bg-gray-100"
+          on:click={confirmExit}
+        >
+          YES
+        </button>
+        
+        <button 
+          class="bg-white rounded-full py-2 px-8 font-pixelify text-black font-bold text-lg border-2 border-black hover:bg-gray-100"
+          on:click={cancelExit}
+        >
+          NO
+        </button>
+      </div>
+    </div>
+  </div>
+{/if}
 
 <style>
   :global(body) {
