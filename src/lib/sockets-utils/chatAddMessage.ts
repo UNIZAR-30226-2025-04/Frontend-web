@@ -1,7 +1,11 @@
 import type { ChatBuble } from "$lib/interfaces";
-import { chatStore, userDataStore } from "$lib/stores";
+import { chatFeedElem, chatStore, userDataStore } from "$lib/stores";
 import { get } from "svelte/store";
 
+// Function to scroll to bottom on new message
+function scrollChatBottom(behavior?: ScrollBehavior): void {
+    get(chatFeedElem).scrollTo({ top: get(chatFeedElem).scrollHeight, behavior });
+}
 
 export function addMessage(username:string, icon:number,  message:string): void {
     // Gets the time and formats it
@@ -20,6 +24,10 @@ export function addMessage(username:string, icon:number,  message:string): void 
         timestamp: timeString,
         message: message,
     };
+
     // Append the new message to the message feed
     chatStore.update(chats => [...chats, newMessage]);
+
+    // Smoothly scroll to the bottom of the feed
+    setTimeout(() => { scrollChatBottom('smooth'); }, 0);
 }

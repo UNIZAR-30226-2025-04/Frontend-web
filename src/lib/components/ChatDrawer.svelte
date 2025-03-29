@@ -1,11 +1,11 @@
 <script lang="ts">
     import type { ChatBuble } from "$lib/interfaces";
     import AvatarDisplay from "./AvatarDisplay.svelte";
-    import { chatStore, lobbyStore, socketStore, userDataStore } from "$lib/stores";
+    import { chatFeedElem, chatStore, lobbyStore, socketStore, userDataStore } from "$lib/stores";
     import { get } from "svelte/store";
     import type { Socket } from "socket.io-client";
     import { onMount } from "svelte";
-    import { addMessage } from "$lib/sockets/chatAddMessage";
+    import { addMessage } from "$lib/sockets-utils/chatAddMessage";
     
 
     let elemChat: HTMLElement;
@@ -53,6 +53,7 @@
 
     onMount(() => {
         socket = get(socketStore);
+        chatFeedElem.set(elemChat);
     });
 
 </script>

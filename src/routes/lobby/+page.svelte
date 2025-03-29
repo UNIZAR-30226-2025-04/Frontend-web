@@ -16,7 +16,7 @@
   } from "@skeletonlabs/skeleton";
   import { onDestroy, onMount } from "svelte";
   import { io } from "socket.io-client";
-  import { addMessage } from "$lib/sockets/chatAddMessage";
+  import { addMessage } from "$lib/sockets-utils/chatAddMessage";
 
   const modalStore = getModalStore();
   const drawerStore = getDrawerStore();
@@ -174,8 +174,14 @@
   });
 
   onDestroy(() => {
-    if (socket) socket.disconnect();
+    if (socket){
+      // Sending an event to let know the that the user just left the lobby
+      console.log("<- Sending exit_lobby:", get(lobbyStore).code);
+      socket.emit("exit_lobby", get(lobbyStore).code);
+      socket.disconnect();
+    }
   });
+
 </script>
 
 <div class="w-[95vw] mt-[5vmin]">
