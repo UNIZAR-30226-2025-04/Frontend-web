@@ -19,6 +19,7 @@
   // Estado para el modal de salida
   let showExitModal = false;
   let showWinModal = false;
+  let showLoseModal = false;
 
   // Consumibles usados con imágenes de mock
   const usedConsumables = [
@@ -134,6 +135,20 @@
   // Función para cerrar el modal de victoria
   function closeWinModal() {
     showWinModal = false;
+  }
+
+  // Función para mostrar el modal de derrota
+  function youLoseDemo() {
+    showLoseModal = true;
+  }
+  
+  // Función para cerrar el modal de derrota
+  function closeLoseModal() {
+    showLoseModal = false;
+  }
+  
+  function goToMainMenu() {
+    window.location.href = "/lobbies";
   }
 </script>
 
@@ -370,13 +385,22 @@
   </div>
 </div>
 
-<!-- Botón para demostración de victoria -->
-<button 
-  class="fixed bottom-4 left-4 bg-white rounded-lg p-2 font-pixelify text-black font-bold border-2 border-black z-50"
-  on:click={youWinDemo}
->
-  youwindemo
-</button>
+<!-- Botones para demostración -->
+<div class="fixed bottom-4 left-4 flex gap-2 z-50">
+  <button 
+    class="bg-white rounded-lg p-2 font-pixelify text-black font-bold border-2 border-black"
+    on:click={youWinDemo}
+  >
+    youwindemo
+  </button>
+  
+  <button 
+    class="bg-white rounded-lg p-2 font-pixelify text-black font-bold border-2 border-black"
+    on:click={youLoseDemo}
+  >
+    youlosedemo
+  </button>
+</div>
 
 <!-- Modal de victoria -->
 {#if showWinModal}
@@ -407,6 +431,40 @@
         on:click={closeWinModal}
       >
         CONTINUE
+      </button>
+    </div>
+  </div>
+{/if}
+
+<!-- Modal de derrota (Game Over) -->
+{#if showLoseModal}
+  <div class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
+    <div class="bg-white rounded-xl w-96 overflow-hidden border-4 border-black text-center p-6">
+      <!-- Icono de bufón -->
+      <div class="mb-4">
+        <img src="/icons/jester.png" alt="Jester" class="w-16 h-16 mx-auto" />
+      </div>
+      
+      <h2 class="font-pixelify text-center text-4xl font-bold text-black mb-6">GAME OVER</h2>
+      
+      <!-- Estadísticas del juego -->
+      <div class="border-2 border-black rounded-lg p-4 mb-4">
+        <p class="font-pixelify text-black text-xl font-bold">XXXXXXXX</p>
+      </div>
+      
+      <div class="border-2 border-black rounded-lg p-4 mb-4">
+        <p class="font-pixelify text-black text-xl font-bold">XXXXXXXX</p>
+      </div>
+      
+      <div class="border-2 border-black rounded-lg p-4 mb-8">
+        <p class="font-pixelify text-black text-xl font-bold">XXXXXXXX</p>
+      </div>
+      
+      <button 
+        class="bg-white rounded-full py-3 px-12 font-pixelify text-black font-bold text-xl border-2 border-black hover:bg-gray-100"
+        on:click={goToMainMenu}
+      >
+        Main menu
       </button>
     </div>
   </div>
