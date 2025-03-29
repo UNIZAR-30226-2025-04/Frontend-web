@@ -18,6 +18,7 @@
 
   // Estado para el modal de salida
   let showExitModal = false;
+  let showWinModal = false;
 
   // Consumibles usados con imágenes de mock
   const usedConsumables = [
@@ -123,6 +124,16 @@
   
   function nextOption() {
     alert("Siguiente opción");
+  }
+
+  // Función para mostrar el modal de victoria
+  function youWinDemo() {
+    showWinModal = true;
+  }
+  
+  // Función para cerrar el modal de victoria
+  function closeWinModal() {
+    showWinModal = false;
   }
 </script>
 
@@ -358,6 +369,48 @@
     </div>
   </div>
 </div>
+
+<!-- Botón para demostración de victoria -->
+<button 
+  class="fixed bottom-4 left-4 bg-white rounded-lg p-2 font-pixelify text-black font-bold border-2 border-black z-50"
+  on:click={youWinDemo}
+>
+  youwindemo
+</button>
+
+<!-- Modal de victoria -->
+{#if showWinModal}
+  <div class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
+    <div class="bg-white rounded-xl w-96 overflow-hidden border-4 border-black text-center p-6">
+      <h2 class="font-pixelify text-center text-5xl font-bold text-black mb-6">YOU WIN!</h2>
+      
+      <div class="border-2 border-black rounded-lg p-4 mb-6">
+        <p class="font-pixelify text-black text-xl mb-2">Round reward</p>
+        <p class="font-pixelify text-black text-3xl font-bold">$720</p>
+      </div>
+      
+      <div class="border-2 border-black rounded-lg p-4 mb-8">
+        <div class="flex justify-between items-center">
+          <div class="w-1/2 border-r border-black pr-4">
+            <p class="font-pixelify text-black text-lg">Your money</p>
+            <p class="font-pixelify text-black text-2xl font-bold">$3155</p>
+          </div>
+          <div class="w-1/2 pl-4">
+            <p class="font-pixelify text-black text-lg">Next round</p>
+            <p class="font-pixelify text-black text-2xl font-bold">4/10</p>
+          </div>
+        </div>
+      </div>
+      
+      <button 
+        class="bg-white rounded-full py-3 px-12 font-pixelify text-black font-bold text-xl border-2 border-black hover:bg-gray-100"
+        on:click={closeWinModal}
+      >
+        CONTINUE
+      </button>
+    </div>
+  </div>
+{/if}
 
 <!-- Modal de confirmación para salir -->
 {#if showExitModal}
