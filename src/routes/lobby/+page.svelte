@@ -40,7 +40,7 @@
 
   // Function to start the game
   function onStart() {
-    console.log("Starting game");
+    goto(base + "/game");
   }
 
   // Player type
