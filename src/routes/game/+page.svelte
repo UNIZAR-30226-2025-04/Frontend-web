@@ -2,9 +2,9 @@
   import GameCard from "$lib/components/GameCard.svelte";
 
   // Estado del juego
-  let round = 0;
+  let round = 3;
   let totalRounds = 10;
-  let money = 243;
+  let money = 2435;
   let roundPot = 10;
   let buyIn = 10;
   let discards = 4;
@@ -18,6 +18,8 @@
 
   // Consumibles usados
   const usedConsumables = [
+    { name: "Mod", description: "Modificador de cartas" },
+    { name: "Mod", description: "Modificador de cartas" },
     { name: "Mod", description: "Modificador de cartas" },
     { name: "Mod", description: "Modificador de cartas" }
   ];
@@ -45,7 +47,15 @@
     "/icons/pxArt(8).png"
   ];
 
+  // Jokers en la parte superior
   const jokers = [
+    { name: "Joker", description: "Comodín que puede sustituir cualquier carta" },
+    { name: "Joker", description: "Comodín que puede sustituir cualquier carta" },
+    { name: "Joker", description: "Comodín que puede sustituir cualquier carta" },
+    { name: "Joker", description: "Comodín que puede sustituir cualquier carta" }
+  ];
+
+  const tableCards = [
     { name: "J", value: 11, suit: "♠", image: artImages[0] },
     { name: "Q", value: 12, suit: "♥", image: artImages[1] },
     { name: "K", value: 13, suit: "♦", image: artImages[2] },
@@ -80,15 +90,32 @@
       window.location.href = "/lobbies";
     }
   }
+  
+  // Funciones para los botones de acción
+  function playCards() {
+    alert("Jugando cartas");
+  }
+  
+  function discardCards() {
+    alert("Descartando cartas");
+  }
+  
+  function prevOption() {
+    alert("Opción anterior");
+  }
+  
+  function nextOption() {
+    alert("Siguiente opción");
+  }
 </script>
 
 <div class="h-screen flex bg-[#1E213F80]">
-  <!-- Panel lateral blanco - pegado a la izquierda del todo -->
-  <div class="w-[250px] min-w-[350px] bg-white p-4 flex flex-col left-0 absolute h-full z-10">
+  <!-- Panel lateral blanco - con margen a la izquierda -->
+  <div class="w-[250px] min-w-[350px] bg-white p-4 flex flex-col left-8 absolute h-full z-10 rounded-lg shadow-lg">
     <h2 class="text-xl mb-4 font-pixelify text-black font-bold">Round {round}/{totalRounds}</h2>
     
     <div class="mb-6">
-      <h3 class="mb-2 font-pixelify text-black font-bold">Used consumables</h3>
+      <h3 class="mb-2 font-pixelify text-black font-bold">Active consumables</h3>
       <div class="grid grid-cols-2 gap-2">
         {#each usedConsumables as consumable}
           <div class="aspect-[3/4] border-2 border-black rounded-lg flex items-center justify-center bg-white">
@@ -99,22 +126,6 @@
       <!-- Barra de progreso con el 15% completado -->
       <div class="w-full h-2 bg-white border border-black rounded mt-2 overflow-hidden">
         <div class="h-full bg-black" style="width: {progressPercentage}%"></div>
-      </div>
-    </div>
-
-    <!-- Sección de inputs según la imagen de referencia -->
-    <div class="border-2 border-black rounded-lg p-3 mb-6">
-      <h3 class="font-pixelify text-center mb-2 text-black font-bold">Inputs</h3>
-      <div class="flex flex-col gap-2">
-        <!-- Dos botones en la primera fila -->
-        <div class="grid grid-cols-2 gap-2">
-          <button class="border-2 border-black rounded-lg py-2 px-3 font-pixelify hover:bg-gray-100 text-black font-medium">
-            Acción 1
-          </button>
-          <button class="border-2 border-black rounded-lg py-2 px-3 font-pixelify hover:bg-gray-100 text-black font-medium">
-            Acción 2
-          </button>
-        </div>
       </div>
     </div>
 
@@ -149,7 +160,7 @@
   </div>
 
   <!-- Área de juego - expandida y centrada -->
-  <div class="ml-[350px] flex-1 p-8 relative flex flex-col items-center justify-center">
+  <div class="ml-[190px] flex-1 p-8 relative">
     <!-- Controles superiores: Chat, Timer y Exit - Posicionados a la derecha del todo de la pantalla -->
     <div class="fixed top-4 right-4 flex flex-col items-end gap-2 z-20">
       <div class="flex gap-2">
@@ -176,33 +187,26 @@
       </div>
     </div>
 
-    <!-- Jokers - centrados -->
-    <div class="flex justify-center gap-4 mb-12 w-full max-w-[1200px]">
-      {#each jokers as card, i}
-        <div class="w-40 h-56 bg-white rounded-lg border-2 border-black relative overflow-hidden">
-          <div class="absolute top-2 left-2 text-lg font-bold z-10" class:text-red-500={card.suit === "♥" || card.suit === "♦"} class:text-black={card.suit === "♠" || card.suit === "♣"}>
-            {card.name}{card.suit}
+    <!-- Estructura de tres secciones para el área de juego -->
+    <div class="h-full flex flex-col">
+      <!-- Jokers en la parte superior - Movidos más arriba -->
+      <div class="flex justify-center gap-3 mt-4">
+        {#each jokers as joker, i}
+          <div class="w-[145px] h-[193px] bg-white rounded-lg border-2 border-black flex items-center justify-center">
+            <span class="font-pixelify text-black font-bold text-xl">Joker</span>
           </div>
-          <div class="flex items-center justify-center h-full">
-            <img src={card.image} alt={card.suit} class="w-24 h-24 object-contain" />
-          </div>
-          <div class="absolute bottom-2 right-2 text-lg font-bold rotate-180 z-10" class:text-red-500={card.suit === "♥" || card.suit === "♦"} class:text-black={card.suit === "♠" || card.suit === "♣"}>
-            {card.name}{card.suit}
-          </div>
-        </div>
-      {/each}
-    </div>
-
-    <!-- Cartas del jugador - centradas -->
-    <div class="mt-auto mb-16">
-      <div class="flex justify-center gap-6">
-        {#each playerCards as card, i}
-          <div class="w-40 h-56 bg-white rounded-lg border-2 border-black relative overflow-hidden">
+        {/each}
+      </div>
+      
+      <!-- Cartas de la mesa (tableCards) - CENTRADAS HORIZONTALMENTE Y MOVIDAS HACIA ARRIBA -->
+      <div class="absolute top-[40%] left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex justify-center gap-4 w-full max-w-[1200px]">
+        {#each tableCards as card, i}
+          <div class="w-[130px] h-[173px] bg-white rounded-lg border-2 border-black relative overflow-hidden">
             <div class="absolute top-2 left-2 text-lg font-bold z-10" class:text-red-500={card.suit === "♥" || card.suit === "♦"} class:text-black={card.suit === "♠" || card.suit === "♣"}>
               {card.name}{card.suit}
             </div>
             <div class="flex items-center justify-center h-full">
-              <img src={card.image} alt={card.suit} class="w-24 h-24 object-contain" />
+              <img src={card.image} alt={card.suit} class="w-16 h-16 object-contain" />
             </div>
             <div class="absolute bottom-2 right-2 text-lg font-bold rotate-180 z-10" class:text-red-500={card.suit === "♥" || card.suit === "♦"} class:text-black={card.suit === "♠" || card.suit === "♣"}>
               {card.name}{card.suit}
@@ -210,26 +214,85 @@
           </div>
         {/each}
       </div>
+      
+      <!-- Espacio inferior con las cartas del jugador -->
+      <div class="flex-1 flex flex-col justify-end">
+        <!-- Cartas del jugador - en la parte inferior -->
+        <div class="mt-auto">
+          <div class="flex justify-center gap-4">
+            {#each playerCards as card, i}
+              <div class="w-[145px] h-[193px] bg-white rounded-lg border-2 border-black relative overflow-hidden">
+                <div class="absolute top-2 left-2 text-base font-bold z-10" class:text-red-500={card.suit === "♥" || card.suit === "♦"} class:text-black={card.suit === "♠" || card.suit === "♣"}>
+                  {card.name}{card.suit}
+                </div>
+                <div class="flex items-center justify-center h-full">
+                  <img src={card.image} alt={card.suit} class="w-16 h-16 object-contain" />
+                </div>
+                <div class="absolute bottom-2 right-2 text-base font-bold rotate-180 z-10" class:text-red-500={card.suit === "♥" || card.suit === "♦"} class:text-black={card.suit === "♠" || card.suit === "♣"}>
+                  {card.name}{card.suit}
+                </div>
+              </div>
+            {/each}
+          </div>
+          
+          <!-- Barra de progreso debajo de las cartas -->
+          <div class="w-full h-2 bg-white border border-black rounded mt-4 mb-4 overflow-hidden">
+            <div class="h-full bg-black" style="width: 15%"></div>
+          </div>
+          
+          <!-- Controles de juego estilo pixelado -->
+          <div class="flex justify-center items-center gap-2 mt-2 mb-8">
+            <button 
+              class="bg-white rounded-full py-2 px-10 font-pixelify text-black font-bold text-base border-2 border-black hover:bg-gray-100"
+              on:click={playCards}
+            >
+              Play
+            </button>
+            
+            <div class="flex border-2 border-black rounded-md">
+              <button 
+                class="bg-white py-2 px-4 font-pixelify text-black font-bold hover:bg-gray-100 border-r border-black"
+                on:click={prevOption}
+              >
+                ←
+              </button>
+              <button 
+                class="bg-white py-2 px-4 font-pixelify text-black font-bold hover:bg-gray-100"
+                on:click={nextOption}
+              >
+                →
+              </button>
+            </div>
+            
+            <button 
+              class="bg-white rounded-full py-2 px-10 font-pixelify text-black font-bold text-base border-2 border-black hover:bg-gray-100"
+              on:click={discardCards}
+            >
+              Discard
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Mazo de cartas apiladas en la esquina inferior derecha de la pantalla -->
     <div class="fixed bottom-8 right-8 z-20">
       <div class="relative">
         <!-- Carta 3 (la de más atrás) -->
-        <div class="absolute -right-4 -bottom-4 w-32 h-44 bg-white rounded-lg border-2 border-black">
+        <div class="absolute -right-3 -bottom-3 w-28 h-40 bg-white rounded-lg border-2 border-black">
           <!-- Patrón de cruces azules en los bordes -->
           <div class="absolute inset-0 p-1">
             <div class="border-2 border-dashed border-blue-400 h-full w-full rounded-md flex items-center justify-center">
               <!-- Círculo verde en el centro -->
-              <div class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center">
-                <span class="text-white font-bold text-xl">×</span>
+              <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+                <span class="text-white font-bold text-lg">×</span>
               </div>
             </div>
           </div>
         </div>
         
         <!-- Carta 2 (en medio) -->
-        <div class="absolute -right-2 -bottom-2 w-32 h-44 bg-white rounded-lg border-2 border-black">
+        <div class="absolute -right-1.5 -bottom-1.5 w-28 h-40 bg-white rounded-lg border-2 border-black">
           <!-- Patrón de cruces azules en los bordes -->
           <div class="absolute inset-0 p-1">
             <div class="border-2 border-dashed border-blue-400 h-full w-full rounded-md"></div>
@@ -237,7 +300,7 @@
         </div>
         
         <!-- Carta 1 (la de más adelante) -->
-        <div class="relative w-32 h-44 bg-white rounded-lg border-2 border-black">
+        <div class="relative w-28 h-40 bg-white rounded-lg border-2 border-black">
           <!-- Patrón de cruces azules en los bordes -->
           <div class="absolute inset-0 p-1">
             <div class="border-2 border-dashed border-blue-400 h-full w-full rounded-md"></div>
