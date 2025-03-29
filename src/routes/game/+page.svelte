@@ -150,6 +150,19 @@
   function goToMainMenu() {
     window.location.href = "/lobbies";
   }
+
+  // Estado para la tienda
+  let showShop = false;
+  let shopItems = [
+    { name: "Mod", price: 14, icon: "/icons/pxArt(1).png" },
+    { name: "Card", price: 2, icon: "/icons/pxArt(2).png" },
+    { name: "Card pack", price: 5, icon: "/icons/pxArt(3).png" },
+    { name: "Cool pack", price: 30, icon: "/icons/pxArt(4).png" }
+  ];
+
+  function toggleShop() {
+    showShop = !showShop;
+  }
 </script>
 
 <div class="h-screen flex">
@@ -402,6 +415,14 @@
   </button>
 </div>
 
+<!-- Botón de tienda -->
+<button 
+  class="fixed bottom-4 right-4 bg-white rounded-lg p-2 font-pixelify text-black font-bold border-2 border-black z-50"
+  on:click={toggleShop}
+>
+  Shop
+</button>
+
 <!-- Modal de victoria -->
 {#if showWinModal}
   <div class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
@@ -494,6 +515,132 @@
         >
           NO
         </button>
+      </div>
+    </div>
+  </div>
+{/if}
+
+<!-- Modal de tienda -->
+{#if showShop}
+  <!-- Botón Leave Shop - Ahora fuera del modal -->
+  <button 
+    class="fixed top-4 right-4 bg-white rounded-lg p-2 font-pixelify text-black font-bold border-2 border-black z-[60]"
+    on:click={toggleShop}
+  >
+    Leave shop
+  </button>
+
+  <div class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
+    <div class="bg-white rounded-xl w-[900px] h-[700px] overflow-hidden border-4 border-black p-8 relative">
+      <!-- Botones superiores izquierdos -->
+      <div class="absolute top-8 left-8 flex flex-col gap-4">
+        <button class="bg-white rounded-xl py-3 px-6 font-pixelify text-black font-bold border-2 border-black w-40">
+          Next Round
+        </button>
+        <button class="bg-white rounded-xl py-3 px-6 font-pixelify text-black font-bold border-2 border-black w-40">
+          Reroll 6$
+        </button>
+      </div>
+
+      <!-- Jokers superiores derechos -->
+      <div class="absolute top-8 right-8 flex gap-6">
+        {#each jokers.slice(0, 3) as joker, i}
+          <div class="relative">
+            <div class="w-[160px] h-[213px] bg-white border-2 border-black rounded-lg flex flex-col items-center justify-center relative overflow-hidden">
+              <div class="absolute top-2 left-2 text-base font-bold z-10 text-purple-700">
+                Joker
+              </div>
+              <div class="flex items-center justify-center h-full">
+                <img src={joker.image} alt="Joker" class="w-16 h-16 object-contain" />
+              </div>
+              <div class="absolute bottom-2 right-2 text-base font-bold rotate-180 z-10 text-purple-700">
+                Joker
+              </div>
+              </div>
+            <div class="mt-2 text-center">
+              <div class="bg-white border-2 border-black rounded-lg px-3 py-1 inline-block">
+                <span class="font-pixelify text-black font-bold">${i === 0 ? '7' : '8'}</span>
+              </div>
+            </div>
+          </div>
+        {/each}
+      </div>
+
+      <!-- Contenido inferior con proporción 4:3 -->
+      <div class="absolute bottom-8 inset-x-8 flex justify-between">
+        <!-- Consumible izquierdo -->
+        <div class="relative">
+          <div class="w-[145px] h-[193px] bg-white border-2 border-black rounded-lg flex flex-col items-center justify-center relative overflow-hidden">
+            <div class="absolute top-2 left-2 text-base font-bold z-10 text-black">
+              A♠
+            </div>
+            <span class="font-pixelify text-black text-xl">Mod</span>
+            <div class="absolute bottom-2 right-2 text-base font-bold rotate-180 z-10 text-black">
+              A♠
+            </div>
+          </div>
+          <div class="mt-2 text-center">
+            <div class="bg-white border-2 border-black rounded-lg px-3 py-1 inline-block">
+              <span class="font-pixelify text-black font-bold">14$</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Paquetes derechos -->
+        <div class="flex gap-6">
+          <!-- Card (ahora sin selección) -->
+          <div class="relative">
+            <div class="w-[160px] h-[213px] bg-white border-2 border-black rounded-lg flex flex-col items-center justify-center relative overflow-hidden">
+              <div class="absolute top-2 left-2 text-base font-bold z-10 text-red-500">
+                K♥
+              </div>
+              <span class="font-pixelify text-black text-xl">Card</span>
+              <div class="absolute bottom-2 right-2 text-base font-bold rotate-180 z-10 text-red-500">
+                K♥
+              </div>
+            </div>
+            <div class="mt-2 text-center">
+              <div class="bg-white border-2 border-black rounded-lg px-3 py-1 inline-block">
+                <span class="font-pixelify text-black font-bold">2$</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card pack -->
+          <div class="relative">
+            <div class="w-[160px] h-[213px] bg-white border-2 border-black rounded-lg flex flex-col items-center justify-center relative overflow-hidden">
+              <div class="absolute top-2 left-2 text-base font-bold z-10 text-black">Q♠</div>
+              <div class="absolute top-2 right-2 text-base font-bold z-10 text-red-500 -rotate-45">J♥</div>
+              <span class="font-pixelify text-black text-xl">Card pack</span>
+              <div class="absolute bottom-2 left-2 text-base font-bold z-10 text-red-500 rotate-45">10♦</div>
+              <div class="absolute bottom-2 right-2 text-base font-bold z-10 text-black rotate-[135deg]">A♣</div>
+            </div>
+            <div class="mt-2 text-center">
+              <div class="bg-white border-2 border-black rounded-lg px-3 py-1 inline-block">
+                <span class="font-pixelify text-black font-bold">5$</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Cool pack -->
+          <div class="relative">
+            <div class="w-[160px] h-[213px] bg-white border-2 border-black rounded-lg flex flex-col items-center justify-center relative overflow-hidden">
+              <div class="absolute inset-0 flex flex-wrap justify-around p-2">
+                {#each Array(6) as _, i}
+                  <div class="text-xs font-bold" class:text-red-500={i % 2 === 0} class:text-black={i % 2 !== 0}>
+                    {['A♠', 'K♥', 'Q♦', 'J♣', '10♥', '9♠'][i]}
+                  </div>
+                {/each}
+              </div>
+              <span class="font-pixelify text-black text-xl">Cool pack</span>
+            </div>
+            <div class="mt-2 text-center">
+              <div class="bg-white border-2 border-black rounded-lg px-3 py-1 inline-block">
+                <span class="font-pixelify text-black font-bold">30$</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
