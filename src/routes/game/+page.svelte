@@ -1,56 +1,66 @@
 <script lang="ts">
   import GameCard from "$lib/components/GameCard.svelte";
 
-  // Mock data para las cartas
-  const playerCards = [
-    { name: "As de Corazones", image: "/cards/hearts_ace.png" },
-    { name: "Rey de Picas", image: "/cards/spades_king.png" },
-    { name: "Reina de Diamantes", image: "/cards/diamonds_queen.png" },
-    { name: "Jota de Tréboles", image: "/cards/clubs_jack.png" },
-    { name: "10 de Corazones", image: "/cards/hearts_10.png" },
-    { name: "9 de Picas", image: "/cards/spades_9.png" },
+  type CardType = {
+    name: string;
+    value: number;
+    suit: "♥" | "♠" | "♦" | "♣";
+    image: string;
+  }
+
+  // Asignamos las imágenes de pixel art a diferentes valores de cartas
+  const playerCards: CardType[] = [
+    { name: "As", value: 14, suit: "♥", image: "/icons/pxArt(1).png" },
+    { name: "Rey", value: 13, suit: "♠", image: "/icons/pxArt(2).png" },
+    { name: "Reina", value: 12, suit: "♦", image: "/icons/pxArt(3).png" },
+    { name: "Jota", value: 11, suit: "♣", image: "/icons/pxArt(4).png" },
+    { name: "10", value: 10, suit: "♥", image: "/icons/pxArt(1).png" },
+    { name: "9", value: 9, suit: "♠", image: "/icons/pxArt(2).png" },
   ];
 
-  const tableCards = [
-    { name: "8 de Diamantes", image: "/cards/diamonds_8.png" },
-    { name: "7 de Tréboles", image: "/cards/clubs_7.png" },
-    { name: "6 de Corazones", image: "/cards/hearts_6.png" },
-    { name: "5 de Picas", image: "/cards/spades_5.png" },
-    { name: "4 de Diamantes", image: "/cards/diamonds_4.png" },
+  const tableCards: CardType[] = [
+    { name: "8", value: 8, suit: "♦", image: "/icons/pxArt(3).png" },
+    { name: "7", value: 7, suit: "♣", image: "/icons/pxArt(4).png" },
+    { name: "6", value: 6, suit: "♥", image: "/icons/pxArt(1).png" },
+    { name: "5", value: 5, suit: "♠", image: "/icons/pxArt(2).png" },
+    { name: "4", value: 4, suit: "♦", image: "/icons/pxArt(3).png" },
   ];
 </script>
 
-<div class="min-h-screen bg-surface-900 p-4 flex flex-col">
-  <!-- Mesa de juego -->
-  <div class="flex-grow flex flex-col items-center justify-between">
-    <!-- Cartas de la mesa -->
-    <div class="w-full mb-8">
-      <h2 class="text-2xl font-bold mb-4 text-white">Mesa</h2>
-      <div class="flex flex-wrap justify-center gap-4">
-        {#each tableCards as card}
+<div class="h-screen bg-surface-900 flex flex-col p-4">
+  <!-- Mesa de juego - ocupa el 60% de la altura -->
+  <div class="h-[60%] flex flex-col justify-center">
+    <h2 class="text-2xl font-bold mb-4 text-white">Mesa</h2>
+    <div class="flex justify-center gap-4 h-full items-center">
+      {#each tableCards as card}
+        <div class="h-[80%] aspect-[4/5]">
           <GameCard 
-            cardName={card.name} 
+            cardName={`${card.name} (${card.value})`}
             imagePath={card.image}
-            width="w-[calc(20%-1rem)]" 
-            height="h-[calc(20vw*1.5)]"
+            width="w-full"
+            height="h-full"
+            suit={card.suit}
           />
-        {/each}
-      </div>
+        </div>
+      {/each}
     </div>
+  </div>
 
-    <!-- Cartas del jugador -->
-    <div class="w-full mt-auto">
-      <h2 class="text-2xl font-bold mb-4 text-white">Tus cartas</h2>
-      <div class="flex flex-wrap justify-center gap-4">
-        {#each playerCards as card}
+  <!-- Cartas del jugador - ocupa el 40% de la altura -->
+  <div class="h-[40%] flex flex-col justify-center">
+    <h2 class="text-2xl font-bold mb-4 text-white">Tus cartas</h2>
+    <div class="flex justify-center gap-4 h-full items-center">
+      {#each playerCards as card}
+        <div class="h-[80%] aspect-[4/5]">
           <GameCard 
-            cardName={card.name} 
+            cardName={`${card.name} (${card.value})`}
             imagePath={card.image}
-            width="w-[calc(16.66%-1rem)]" 
-            height="h-[calc(16.66vw*1.5)]"
+            width="w-full"
+            height="h-full"
+            suit={card.suit}
           />
-        {/each}
-      </div>
+        </div>
+      {/each}
     </div>
   </div>
 </div>
