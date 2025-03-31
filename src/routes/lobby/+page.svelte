@@ -223,6 +223,15 @@
     socket.on("player_left", (args: any) => {
       console.log("-> player_left", args);
       players = players.filter((play:Player) => play.username !== args.username);
+
+      let playersLobby: publicInformationUser[] = get(lobbyStore).players;
+      playersLobby = playersLobby.filter((user:publicInformationUser) => user.username !== args.username);
+      lobbyStore.update((lob: Lobby) => ({
+        code: lob.code,
+        host: lob.host,
+        players: playersLobby,
+      }));
+
     });
 
     socket.onAny((event: any, ...args: any) => {
