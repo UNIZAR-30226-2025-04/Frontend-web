@@ -17,6 +17,7 @@
   import { onDestroy, onMount } from "svelte";
   import { io } from "socket.io-client";
   import { addMessage } from "$lib/sockets-utils/chatAddMessage";
+    import type { Lobby, publicInformationUser } from "$lib/interfaces";
 
   const modalStore = getModalStore();
   const drawerStore = getDrawerStore();
@@ -33,12 +34,12 @@
     component: "shareModal",
   };
 
-  let actual = 8; // Actual number of players
+  let actual = 0; // Actual number of players
   let max = 8; // Maximum number of players
   let publicString = "PUBLIC"; // String to show if the lobby is public or private
   let publicValue = true; // Boolean to know if the lobby is public or private
-  let code = $lobbyStore.code; // Code of the lobby
-  let host = $lobbyStore.host; // Boolean to know if the player is the host
+  $: code = $lobbyStore.code; // Code of the lobby
+  $: host = $lobbyStore.host; // Boolean to know if the player is the host
 
   // Function to switch the public value
   function onSwitchPublic() {
@@ -69,17 +70,8 @@
   let username: string = $userDataStore.username;
   let avatar: number = $userDataStore.icon;
 
-  // List of players, includes testing data for viewing purposes
-  let players: Player[] = [
-    { username: username, icon: avatar, key: 0, host: true },
-    { username: "Player2", icon: 2, key: 1, host: false },
-    { username: "Player3", icon: 3, key: 2, host: false },
-    { username: "Player4", icon: 4, key: 3, host: false },
-    { username: "Player5", icon: 5, key: 4, host: false },
-    { username: "Player6", icon: 6, key: 5, host: false },
-    { username: "Player7", icon: 7, key: 6, host: false },
-    { username: "Player8", icon: 8, key: 7, host: false },
-  ];
+  // List of players
+  let players: Player[] = [];
 
   /**
    * Function to kick a player of the list that has index
@@ -113,13 +105,15 @@
    * @param icon
    */
   function addPlayer(username: string, icon: number) {
-    let newUser: Player = {
-      username: username,
-      icon: icon,
-      key: players.length,
-      host: false,
-    };
-    players = [...players, newUser];
+    if( username !== get(userDataStore).username){
+      let newUser: Player = {
+        username: username,
+        icon: icon,
+        key: players.length,
+        host: false,
+      };
+      players = [...players, newUser];
+    }
   }
 
   function openDrawer() {
@@ -150,7 +144,7 @@
       console.log("-> disconnect");
     });
 
-    socket.on("joined_lobby", (args: any) => {
+    socket.on("new_user_in_lobby", (args: any) => {
       console.log("-> joined_lobby", args);
     });
 
@@ -164,6 +158,67 @@
       addMessage(args.username, args.user_icon, args.message);
     });
 
+    socket.on("lobby_info", (args: any) => {
+      console.log("-> lobby_info", args);
+
+      players = [];
+      let playersLobby:publicInformationUser[] = []
+      for(let i:number = 0; i < args.players.length; i++){
+        let newPlayer:Player = {
+          key:players.length,
+          username: args.players[i].username,
+          icon: args.players[i].user_icon,
+          host: args.players[i].username === args.creator.username
+        }
+        console.log("Pushed player:",newPlayer);
+        players.push(newPlayer);
+
+        let newPlayer2:publicInformationUser = {
+          username: args.players[i].username,
+          icon: args.players[i].user_icon
+        };
+        playersLobby.push(newPlayer2);
+      }
+      players = players;
+
+      lobbyStore.update((lob:Lobby) => ({
+        code:lob.code,
+        host: args.creator.username === get(userDataStore).username,
+        players: playersLobby
+      }));
+
+    });
+
+    socket.on("new_user_in_lobby", (args: any) => {
+      console.log("-> new_user_in_lobby", args);
+      // If it is not on the list
+      if(players.find((p:Player) => p.username === args.username) === undefined){
+        let newPlayer:Player = {
+          key:players.length,
+          username: args.username,
+          icon: args.icon,
+          host: false
+        }
+        console.log("Pushed player:",newPlayer);
+        players.push(newPlayer)
+        players = players;
+      }
+
+      let playersLobby:publicInformationUser[] = get(lobbyStore).players;
+      let newPlayer2:publicInformationUser = {
+          username: args.username,
+          icon: args.icon
+      };
+      playersLobby.push(newPlayer2);
+
+      lobbyStore.update((lob:Lobby) => ({
+        code:lob.code,
+        host: args.creator.username === get(userDataStore).username,
+        players: playersLobby
+      }));
+
+    });
+
     socket.onAny((event: any, ...args: any) => {
       console.log(`-> Event recieved: ${event}`, args);
     });
@@ -171,6 +226,11 @@
     // Sending an event to let know the lobby that the user just joined
     console.log("<- Sending join_lobby:", get(lobbyStore).code);
     socket.emit("join_lobby", get(lobbyStore).code);
+
+    // Getting all info on the lobby
+    console.log("<- Sending get_lobby_info:", get(lobbyStore).code);
+    socket.emit("get_lobby_info", get(lobbyStore).code);
+    
   });
 
   onDestroy(() => {
@@ -181,6 +241,11 @@
       socket.disconnect();
     }
   });
+
+  function customAction(){
+    console.log("<- Sending get_lobby_info:", get(lobbyStore).code);
+    socket.emit("get_lobby_info", get(lobbyStore).code);
+  }
 
 </script>
 
@@ -252,5 +317,10 @@
         on:click={onStart}>Start</button
       >
     {/if}
+    <button
+      type="button"
+      class="btn btn-lg variant-filled text-2xl w-[21vw]"
+      on:click={customAction}>Do custom action</button
+    >
   </div>
 </div>

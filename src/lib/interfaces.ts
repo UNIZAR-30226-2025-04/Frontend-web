@@ -32,6 +32,7 @@ export interface publicInformationUser {
 export interface Lobby {
     code: string
     host: boolean
+    players: publicInformationUser[]
 }
 
 // INBOX AND FRIENDS interfaces

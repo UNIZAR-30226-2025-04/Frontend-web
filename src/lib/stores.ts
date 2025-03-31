@@ -17,7 +17,8 @@ export const userDataStore = persisted('userDataNogler',userDataInitial)
 
 const lobbyInitial: Lobby = {
     code: "code",
-    host: false
+    host: false,
+    players:[]
 }
 
 export const lobbyStore = writable<Lobby>(lobbyInitial)
