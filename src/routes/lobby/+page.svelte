@@ -1,23 +1,23 @@
 <script lang="ts">
-  import AvatarDisplay from "../../lib/components/AvatarDisplay.svelte";
-  import { userDataStore, lobbyStore, socketStore } from "$lib/stores";
   import { goto } from "$app/navigation";
+  import { base } from "$app/paths";
+  import AvatarDisplay from "$lib/components/AvatarDisplay.svelte";
+  import { fetchExitLobby } from "$lib/fetch/lobbyFetch";
+  import type { Lobby, publicInformationUser } from "$lib/interfaces";
+  import { wsBase } from "$lib/paths";
+  import { addMessage } from "$lib/sockets-utils/chatAddMessage";
+  import { lobbyStore, socketStore, userDataStore } from "$lib/stores";
+  import {
+      getDrawerStore,
+      getModalStore,
+      type DrawerSettings,
+      type ModalSettings,
+  } from "@skeletonlabs/skeleton";
+  import { io } from "socket.io-client";
+  import { onDestroy, onMount } from "svelte";
   import { flip } from "svelte/animate";
   import { cubicOut } from "svelte/easing";
-  import { base } from "$app/paths";
-  import { wsBase } from "$lib/paths";
   import { get } from "svelte/store";
-  import { fetchExitLobby } from "$lib/fetch/lobbyFetch";
-  import {
-    getDrawerStore,
-    getModalStore,
-    type DrawerSettings,
-    type ModalSettings,
-  } from "@skeletonlabs/skeleton";
-  import { onDestroy, onMount } from "svelte";
-  import { io } from "socket.io-client";
-  import { addMessage } from "$lib/sockets-utils/chatAddMessage";
-    import type { Lobby, publicInformationUser } from "$lib/interfaces";
 
   const modalStore = getModalStore();
   const drawerStore = getDrawerStore();
@@ -95,7 +95,8 @@
    * @async
    * */
   async function onLeave() {
-    await fetchExitLobby();
+    exitLobby();
+    //await fetchExitLobby();
     goto(base + "/home");
   }
 
@@ -105,7 +106,7 @@
    * @param icon
    */
   function addPlayer(username: string, icon: number) {
-    if( username !== get(userDataStore).username){
+    if (username !== get(userDataStore).username) {
       let newUser: Player = {
         username: username,
         icon: icon,
@@ -162,61 +163,66 @@
       console.log("-> lobby_info", args);
 
       players = [];
-      let playersLobby:publicInformationUser[] = []
-      for(let i:number = 0; i < args.players.length; i++){
-        let newPlayer:Player = {
-          key:players.length,
+      let playersLobby: publicInformationUser[] = [];
+      for (let i: number = 0; i < args.players.length; i++) {
+        let newPlayer: Player = {
+          key: players.length,
           username: args.players[i].username,
           icon: args.players[i].user_icon,
-          host: args.players[i].username === args.creator.username
-        }
-        console.log("Pushed player:",newPlayer);
+          host: args.players[i].username === args.creator.username,
+        };
+        console.log("Pushed player:", newPlayer);
         players.push(newPlayer);
 
-        let newPlayer2:publicInformationUser = {
+        let newPlayer2: publicInformationUser = {
           username: args.players[i].username,
-          icon: args.players[i].user_icon
+          icon: args.players[i].user_icon,
         };
         playersLobby.push(newPlayer2);
       }
       players = players;
 
-      lobbyStore.update((lob:Lobby) => ({
-        code:lob.code,
+      lobbyStore.update((lob: Lobby) => ({
+        code: lob.code,
         host: args.creator.username === get(userDataStore).username,
-        players: playersLobby
+        players: playersLobby,
       }));
-
     });
 
     socket.on("new_user_in_lobby", (args: any) => {
       console.log("-> new_user_in_lobby", args);
       // If it is not on the list
-      if(players.find((p:Player) => p.username === args.username) === undefined){
-        let newPlayer:Player = {
-          key:players.length,
+      if (
+        players.find((p: Player) => p.username === args.username) === undefined
+      ) {
+        let newPlayer: Player = {
+          key: players.length,
           username: args.username,
           icon: args.icon,
-          host: false
-        }
-        console.log("Pushed player:",newPlayer);
-        players.push(newPlayer)
+          host: false,
+        };
+        console.log("Pushed player:", newPlayer);
+        players.push(newPlayer);
         players = players;
       }
 
-      let playersLobby:publicInformationUser[] = get(lobbyStore).players;
-      let newPlayer2:publicInformationUser = {
-          username: args.username,
-          icon: args.icon
+      let playersLobby: publicInformationUser[] = get(lobbyStore).players;
+      let newPlayer2: publicInformationUser = {
+        username: args.username,
+        icon: args.icon,
       };
       playersLobby.push(newPlayer2);
 
-      lobbyStore.update((lob:Lobby) => ({
-        code:lob.code,
-        host: args.creator.username === get(userDataStore).username,
-        players: playersLobby
+      lobbyStore.update((lob: Lobby) => ({
+        code: lob.code,
+        host: lob.host,
+        players: playersLobby,
       }));
+    });
 
+    socket.on("player_left", (args: any) => {
+      console.log("-> player_left", args);
+      players = players.filter((play:Player) => play.username !== args.username);
     });
 
     socket.onAny((event: any, ...args: any) => {
@@ -230,23 +236,24 @@
     // Getting all info on the lobby
     console.log("<- Sending get_lobby_info:", get(lobbyStore).code);
     socket.emit("get_lobby_info", get(lobbyStore).code);
-    
   });
 
+  function exitLobby(){
+    // Sending an event to let know the that the user just left the lobby
+    console.log("<- Sending exit_lobby:", get(lobbyStore).code);
+    socket.emit("exit_lobby", get(lobbyStore).code);
+  }
+
   onDestroy(() => {
-    if (socket){
-      // Sending an event to let know the that the user just left the lobby
-      console.log("<- Sending exit_lobby:", get(lobbyStore).code);
-      socket.emit("exit_lobby", get(lobbyStore).code);
+    if (socket) {
       socket.disconnect();
     }
   });
 
-  function customAction(){
+  function customAction() {
     console.log("<- Sending get_lobby_info:", get(lobbyStore).code);
     socket.emit("get_lobby_info", get(lobbyStore).code);
   }
-
 </script>
 
 <div class="w-[95vw] mt-[5vmin]">
