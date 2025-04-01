@@ -70,10 +70,6 @@
     async function checkCode() {
         const enteredCode = code.join("");
         if (await joinLobbyFetch(enteredCode)) {
-            lobbyStore.update(() => ({
-                code: enteredCode,
-                host: false
-            }));
             goto(base+"/lobby");
             parent.onClose();
         }

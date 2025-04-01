@@ -1,5 +1,7 @@
 // Base url of the backend API
 export const apiBase:string = 'https://nogler.ddns.net/';
+// Base url to socket
+export const wsBase:string = 'https://nogler.ddns.net:443'
 
 // USERS
 // me, private information

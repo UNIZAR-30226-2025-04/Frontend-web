@@ -1,8 +1,9 @@
 import { writable } from 'svelte/store';
-import type { UserData, Lobby } from '$lib/interfaces';
+import type { UserData, Lobby, ChatBuble } from '$lib/interfaces';
 import { persisted } from 'svelte-persisted-store'
+import { Socket } from 'socket.io-client';
 
-let userDataInitial: UserData = {
+const userDataInitial: UserData = {
     username: "Name",
     email: "",
     password: "",
@@ -11,12 +12,20 @@ let userDataInitial: UserData = {
     remember: false
 }
 
-export let userDataStore = persisted('userDataNogler',userDataInitial)
+export const userDataStore = persisted('userDataNogler',userDataInitial)
 
 
-let lobbyInitial: Lobby = {
+const lobbyInitial: Lobby = {
     code: "code",
-    host: false
+    host: false,
+    players:[]
 }
 
-export let lobbyStore = writable<Lobby>(lobbyInitial)
+export const lobbyStore = writable<Lobby>(lobbyInitial)
+
+const chatInitial: ChatBuble[] = []
+
+export const chatStore = writable<ChatBuble[]>(chatInitial)
+export const chatFeedElem = writable<HTMLElement>()
+
+export const socketStore = writable<Socket>()
