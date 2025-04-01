@@ -29,5 +29,5 @@ export function addMessage(username:string, icon:number,  message:string): void 
     chatStore.update(chats => [...chats, newMessage]);
 
     // Smoothly scroll to the bottom of the feed
-    setTimeout(() => { scrollChatBottom('smooth'); }, 0);
+    //setTimeout(() => { scrollChatBottom('smooth'); }, 0);
 }

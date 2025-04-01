@@ -77,8 +77,9 @@
    * Function to kick a player of the list that has index
    * @number index
    * */
-  function onKickPlayer(index: number) {
+  function kickPlayerList(index: number) {
     console.log("Kicking player", players[index].username);
+    let auxName:string = players[index].username;
     players = [...players.slice(0, index), ...players.slice(index + 1)];
     actual = players.length;
   }
@@ -163,7 +164,6 @@
       console.log("-> lobby_info", args);
 
       players = [];
-      let playersLobby: publicInformationUser[] = [];
       for (let i: number = 0; i < args.players.length; i++) {
         let newPlayer: Player = {
           key: players.length,
@@ -173,20 +173,9 @@
         };
         console.log("Pushed player:", newPlayer);
         players.push(newPlayer);
-
-        let newPlayer2: publicInformationUser = {
-          username: args.players[i].username,
-          icon: args.players[i].user_icon,
-        };
-        playersLobby.push(newPlayer2);
       }
       players = players;
-
-      lobbyStore.update((lob: Lobby) => ({
-        code: lob.code,
-        host: args.creator.username === get(userDataStore).username,
-        players: playersLobby,
-      }));
+      host = args.creator.username === get(userDataStore).username;
     });
 
     socket.on("new_user_in_lobby", (args: any) => {
@@ -199,39 +188,32 @@
           key: players.length,
           username: args.username,
           icon: args.icon,
-          host: false,
+          host: get(userDataStore).username === args.username,
         };
         console.log("Pushed player:", newPlayer);
         players.push(newPlayer);
         players = players;
       }
-
-      let playersLobby: publicInformationUser[] = get(lobbyStore).players;
-      let newPlayer2: publicInformationUser = {
-        username: args.username,
-        icon: args.icon,
-      };
-      playersLobby.push(newPlayer2);
-
-      lobbyStore.update((lob: Lobby) => ({
-        code: lob.code,
-        host: lob.host,
-        players: playersLobby,
-      }));
     });
 
     socket.on("player_left", (args: any) => {
       console.log("-> player_left", args);
       players = players.filter((play:Player) => play.username !== args.username);
+    });
 
-      let playersLobby: publicInformationUser[] = get(lobbyStore).players;
-      playersLobby = playersLobby.filter((user:publicInformationUser) => user.username !== args.username);
-      lobbyStore.update((lob: Lobby) => ({
-        code: lob.code,
-        host: lob.host,
-        players: playersLobby,
-      }));
+    socket.on("player_kicked", (args: any) => {
+      console.log("-> player_kicked", args);
+      players = players.filter((play:Player) => play.username !== args.kicked_user);
+    });
 
+    socket.on("kick_success", (args: any) => {
+      console.log("-> kick_success", args);
+      players = players.filter((play:Player) => play.username !== args.kicked_user);
+    });
+
+    socket.on("you_were_kicked", (args: any) => {
+      console.log("-> you_were_kicked", args);
+      goto(base + "/home");
     });
 
     socket.onAny((event: any, ...args: any) => {
@@ -251,6 +233,12 @@
     // Sending an event to let know the that the user just left the lobby
     console.log("<- Sending exit_lobby:", get(lobbyStore).code);
     socket.emit("exit_lobby", get(lobbyStore).code);
+  }
+
+  function kickUser(username:string){
+    // Sends an even to kick a user out off the lobby
+    console.log("<- kick_from_lobby:", get(lobbyStore).code, username);
+    socket.emit("kick_from_lobby", get(lobbyStore).code, username);
   }
 
   onDestroy(() => {
@@ -311,7 +299,7 @@
           {#if index != 0}
             <button
               class="btn btn-lg variant-filled mt-[30%]"
-              on:click={() => onKickPlayer(index)}>Kick</button
+              on:click={() => kickUser(players[index].username)}>Kick</button
             >
           {/if}
         {/if}
