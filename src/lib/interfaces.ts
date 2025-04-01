@@ -32,7 +32,7 @@ export interface publicInformationUser {
 export interface Lobby {
     code: string
     host: boolean
-    players: publicInformationUser[]
+    players: Player[]
 }
 
 // INBOX AND FRIENDS interfaces
@@ -83,6 +83,14 @@ export interface LobbyDisplay {
     rounds?: number;
     points?: number;
 }
+
+// Player type
+export type Player = {
+    key: number;
+    username: string;
+    icon: number;
+    host: boolean;
+  };
 
 
 //CHAT

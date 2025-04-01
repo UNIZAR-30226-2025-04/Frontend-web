@@ -1,58 +1,26 @@
 <script lang="ts">
-    import type { ChatBuble } from "$lib/interfaces";
     import AvatarDisplay from "./AvatarDisplay.svelte";
-    import { chatFeedElem, chatStore, lobbyStore, socketStore, userDataStore } from "$lib/stores";
-    import { get } from "svelte/store";
-    import type { Socket } from "socket.io-client";
+    import { chatFeedElem, chatStore } from "$lib/stores";
     import { onMount } from "svelte";
-    import { addMessage } from "$lib/sockets-utils/chatAddMessage";
+    import { sendMessage } from "$lib/sockets-utils/lobbySocket";
     
-
     let elemChat: HTMLElement;
-
     let currentMessage = "";
-    let chatLength = 0;
-    let messageFeed: ChatBuble[] = [];
-    let socket:Socket;
+    $: messageFeed = $chatStore;
 
-    // Reactive variables
-    chatStore.subscribe(chats => {
-        chatLength = chats.length;
-        messageFeed = chats;
-    });
-
-
-    // Function to scroll to bottom on new message
-    function scrollChatBottom(behavior?: ScrollBehavior): void {
-        elemChat.scrollTo({ top: elemChat.scrollHeight, behavior });
-    }
-
-    function addMessageHost(username:string, icon:number,  message:string): void {
-        addMessage(username,icon,message);
-        // Smoothly scroll to the bottom of the feed
-        setTimeout(() => { scrollChatBottom('smooth'); }, 0);
-    }
-
-
-    function sendMessage(): void {
-
-        console.log("<- Sending broadcast_to_lobby:", get(lobbyStore).code, currentMessage);
-        socket.emit("broadcast_to_lobby", get(lobbyStore).code, currentMessage);
-
-        // Clear the textarea message
+    function onSend(){
+        sendMessage(currentMessage);
         currentMessage = '';
     }
 
     function handleKeyDown(event:any) {
         if (event.key === "Enter" && !event.shiftKey) {
             event.preventDefault();
-            sendMessage();
+            onSend();
         }
     }
 
-
     onMount(() => {
-        socket = get(socketStore);
         chatFeedElem.set(elemChat);
     });
 
@@ -106,7 +74,7 @@
                 rows="1"
                 on:keydown={handleKeyDown}
             />
-            <button class="variant-filled-primary" on:click={sendMessage}>Send</button>
+            <button class="variant-filled-primary" on:click={onSend}>Send</button>
         </div>
     </div>
 </div>
