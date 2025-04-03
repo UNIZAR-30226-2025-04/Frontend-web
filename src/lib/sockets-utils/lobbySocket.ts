@@ -82,6 +82,24 @@ export function initializeSocket() {
 		console.log("-> disconnect");
 	});
 
+	socket.on("connection_success", (args:any) => {
+		console.log("-> connection_success",args);
+		
+		// Starting emits when a user joins the lobby
+
+		// Sending an event to let know the lobby that the user just joined
+		console.log("<- join_lobby:", get(lobbyStore).code);
+		socket.emit("join_lobby", get(lobbyStore).code);
+
+		// Getting all info on the lobby
+		console.log("<- get_lobby_info:", get(lobbyStore).code);
+		socket.emit("get_lobby_info", get(lobbyStore).code);
+	});
+
+	socket.on("connection_error", (args:any) => {
+		console.log("-> connection_error",args);
+	});
+
 	socket.on("error", function (error: any) {
 		console.error("-> Error:", error);
 	});
@@ -134,27 +152,9 @@ export function initializeSocket() {
 	// When the host kick the user from the lobby
 	socket.on("you_were_kicked", (args: any) => {
 		console.log("-> you_were_kicked", args);
-
-		// Empties the lobbyStore
-		lobbyStore.set({
-			code: "0000",
-			host: false,
-			players: []
-		});
-
 		goto(base + "/home");
 	});
 
-
-	// Starting emits when a user joins the lobby
-
-	// Sending an event to let know the lobby that the user just joined
-	console.log("<- join_lobby:", get(lobbyStore).code);
-	socket.emit("join_lobby", get(lobbyStore).code);
-
-	// Getting all info on the lobby
-	console.log("<- get_lobby_info:", get(lobbyStore).code);
-	socket.emit("get_lobby_info", get(lobbyStore).code);
 
 }
 
@@ -165,14 +165,6 @@ export function exitLobby() {
 	// Sending an event to let know the that the user just left the lobby
 	console.log("<- exit_lobby:", get(lobbyStore).code);
 	get(socketStore).emit("exit_lobby", get(lobbyStore).code);
-
-	// Empty the lobby store
-	lobbyStore.set({
-		code: "0000",
-		host: false,
-		players: []
-	});
-
 	goto(base + "/home");
 }
 
