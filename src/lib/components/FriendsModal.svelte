@@ -70,11 +70,11 @@
      * @param key
      * @async
      */
-    async function removeRequest(index:number, key:number){
+     async function removeRequest(index: number, key: number) {
         let auxUsername:string = pendingRequests[index].username;
         pendingRequests[index].username = "Removing..."
         pendingRequests=pendingRequests;
-
+        
         if(await fetchDeleteSentFriendRequest(auxUsername)){
             pendingRequests = pendingRequests.filter(request => request.key !== key);
         }else{
@@ -128,7 +128,7 @@
     <div class="content-center text-[18px]">Saved friends</div>
     <div class="h-52 overflow-y-auto p-2">
         {#each savedFriends as friend, index (friend.key)}
-            <div animate:flip class="flex mb-2 gap-3">
+            <div class="flex mb-2 gap-3">
                 <!--on:click funtions need to be anonimus so a landa function is necesary-->
                 <button class="btn-icon-sm rounded-md font-bold variant-filled text-[15px]" on:click={() => {removeFriend(index, friend.key)}}>X</button>
                 <div class="content-center"><AvatarDisplay icon={friend.icon} width={35}/></div>
@@ -139,12 +139,12 @@
     <!--Title and vertical scroll for pending friend requests-->
     <div class="content-center text-[18px]">Pending friend requests</div>
     <div class="h-52 overflow-y-auto p-2">
-        {#each pendingRequests as request, index (request.key)}
-            <div animate:flip class="flex mb-2 gap-3">
+        {#each pendingRequests as req, index (req.key)}
+            <div class="flex mb-2 gap-3">
                 <!--on:click funtions need to be anonimus so a landa function is necesary-->
-                <button class="btn-icon-sm rounded-md font-bold variant-filled text-[15px]" on:click={() => {removeRequest(index, request.key)}}>X</button>
-                <div class="content-center"><AvatarDisplay icon={request.icon} width={35}/></div>
-                <div class="content-center text-[22px]">{request.username}</div>
+                <button class="btn-icon-sm rounded-md font-bold variant-filled text-[15px]" on:click={() => {removeRequest(index, req.key)}}>X</button>
+                <div class="content-center"><AvatarDisplay icon={req.icon} width={35}/></div>
+                <div class="content-center text-[22px]">{req.username}</div>
             </div>
         {/each}
     </div>

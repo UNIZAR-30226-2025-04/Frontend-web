@@ -17,15 +17,19 @@
 	storePopup.set({ computePosition, autoUpdate, flip, shift, offset, arrow });
 
 	// Modal signleton setup, once per proyect
-	import { initializeStores, Modal } from '@skeletonlabs/skeleton';
+	import { initializeStores, Modal, Drawer, getDrawerStore } from '@skeletonlabs/skeleton';
 	import JoinLobbyCodeModal from '$lib/components/JoinLobbyCodeModal.svelte';
     import FriendsModal from '$lib/components/FriendsModal.svelte';
     import InboxModal from '$lib/components/InboxModal.svelte';
   	import InformationChangeFormModal from '$lib/components/InformationChangeFormModal.svelte';
 	import MatchMakingModal from '$lib/components/MatchMakingModal.svelte';
 	import ShareModal from '$lib/components/ShareModal.svelte';
+    import ChatDrawer from '$lib/components/ChatDrawer.svelte';
 	
+	// For all singletons
 	initializeStores();
+
+	const drawerStore = getDrawerStore();
 
   	const modalRegistry: Record<string, ModalComponent> = {
 		infoChangeModal: { ref: InformationChangeFormModal },
@@ -40,6 +44,13 @@
   
 </script>
 
+<Drawer>
+	{#if $drawerStore.id === "chat" }
+		<ChatDrawer/>
+	{:else}
+		<h1>ERROR!</h1>
+	{/if}
+</Drawer>
 <Modal components={modalRegistry}/>
 <slot />
 

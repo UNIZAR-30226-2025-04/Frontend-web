@@ -26,10 +26,13 @@ export async function createLobbyFetch(): Promise<boolean> {
 
         const data = await response.json();
         const lobbyCode = data["lobby_id"];
-        lobbyStore.update(() => ({
+
+        lobbyStore.set({
             code: lobbyCode,
-            host: true
-        }));
+            host: true,
+            players:[]
+        });
+        
         console.log("API response (create a lobby):", data);
         return await joinLobbyFetch(lobbyCode);
     } catch (err: any) {
@@ -56,6 +59,12 @@ export async function joinLobbyFetch(lobbyCode: string): Promise<boolean> {
         if (!response.ok) {
             throw new Error("Error inserting the user into the lobby");
         }
+
+        lobbyStore.update(() => ({
+            code: lobbyCode,
+            host: false,
+            players:[]
+        }));
 
         const data = await response.json();
         console.log("API response (insert the user into the lobby):", data);
@@ -86,6 +95,12 @@ export async function fetchExitLobby() {
         if (!response.ok) {
             throw new Error("Error leaving the lobby");
         }
+
+        lobbyStore.update(() => ({
+            code: "0000",
+            host: false,
+            players:[]
+        }));
 
         const data = await response.json();
         console.log("API response (leave the lobby):", data);

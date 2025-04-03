@@ -1,8 +1,10 @@
 <script lang="ts">
   import { getModalStore, type ModalComponent, type ModalSettings } from '@skeletonlabs/skeleton';
-  import { userDataStore } from '$lib/stores';
+  import { lobbyStore, userDataStore } from '$lib/stores';
   import { base } from '$app/paths';
   import { goto } from '$app/navigation';
+    import { onMount } from 'svelte';
+    import type { Lobby } from '$lib/interfaces';
 
   const modalStore = getModalStore();
   
@@ -46,6 +48,17 @@
   function clickOnFriends(){
     modalStore.trigger(modalFriends);
   }
+
+  onMount(() => {
+    // We reset the lobby store in case on forcefull exit
+    // May change later to a "is user in lobby" enpoint fetch
+    const defaultLobby:Lobby = {
+      code: "0000",
+      host:false,
+      players:[]
+    }
+    lobbyStore.set(defaultLobby);
+  });
 
 </script>
 

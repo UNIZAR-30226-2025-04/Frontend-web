@@ -4,13 +4,16 @@
 	import { userDataStore } from '$lib/stores';
     import { onMount } from 'svelte';
     import { loginFetch } from '$lib/fetch/loginFetch';
+    import { getDrawerStore, type DrawerSettings } from '@skeletonlabs/skeleton';
 
 	onMount(async () => {
 		// If user is cached and wants to be remembered we log in and get info
 		if( $userDataStore.token !== "" && $userDataStore.remember === true){
 			try{
 				await loginFetch($userDataStore.email,$userDataStore.password,true);
-				goto(base+"/home");
+				// Dev purposes
+				//goto(base+"/home");
+				goto(base + "/game");
 			}catch(err:any){
 				console.log(err.message);
 				// If it fails we don't try again
@@ -47,7 +50,7 @@
   
 	  requestAnimationFrame(scrollAnimation);
 	}
-  </script>
+</script>
 
 
 <!-- Game logo -->
@@ -63,9 +66,10 @@
 <a href="{base}/login" class="btn variant-filled p-[1.5vmin]" style="margin-top: 2%; font-size: max(2vmin,15px);">
 	<span>Login page</span>
 </a>
-<a href="{base}/home" class="btn variant-filled p-[1.5vmin]" style="margin-top: 2%; font-size: max(2vmin,15px);">
+<a href="{base}/home" class="btn variant-filled p-[1.5vmin] w-" style="margin-top: 2%; font-size: max(2vmin,15px);">
 	<span>Home</span>
 </a>
+
 <!-- Scroll how to play	-->
 <button class='howToPlay' style="margin-top: 6%; font-size: max(1.5vmin,12px);" on:click={scrollToBottom}>
 	<p>How to play</p>
