@@ -102,3 +102,21 @@ export interface ChatBuble{
     timestamp: string,
     message: string,
 }
+
+
+// GAME
+
+// Suit of a card
+export type Suit = {
+    name:string,
+    color:number,
+    image:string
+}
+
+// Normal playing card
+export type Card = {
+    rank: string,
+    suit: string,
+    faceUp: boolean,
+    overlay: number
+}
