@@ -1,4 +1,4 @@
-import type { Suit } from "./interfaces";
+import type { Overlay, Suit } from "./interfaces";
 
 // Names and links of all the possible suits of cards
 export const suitDirectory:Suit[] = [
@@ -12,4 +12,9 @@ export const suitDirectory:Suit[] = [
 export const suitColorDirectory:string[] = [
     "text-red-500",
     "text-black"
+]
+
+export const overlayDirectory:Overlay[] = [
+    {name:"None",image:"",tooltip:""},
+    {name:"Glass",image:"cards/overlays/glassDemo3.png",tooltip:"This is a tooltip for the glass overlay!"}
 ]

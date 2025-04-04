@@ -120,3 +120,10 @@ export type Card = {
     faceUp: boolean,
     overlay: number
 }
+
+// Overlay for cards
+export type Overlay = {
+    name:string,
+    image:string,
+    tooltip:string,
+}

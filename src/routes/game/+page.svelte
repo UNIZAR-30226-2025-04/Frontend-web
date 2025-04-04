@@ -6,9 +6,9 @@
     rank:"A",
     suit:"h",
     faceUp: true,
-    overlay:0
+    overlay:1
   }
 
 </script>
-
-<GameCard width="w-[200px]" card={card}/>
+<div class="mt-[400px]"></div>
+<GameCard width="w-[100px]" card={card}/>

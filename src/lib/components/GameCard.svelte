@@ -1,45 +1,78 @@
 <script lang="ts">
-    import { suitColorDirectory, suitDirectory } from "$lib/cardDirectory";
-    import type { Card, Suit } from "$lib/interfaces";
+	import {
+		overlayDirectory,
+		suitColorDirectory,
+		suitDirectory,
+	} from "$lib/cardDirectory";
+	import type { Card, Overlay, Suit } from "$lib/interfaces";
+    import { popup, type PopupSettings } from "@skeletonlabs/skeleton";
 
-	export let card:Card;
+	export let card: Card;
 	export let width: string = "w-full";
 	export let ratio: number = 0.714285;
-	let suitColor:string;
-	let suitImage:string;
-	let alt:string;
+	let suitColor: string;
+	let suitImage: string;
+	let altSuit: string;
+	let overlay: Overlay;
 
 	// If suits exist we extract the color and image
-	let s:Suit|undefined = suitDirectory.find((s:Suit) => s.name === card.suit);
-	if(s !== undefined){
+	let s: Suit | undefined = suitDirectory.find(
+		(s: Suit) => s.name === card.suit,
+	);
+	if (s !== undefined) {
 		suitColor = suitColorDirectory[s.color];
 		suitImage = s.image;
-		alt = card.rank+s.name;
-	}else{
+		altSuit = card.rank + s.name;
+	} else {
 		suitColor = suitColorDirectory[0];
 		suitImage = "icon/missing.png";
-		alt="Default image";
+		altSuit = "Default image";
 	}
 
+	if (card.overlay < 0 || card.overlay >= overlayDirectory.length) {
+		overlay = overlayDirectory[0];
+	} else {
+		overlay = overlayDirectory[card.overlay];
+	}
+
+	const popupHover: PopupSettings = {
+		event: 'hover',
+		target: 'popupHover',
+		placement: 'top'
+	};
 </script>
 
+<div class="card p-4 variant-filled-secondary" data-popup="popupHover">
+	<p>{overlay.name}: {overlay.tooltip}</p>
+	<div class="arrow variant-filled-secondary" />
+</div>
+
 <div
-	class="{width} bg-white rounded-[5.46875%] grid grid-cols-[1fr_4fr_1fr] place-items-center"
+	class="{width} min-w-[70px] bg-white rounded-[5.46875%] relative z-[1]"
 	style="aspect-ratio: {ratio};"
 >
-	<div class="mt-[30%] h-full text-[150%]">
-		<div class="font-bold {suitColor}">
-			{card.rank}
-		</div>
-		<img src={suitImage} alt={alt} class="w-[70%] ml-[15%]"/>
-	</div>
+	{#if card.overlay > 0}
+		<img
+			src={overlay.image}
+			alt={overlay.name}
+			class="absolute w-full h-full object-fill top-0 z-[3] rounded-[5.46875%] opacity-50"
+			use:popup={popupHover}
+		/>
+	{/if}
 
-	<img src="icons/pxArt.png" alt="a" class="w-full"/>
-
-	<div class="pt-[30%] h-full transform rotate-180 text-[150%]">
-		<div class="font-bold {suitColor}">
-			{card.rank}
+	<div class="w-full h-full grid grid-cols-[15%_70%_15%] place-items-center">
+		<div class="mt-[30%] h-full w-full">
+			<div class="font-bold {suitColor} text-[150%]">
+				{card.rank}
+			</div>
 		</div>
-		<img src={suitImage} alt={alt} class="w-[70%] ml-[15%]"/>
+
+		<img src={suitImage} alt={altSuit} class="w-full"/>
+
+		<div class="pt-[30%] h-full w-full transform rotate-180">
+			<div class="font-bold {suitColor} text-[150%]">
+				{card.rank}
+			</div>
+		</div>
 	</div>
 </div>
