@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { boucherDirectory } from "$lib/cardDirectory";
+    import { boucherDirectory, errorBoucher } from "$lib/cardDirectory";
     import type { Boucher } from "$lib/interfaces";
     import { popup, type PopupSettings } from "@skeletonlabs/skeleton";
 
@@ -11,7 +11,7 @@
     let salt:number = Math.floor(Math.random() * (100000));
 
     if (boucherId < 0 || boucherId >= boucherDirectory.length) {
-        boucher = boucherDirectory[0];
+        boucher = errorBoucher;
     } else {
         boucher = boucherDirectory[boucherId];
     }
@@ -26,9 +26,8 @@
 
 <div class="{width} min-w-[70px] relative">
 
-    <div class="card p-4 variant-filled-tertiary w-[200%]" data-popup={boucher.name+salt}>
+    <div class="card p-4 variant-filled-surface w-[200%] border-2 " data-popup={boucher.name+salt}>
         <p>{boucher.name}: {boucher.tooltip}</p>
-        <div class="arrow variant-filled-tertiary" />
     </div>
 
     <img
