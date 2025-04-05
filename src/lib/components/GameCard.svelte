@@ -14,6 +14,8 @@
 	let suitImage: string;
 	let altSuit: string;
 	let overlay: Overlay;
+	// Necesary for avoiding animation errors
+    let salt:number = Math.floor(Math.random() * (100000));
 
 	// If suits exist we extract the color and image
 	let s: Suit | undefined = suitDirectory.find(
@@ -25,7 +27,7 @@
 		altSuit = card.rank + s.name;
 	} else {
 		suitColor = suitColorDirectory[0];
-		suitImage = "icon/missing.png";
+		suitImage = "icons/missing.png";
 		altSuit = "Default image";
 	}
 
@@ -37,42 +39,51 @@
 
 	const popupHover: PopupSettings = {
 		event: 'hover',
-		target: 'popupHover',
+		target: overlay.name+salt,
 		placement: 'top'
 	};
 </script>
-
-<div class="card p-4 variant-filled-secondary" data-popup="popupHover">
-	<p>{overlay.name}: {overlay.tooltip}</p>
-	<div class="arrow variant-filled-secondary" />
-</div>
 
 <div
 	class="{width} min-w-[70px] bg-white rounded-[5.46875%] relative z-[1]"
 	style="aspect-ratio: {ratio};"
 >
-	{#if card.overlay > 0}
+	{#if card.faceUp}
+		<div class="card p-4 variant-filled-tertiary w-[200%]" data-popup={overlay.name+salt}>
+			<p>{overlay.name}: {overlay.tooltip}</p>
+			<div class="arrow variant-filled-tertiary" />
+		</div>
+
+		{#if card.overlay > 0}
+			<img
+				src={overlay.image}
+				alt={overlay.name}
+				class="absolute w-full h-full object-fill top-0 z-[3] rounded-[5.46875%] opacity-50"
+				use:popup={popupHover}
+			/>
+		{/if}
+
+		<div class="w-full h-full grid grid-cols-[15%_70%_15%] place-items-center">
+			<div class="mt-[30%] h-full w-full">
+				<div class="font-bold {suitColor} text-[150%]">
+					{card.rank}
+				</div>
+			</div>
+
+			<img src={suitImage} alt={altSuit} class="w-full"/>
+
+			<div class="pt-[30%] h-full w-full transform rotate-180">
+				<div class="font-bold {suitColor} text-[150%]">
+					{card.rank}
+				</div>
+			</div>
+		</div>
+	{:else}
 		<img
-			src={overlay.image}
-			alt={overlay.name}
-			class="absolute w-full h-full object-fill top-0 z-[3] rounded-[5.46875%] opacity-50"
-			use:popup={popupHover}
+			src="cards/Blue_Deck.png"
+			alt="Face down card"
+			class="w-full h-full object-fill rounded-[5.46875%]"
+			style="aspect-ratio: {ratio};"
 		/>
 	{/if}
-
-	<div class="w-full h-full grid grid-cols-[15%_70%_15%] place-items-center">
-		<div class="mt-[30%] h-full w-full">
-			<div class="font-bold {suitColor} text-[150%]">
-				{card.rank}
-			</div>
-		</div>
-
-		<img src={suitImage} alt={altSuit} class="w-full"/>
-
-		<div class="pt-[30%] h-full w-full transform rotate-180">
-			<div class="font-bold {suitColor} text-[150%]">
-				{card.rank}
-			</div>
-		</div>
-	</div>
 </div>

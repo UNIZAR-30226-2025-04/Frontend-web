@@ -127,3 +127,21 @@ export type Overlay = {
     image:string,
     tooltip:string,
 }
+
+export type Joker = {
+    name:string,
+    image:string,
+    tooltip:string,
+}
+
+export type JokerEdition = {
+    name:string,
+    image:string,
+    tooltip:string
+}
+
+export type Boucher = {
+    name:string,
+    image:string,
+    tooltip:string,
+}
