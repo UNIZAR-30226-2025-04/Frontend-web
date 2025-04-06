@@ -1,0 +1,11 @@
+// vite.config.ts
+import { purgeCss } from "file:///home/victor/c++/Frontend-web/node_modules/vite-plugin-tailwind-purgecss/dist/index.js";
+import { sveltekit } from "file:///home/victor/c++/Frontend-web/node_modules/@sveltejs/kit/src/exports/vite/index.js";
+import { defineConfig } from "file:///home/victor/c++/Frontend-web/node_modules/vite/dist/node/index.js";
+var vite_config_default = defineConfig({
+  plugins: [sveltekit(), purgeCss()]
+});
+export {
+  vite_config_default as default
+};
+//# sourceMappingURL=data:application/json;base64,ewogICJ2ZXJzaW9uIjogMywKICAic291cmNlcyI6IFsidml0ZS5jb25maWcudHMiXSwKICAic291cmNlc0NvbnRlbnQiOiBbImNvbnN0IF9fdml0ZV9pbmplY3RlZF9vcmlnaW5hbF9kaXJuYW1lID0gXCIvaG9tZS92aWN0b3IvYysrL0Zyb250ZW5kLXdlYlwiO2NvbnN0IF9fdml0ZV9pbmplY3RlZF9vcmlnaW5hbF9maWxlbmFtZSA9IFwiL2hvbWUvdmljdG9yL2MrKy9Gcm9udGVuZC13ZWIvdml0ZS5jb25maWcudHNcIjtjb25zdCBfX3ZpdGVfaW5qZWN0ZWRfb3JpZ2luYWxfaW1wb3J0X21ldGFfdXJsID0gXCJmaWxlOi8vL2hvbWUvdmljdG9yL2MrKy9Gcm9udGVuZC13ZWIvdml0ZS5jb25maWcudHNcIjtpbXBvcnQgeyBwdXJnZUNzcyB9IGZyb20gJ3ZpdGUtcGx1Z2luLXRhaWx3aW5kLXB1cmdlY3NzJztcbmltcG9ydCB7IHN2ZWx0ZWtpdCB9IGZyb20gJ0BzdmVsdGVqcy9raXQvdml0ZSc7XG5pbXBvcnQgeyBkZWZpbmVDb25maWcgfSBmcm9tICd2aXRlJztcblxuZXhwb3J0IGRlZmF1bHQgZGVmaW5lQ29uZmlnKHtcblx0cGx1Z2luczogW3N2ZWx0ZWtpdCgpLCBwdXJnZUNzcygpXVxufSk7Il0sCiAgIm1hcHBpbmdzIjogIjtBQUF5USxTQUFTLGdCQUFnQjtBQUNsUyxTQUFTLGlCQUFpQjtBQUMxQixTQUFTLG9CQUFvQjtBQUU3QixJQUFPLHNCQUFRLGFBQWE7QUFBQSxFQUMzQixTQUFTLENBQUMsVUFBVSxHQUFHLFNBQVMsQ0FBQztBQUNsQyxDQUFDOyIsCiAgIm5hbWVzIjogW10KfQo=

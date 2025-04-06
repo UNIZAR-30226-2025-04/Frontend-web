@@ -7,13 +7,12 @@
     import { getDrawerStore, type DrawerSettings } from '@skeletonlabs/skeleton';
 
 	onMount(async () => {
+		/*
 		// If user is cached and wants to be remembered we log in and get info
 		if( $userDataStore.token !== "" && $userDataStore.remember === true){
 			try{
 				await loginFetch($userDataStore.email,$userDataStore.password,true);
-				// Dev purposes
-				//goto(base+"/home");
-				goto(base + "/game");
+				goto(base+"/home");
 			}catch(err:any){
 				console.log(err.message);
 				// If it fails we don't try again
@@ -23,6 +22,8 @@
 				}));
 			}
 		}
+		*/
+		goto(base + "/game");
 	});
 		
 

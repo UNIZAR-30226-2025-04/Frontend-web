@@ -5,17 +5,25 @@
 		suitDirectory,
 	} from "$lib/cardDirectory";
 	import type { Card, Overlay, Suit } from "$lib/interfaces";
-    import { popup, type PopupSettings } from "@skeletonlabs/skeleton";
+	import { popup, type PopupSettings } from "@skeletonlabs/skeleton";
+	import { onDestroy, onMount } from "svelte";
+	import { cardAnimation } from "$lib/components/animator";
 
 	export let card: Card;
 	export let width: string = "w-full";
 	export let ratio: number = 0.714285;
+	export let animateCard: boolean = false;
+
 	let suitColor: string;
 	let suitImage: string;
 	let altSuit: string;
 	let overlay: Overlay;
 	// Necesary for avoiding animation errors
-    let salt:number = Math.floor(Math.random() * (100000));
+	let salt: number = Math.floor(Math.random() * 100000);
+	// Animation variables
+	let stopAnimation: () => void;
+	let cardImage: HTMLElement;
+	let overlayImage: HTMLElement;
 
 	// If suits exist we extract the color and image
 	let s: Suit | undefined = suitDirectory.find(
@@ -37,40 +45,73 @@
 		overlay = overlayDirectory[card.overlay];
 	}
 
-	const popupHover: PopupSettings = {
-		event: 'hover',
-		target: overlay.name+salt,
-		placement: 'top'
+	let popupHover: PopupSettings = {
+		event: "hover",
+		target: "",
+		placement: "top",
 	};
+
+	if (card.overlay > 0) {
+		popupHover = {
+			event: "hover",
+			target: overlay.name + salt,
+			placement: "top",
+		};
+	}
+
+	onMount(() => {
+		if (animateCard) {
+			stopAnimation = cardAnimation({
+				elem1: cardImage,
+				elem2: overlayImage,
+			});
+		}
+	});
+
+	onDestroy(() => {
+		if (animateCard && stopAnimation) {
+			stopAnimation();
+		}
+	});
+
+	function onClick() {
+		console.log(card);
+	}
 </script>
 
-<div
-	class="{width} min-w-[70px] bg-white rounded-[5.46875%] relative z-[1]"
-	style="aspect-ratio: {ratio};"
->
+<div class="{width} min-w-[70px] relative z-[1]" style="aspect-ratio: {ratio};">
 	{#if card.faceUp}
-		<div class="card p-4 variant-filled-tertiary w-[200%]" data-popup={overlay.name+salt}>
+		<div
+			class="card p-4 variant-filled-surface border-2 w-[200%]"
+			data-popup={overlay.name + salt}
+		>
 			<p>{overlay.name}: {overlay.tooltip}</p>
-			<div class="arrow variant-filled-tertiary" />
 		</div>
 
 		{#if card.overlay > 0}
 			<img
+				bind:this={overlayImage}
 				src={overlay.image}
 				alt={overlay.name}
 				class="absolute w-full h-full object-fill top-0 z-[3] rounded-[5.46875%] opacity-50"
+				style="transform-style: preserve-3d;"
 				use:popup={popupHover}
 			/>
 		{/if}
 
-		<div class="w-full h-full grid grid-cols-[15%_70%_15%] place-items-center">
+		<div
+			bind:this={cardImage}
+			class="w-full h-full bg-white rounded-[5.46875%]
+			grid grid-cols-[15%_70%_15%] items-center
+			shadow-[5px_15px_10px_rgba(0,0,0,0.5)]"
+		>
 			<div class="mt-[30%] h-full w-full">
 				<div class="font-bold {suitColor} text-[150%]">
 					{card.rank}
 				</div>
 			</div>
 
-			<img src={suitImage} alt={altSuit} class="w-full"/>
+			<img src={suitImage} alt={altSuit} class="w-full" />
 
 			<div class="pt-[30%] h-full w-full transform rotate-180">
 				<div class="font-bold {suitColor} text-[150%]">
@@ -80,10 +121,11 @@
 		</div>
 	{:else}
 		<img
+			bind:this={cardImage}
 			src="cards/Blue_Deck.png"
 			alt="Face down card"
-			class="w-full h-full object-fill rounded-[5.46875%]"
-			style="aspect-ratio: {ratio};"
+			class="w-full h-full object-fill rounded-[5.46875%] shadow-[5px_15px_10px_rgba(0,0,0,0.5)]"
+			style="aspect-ratio: {ratio}; transform-style: preserve-3d;"
 		/>
 	{/if}
 </div>
