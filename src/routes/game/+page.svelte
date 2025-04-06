@@ -10,21 +10,25 @@
 	import GameCard from "$lib/components/GameCard.svelte";
 	import JokerCard from "$lib/components/JokerCard.svelte";
 	import type { Card } from "$lib/interfaces";
+    import { flip } from "svelte/animate";
+    import { quintOut } from "svelte/easing";
+    import { fade, fly, slide } from "svelte/transition";
 
 	type CardItem = {
-		key: number;
-		card: Card;
+		key: number,
+		card: Card,
+		picked: boolean,
 	};
 
 	type JokerItem = {
-		key: number;
-		id: number;
-		edition: number;
+		key: number,
+		id: number,
+		edition: number
 	};
 
 	type BoucherItem = {
-		key: number;
-		id: number;
+		key: number,
+		id: number
 	};
 
 	let nextKey: number = 0;
@@ -34,6 +38,8 @@
 	let jokers: JokerItem[] = [];
 	let bouchers: BoucherItem[] = [];
 
+	let pickedJoker: number = -1;
+
 	let dummyCard:Card = {
 		rank:"A",
 		suit:"h",
@@ -41,12 +47,12 @@
 		faceUp:false
 	}
 
-	for (let i = 0; i < 5; i++) {
-		playedCards.push({ key: getNextKey(), card: generateCard(true, true) });
+	for (let i = 0; i < 0; i++) {
+		playedCards.push({ key: getNextKey(), card: generateCard(true, true), picked:false });
 	}
 
 	for (let i = 0; i < 8; i++) {
-		handCards.push({ key: getNextKey(), card: generateCard(true, true) });
+		handCards.push({ key: getNextKey(), card: generateCard(true, true), picked:false });
 	}
 
 	for (let j = 0; j < 5; j++) {
@@ -104,6 +110,114 @@
 		nextKey++;
 		return nextKey;
 	}
+
+
+	function onClickHand(index:number){
+		pickedJoker = -1;
+		handCards[index].picked = !handCards[index].picked;
+		handCards = handCards;
+	}
+
+	function onClickJoker(index:number){
+		for(let i=0; i<handCards.length; i++){
+			handCards[i].picked = false;
+		}
+		if(index !== pickedJoker){
+			let nPicked:number = 0;
+			for(let i=0; i<handCards.length; i++){
+				if(handCards[i].picked){
+					nPicked++;
+				}
+			}
+			if(nPicked === 0){
+				pickedJoker = index;
+			}
+		}else{
+			pickedJoker = -1;
+		}
+	}
+
+	function onPlay(){
+		if(pickedJoker === -1){
+			let nPicked:number = 0;
+			for(let i=0; i<handCards.length; i++){
+				if(handCards[i].picked){
+					nPicked++;
+				}
+			}
+			if(nPicked>0 && nPicked<6){
+				for(let i=0; i<handCards.length; i++){
+					if(handCards[i].picked){
+						playedCards.push({key:getNextKey(),card:handCards[i].card,picked:false});
+					}
+				}
+				handCards = handCards.filter(cardItem => !cardItem.picked)
+				playedCards = playedCards;
+			}
+		}
+	}
+
+	function onArrowLeft(){
+		if(pickedJoker === -1){
+			let nPicked:number = 0;
+			let index:number = 0;
+			for(let i=0; i<handCards.length; i++){
+				if(handCards[i].picked){
+					nPicked++;
+					index=i;
+				}
+			}
+			if(nPicked === 1 && index > 0){
+				let aux:CardItem = handCards[index-1];
+				handCards[index-1] = handCards[index];
+				handCards[index] = aux;
+			}
+			handCards = handCards;
+		}else if(pickedJoker>0){
+			let aux:JokerItem = jokers[pickedJoker-1];
+			jokers[pickedJoker-1] = jokers[pickedJoker];
+			jokers[pickedJoker] = aux;
+			pickedJoker--;
+		}
+	}
+
+	function onArrowRight(){
+		if(pickedJoker === -1){
+			let nPicked:number = 0;
+			let index:number = handCards.length;
+			for(let i=0; i<handCards.length; i++){
+				if(handCards[i].picked){
+					nPicked++;
+					index=i;
+				}
+			}
+			if(nPicked === 1 && index < handCards.length-1){
+				let aux:CardItem = handCards[index+1];
+				handCards[index+1] = handCards[index];
+				handCards[index] = aux;
+			}
+			handCards = handCards;
+		}else if(pickedJoker < jokers.length-1){
+			let aux:JokerItem = jokers[pickedJoker+1];
+			jokers[pickedJoker+1] = jokers[pickedJoker];
+			jokers[pickedJoker] = aux;
+			pickedJoker++;
+		}
+	}
+
+	function onDiscard(){
+		handCards = handCards.filter(cardItem => !cardItem.picked)
+	}
+
+	function onChat(){
+		playedCards = [];
+	}
+
+	function onExit(){
+		handCards.push({ key: getNextKey(), card: generateCard(true, true), picked:false });
+		handCards = handCards
+	}
+
 </script>
 
 <!-- Main body -->
@@ -200,8 +314,13 @@
 			class="flex justify-between mt-[3%]"
 			style="width: calc(100% - 16vh);"
 		>
-			{#each jokers as joker (joker.key)}
-				<div class="w-0">
+			{#each jokers as joker, index (joker.key)}
+				<!-- svelte-ignore a11y-click-events-have-key-events -->
+				<!-- svelte-ignore a11y-no-static-element-interactions -->
+				<div 
+					animate:flip={{duration:100}}
+					class={`w-1 transition-all duration-[100ms] ease-in-out ${index === pickedJoker ? 'mt-[5%]' : ''}`}
+					on:click={() => onClickJoker(index)}>
 					<div class="absolute">
 						<JokerCard
 							width="w-[16vh]"
@@ -213,12 +332,14 @@
 				</div>
 			{/each}
 		</div>
-		<div class="text-left text-2xl">4/5</div>
+		<div class="text-left text-2xl">{jokers.length}/5</div>
 
 		<!--Played cards-->
-		<div class="flex justify-between" style="width: calc(100% - 14vh);">
+		<div class="flex justify-between ml-[10%] mr-[10%]" style="width: calc(80% - 14vh);">
 			{#each playedCards as card (card.key)}
-				<div class="w-0">
+				<div 
+				transition:fly={{ y: 100, duration: 500 }}
+				class="w-1">
 					<div class="absolute">
 						<GameCard
 							width="w-[14vh]"
@@ -232,8 +353,14 @@
 
 		<!--Hand-->
 		<div class="flex justify-between" style="width: calc(100% - 14vh);">
-			{#each handCards as card (card.key)}
-				<div class="w-0">
+			{#each handCards as card, index (card.key)}
+				<!-- svelte-ignore a11y-click-events-have-key-events -->
+				<!-- svelte-ignore a11y-no-static-element-interactions -->
+				<div
+					animate:flip={{duration:100}}
+					class={`w-1 transition-all duration-[100ms] ease-in-out ${card.picked ? 'mt-[-5%]' : ''}`}
+					on:click={() => onClickHand(index)}
+				>
 					<div class="absolute">
 						<GameCard
 							width="w-[14vh]"
@@ -242,25 +369,29 @@
 						/>
 					</div>
 				</div>
+			
 			{/each}
 		</div>
+		
 
 		<!--Action buttons-->
 		<div class="flex justify-center gap-[4%]">
-			<button class="btn variant-filled-tertiary w-[35%] text-5xl"
+			<button class="btn variant-filled-tertiary w-[35%] text-5xl" on:click={onPlay}
 				>Play
 			</button>
 			<div class="flex w-[15%]">
 				<button
 					class="btn variant-filled-surface rounded-l-md rounded-r-none w-full text-5xl"
+					on:click={onArrowLeft}
 					>&lt;
 				</button>
 				<button
 					class="btn variant-filled-surface rounded-r-md rounded-l-none w-full text-5xl"
+					on:click={onArrowRight}
 					>&gt;
 				</button>
 			</div>
-			<button class="btn variant-filled-error w-[35%] text-5xl"
+			<button class="btn variant-filled-error w-[35%] text-5xl" on:click={onDiscard}
 				>Discard
 			</button>
 		</div>
@@ -272,10 +403,10 @@
 		<div>
 			<!--Chat and leave buttons-->
 			<div class="flex justify-end gap-4">
-				<button class="card w-[25%] aspect-square p-4">
+				<button class="card w-[25%] aspect-square p-4" on:click={onChat}>
 					<img src="icons/chat2.png" alt="chat" class="w-full" />
 				</button>
-				<button class="card w-[25%] aspect-square text-4xl">
+				<button class="card w-[25%] aspect-square text-4xl" on:click={onExit}>
 					X
 				</button>
 			</div>
@@ -296,7 +427,6 @@
 				<div class="absolute">
 					<GameCard width="w-[14vh]" card={dummyCard}/>
 				</div>
-				
 			</div>
 			<div class="w-full text-right text-2xl mt-[10%]">
 				41/52

@@ -29,7 +29,10 @@ export const errorJoker:Joker = {
 }
 
 export const jokerDirectory:Joker[] = [
-    {name:"Average size Michael",image:"cards/jokers/AVERAGE_SIZE_MICHAEL.png",tooltip:"+15 mult, 1/15 chance of being sold each round"}
+    {name:"Average size Michael",image:"cards/jokers/AVERAGE_SIZE_MICHAEL.png",tooltip:"+15 mult, 1/15 chance of being sold each round"},
+    {name:"Wheel of fortune", image:"cards/bouchers/wheel_of_fortune.png",tooltip:"It's just wheel of fortune, it looses money"},
+    {name:"Glass",image:"cards/overlays/glassDemo3.png",tooltip:"This is a tooltip for the glass overlay!"}
+
 ]
 
 export const jokerEditionsDirectory:JokerEdition[] = [
