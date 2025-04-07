@@ -56,11 +56,20 @@
 
     /**
      * Accepts the invitation on the list with the index and key. If success auto joins the lobby
+     * and removes the invitation from the inbox
      * @param index
      * @param key
      */
     async function acceptInvitation(index:number, key:number) {
-        if (await joinLobbyFetch(invitations[index].code)) {
+        const lobbyCode = invitations[index].code;
+        const senderUsername = invitations[index].username;
+        
+        // First join the lobby
+        if (await joinLobbyFetch(lobbyCode)) {
+            // After successful join, delete the invitation
+            await fetchDeleteGameInvitation(lobbyCode, senderUsername);
+            
+            // Navigate to lobby and close the modal
             goto(base+"/lobby");
             parent.onClose();
         }

@@ -305,3 +305,32 @@ export async function fetchLobbyInfo(lobbyId: string): Promise<any> {
         return null;
     }
 }
+
+/**
+ * Deletes a lobby invitation after accepting or rejecting it
+ * @param lobbyId ID of the lobby
+ * @param senderUsername Username of the user who sent the invitation
+ * @returns True if successful, false otherwise
+ */
+export async function deleteReceivedInvitation(lobbyId: string, senderUsername: string): Promise<boolean> {
+    try {
+        const response = await fetch(`${apiBase}/auth/received_lobby_invitation/${lobbyId}/${senderUsername}`, {
+            method: 'DELETE',
+            headers: {
+                'accept': 'application/json',
+                'Authorization': 'Bearer ' + get(userDataStore).token
+            }
+        });
+
+        if (!response.ok) {
+            console.error("Error deleting invitation:", await response.text());
+            return false;
+        }
+
+        console.log("Invitation successfully deleted");
+        return true;
+    } catch (error) {
+        console.error("Exception deleting invitation:", error);
+        return false;
+    }
+}
