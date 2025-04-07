@@ -225,12 +225,12 @@
 	<!-- Info column -->
 	<div class="h-[100vh] ml-[20%] card rounded-none text-left p-[5%]">
 		<!--Title-->
-		<div class="text-5xl h-[12%] card variant-filled-surface p-5">
+		<div class="text-5xl-r h-[12%] card variant-filled-surface p-5">
 			Round 1/10
 		</div>
 
 		<!--Bouchers label-->
-		<div class="text-2xl mt-[3%]">Active consumables</div>
+		<div class="text-2xl-r mt-[3%]">Active consumables</div>
 		<!--Bouchers-->
 		<div
 			class="flex h-[20%] mt-[3%] justify-between"
@@ -247,18 +247,18 @@
 
 		<!--Score to beat-->
 		<div
-			class="card variant-filled-surface w-full h-[8%] mt-[3%] text-center p-3 grid grid-cols-[30%_70%] gap-2"
+			class="card variant-filled-surface w-full h-[8%] mt-[3%] text-center grid grid-cols-[30%_70%] gap-2"
 		>
-			<div class="h-full text-3xl content-center">Round score</div>
-			<div class="card text-5xl content-center mr-[2%]">9000</div>
+			<div class="h-full text-3xl-r content-center p-3">Round score</div>
+			<div class="card h-[6vh] text-5xl-r content-center align-middle mt-[3%] mr-[5%] p-0">9000</div>
 		</div>
 
 		<!--Score-->
 		<div class="card w-full h-[15%] mt-[3%] text-center border-2 p-2">
-			<div class="h-[45%] text-4xl content-center">Full house lvl 2</div>
+			<div class="h-[45%] text-4xl-r content-center">Full house lvl 2</div>
 
 			<div
-				class="flex h-[45%] justify-between text-5xl m-3 gap-0 items-center"
+				class="flex h-[45%] justify-between text-5xl-r m-3 gap-0 items-center"
 			>
 				<div
 					class="w-[45%] h-full card text-right p-2 variant-filled-tertiary content-center"
@@ -277,30 +277,30 @@
 		<!--Info chips-->
 		<div class="h-[25%] mt-[3%] grid grid-cols-2 gap-3">
 			<div
-				class="card text-center variant-filled-surface p-3 grid grid-rows-[25%_75%]"
+				class="card text-center variant-filled-surface p-3 grid grid-rows-[25%_75%] gap-2"
 			>
-				<div class="text-2xl">Hands</div>
-				<div class="card text-5xl content-center text-tertiary-300">
+				<div class="text-2xl-r">Hands</div>
+				<div class="card text-5xl-r content-center text-tertiary-300">
 					3
 				</div>
 			</div>
 			<div
-				class="card text-center variant-filled-surface p-3 grid grid-rows-[25%_75%]"
+				class="card text-center variant-filled-surface p-3 grid grid-rows-[25%_75%] gap-2"
 			>
-				<div class="text-2xl">Discards</div>
-				<div class="card text-5xl content-center text-error-300">1</div>
+				<div class="text-2xl-r">Discards</div>
+				<div class="card text-5xl-r content-center text-error-300">1</div>
 			</div>
 			<div
-				class="card text-center variant-filled-surface p-3 grid grid-rows-[25%_75%]"
+				class="card text-center variant-filled-surface p-3 grid grid-rows-[25%_75%] gap-2"
 			>
-				<div class="text-2xl">Pot</div>
-				<div class="card text-5xl content-center">3$</div>
+				<div class="text-2xl-r">Pot</div>
+				<div class="card text-5xl-r content-center">3$</div>
 			</div>
 			<div
-				class="card text-center variant-filled-surface p-3 grid grid-rows-[25%_75%]"
+				class="card text-center variant-filled-surface p-3 grid grid-rows-[25%_75%] gap-2"
 			>
-				<div class="text-2xl">Money</div>
-				<div class="card text-5xl content-center text-warning-300">
+				<div class="text-2xl-r">Money</div>
+				<div class="card text-5xl-r content-center text-warning-300">
 					3$
 				</div>
 			</div>
@@ -332,7 +332,7 @@
 				</div>
 			{/each}
 		</div>
-		<div class="text-left text-2xl">{jokers.length}/5</div>
+		<div class="text-left text-2xl-r">{jokers.length}/5</div>
 
 		<!--Played cards-->
 		<div class="flex justify-between ml-[10%] mr-[10%]" style="width: calc(80% - 14vh);">
@@ -376,22 +376,22 @@
 
 		<!--Action buttons-->
 		<div class="flex justify-center gap-[4%]">
-			<button class="btn variant-filled-tertiary w-[35%] text-5xl" on:click={onPlay}
+			<button class="btn variant-filled-tertiary w-[35%] text-5xl-r" on:click={onPlay}
 				>Play
 			</button>
 			<div class="flex w-[15%]">
 				<button
-					class="btn variant-filled-surface rounded-l-md rounded-r-none w-full text-5xl"
+					class="btn variant-filled-surface rounded-l-md rounded-r-none w-full text-5xl-r"
 					on:click={onArrowLeft}
 					>&lt;
 				</button>
 				<button
-					class="btn variant-filled-surface rounded-r-md rounded-l-none w-full text-5xl"
+					class="btn variant-filled-surface rounded-r-md rounded-l-none w-full text-5xl-r"
 					on:click={onArrowRight}
 					>&gt;
 				</button>
 			</div>
-			<button class="btn variant-filled-error w-[35%] text-5xl" on:click={onDiscard}
+			<button class="btn variant-filled-error w-[35%] text-5xl-r" on:click={onDiscard}
 				>Discard
 			</button>
 		</div>
@@ -406,11 +406,11 @@
 				<button class="card w-[25%] aspect-square p-4" on:click={onChat}>
 					<img src="icons/chat2.png" alt="chat" class="w-full" />
 				</button>
-				<button class="card w-[25%] aspect-square text-4xl" on:click={onExit}>
+				<button class="card w-[25%] aspect-square text-4xl-r" on:click={onExit}>
 					X
 				</button>
 			</div>
-			<div class="w-full card text-5xl text-right p-4 mt-[5%]">
+			<div class="w-full card text-5xl-r text-right p-4 mt-[5%]">
 				30s
 			</div>
 		</div>
@@ -428,7 +428,7 @@
 					<GameCard width="w-[14vh]" card={dummyCard}/>
 				</div>
 			</div>
-			<div class="w-full text-right text-2xl mt-[10%]">
+			<div class="w-full text-right text-2xl-r mt-[10%]">
 				41/52
 			</div>
 		</div>
@@ -458,6 +458,26 @@
 		animation-name: textflicker;
 		animation-iteration-count: infinite;
 		animation-direction: alternate;
+	}
+
+	.text-5xl-r {
+		font-size: 4.5vh;
+		line-height: 1;
+	}
+
+	.text-4xl-r {
+		font-size: 3vh;
+		line-height: 2.5rem;
+	}
+
+	.text-3xl-r {
+		font-size: 2.5vh;
+		line-height: 1;
+	}
+
+	.text-2xl-r {
+		font-size: 2vh;
+		line-height: 2rem;
 	}
 
 	@keyframes textflicker {
