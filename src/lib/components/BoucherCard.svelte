@@ -5,10 +5,10 @@
     import { onDestroy, onMount } from "svelte";
     import { cardAnimation } from "$lib/components/animator";
 
-    export let boucherId: number;
-    export let width: string = "w-full";
-    export let ratio: number = 0.714285;
-    export let animateCard: boolean = false;
+    export let boucherId: number; // Main data to show
+    export let width: string = "w-full"; // Width of the card
+    export let ratio: number = 0.714285; // Ratio of the card
+    export let animateCard: boolean = false; // If the card is animated
 
     let boucher: Boucher;
     // Necesary for avoiding animation errors
@@ -17,11 +17,14 @@
     let stopAnimation: () => void;
     let boucherImage: HTMLImageElement;
 
+    // If boucher exists we extract the data
     if (boucherId < 0 || boucherId >= boucherDirectory.length) {
         boucher = errorBoucher;
     } else {
         boucher = boucherDirectory[boucherId];
     }
+
+    // Pop up settings
 
     const popupHover: PopupSettings = {
         event: "hover",
@@ -45,10 +48,12 @@
 
 <div class="{width} min-w-[70px] relative">
 
+    <!--Tooltip-->
     <div class="card p-4 variant-filled-surface w-[200%] border-2 " data-popup={boucher.name+salt}>
         <p>{boucher.name}: {boucher.tooltip}</p>
     </div>
 
+    <!--Boucher image-->
     <img
         bind:this={boucherImage}
         src={boucher.image}

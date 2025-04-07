@@ -5,11 +5,11 @@
     import { onDestroy, onMount } from "svelte";
     import { cardAnimation } from "$lib/components/animator";
 
-    export let jokerId: number;
-    export let editionId:number;
-    export let width: string = "w-full";
-    export let ratio: number = 0.714285;
-    export let animateCard: boolean = false;
+    export let jokerId: number; // Main data to show
+    export let editionId:number; // Edition of the joker
+    export let width: string = "w-full"; // Width of the card
+    export let ratio: number = 0.714285; // Ratio of the card
+    export let animateCard: boolean = false; // If the card is animated
 
     let joker: Joker;
     let edition: JokerEdition;
@@ -20,19 +20,22 @@
     let jokerImage: HTMLImageElement;
     let editionImage:HTMLImageElement;
 
-
+    // If joker exists we extract the data
     if (jokerId < 0 || jokerId >= jokerDirectory.length) {
         joker = errorJoker;
     } else {
         joker = jokerDirectory[jokerId];
     }
 
+    // If edition exists we extract the data
     if (editionId < 0 || editionId >= jokerEditionsDirectory.length) {
         edition = jokerEditionsDirectory[0];
         editionId = 0;
     } else {
         edition = jokerEditionsDirectory[editionId];
     }
+
+    // Pop up settings
 
     const popupHover1: PopupSettings = {
         event: "hover",
@@ -65,14 +68,17 @@
 
 <div class="{width} min-w-[70px] relative z-[1]">
 
+    <!--Normal tooltip-->
     <div class="card p-4 variant-filled-surface w-[200%] border-2" data-popup={joker.name+salt}>
         <p>{joker.name}: {joker.tooltip}</p>
     </div>
     
+    <!--With edition tooltip-->
     <div class="card p-4 variant-filled-surface w-[200%] border-2" data-popup={joker.name+edition.name+salt}>
         <p>{joker.name}: {joker.tooltip}. {edition.name}: {edition.tooltip}</p>
     </div>
 
+    <!--Edition image-->
     {#if editionId > 0}
 		<img
             bind:this={editionImage}
@@ -84,6 +90,7 @@
 		/>
 	{/if}
     
+    <!--Joker image-->
     <img
 		bind:this={jokerImage}
 		src={joker.image}

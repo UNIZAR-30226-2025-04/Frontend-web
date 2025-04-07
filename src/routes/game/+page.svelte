@@ -1,26 +1,30 @@
 <script lang="ts">
 	import {
-	    boucherDirectory,
-	    jokerDirectory,
-	    jokerEditionsDirectory,
-	    overlayDirectory,
-	    suitDirectory,
+		boucherDirectory,
+		jokerDirectory,
+		jokerEditionsDirectory,
+		overlayDirectory,
+		suitDirectory,
 	} from "$lib/cardDirectory";
 	import BoucherCard from "$lib/components/BoucherCard.svelte";
 	import GameCard from "$lib/components/GameCard.svelte";
 	import JokerCard from "$lib/components/JokerCard.svelte";
 	import { HandTypesBase, type Card, type GameState } from "$lib/interfaces";
 	import { getNextKey } from "$lib/keyGenerator";
-    import { getDrawerStore, getModalStore, type DrawerSettings, type ModalSettings } from "@skeletonlabs/skeleton";
-    import { stat } from "fs";
-    import { onDestroy, onMount } from "svelte";
+	import {
+		getDrawerStore,
+		getModalStore,
+		type DrawerSettings,
+		type ModalSettings,
+	} from "@skeletonlabs/skeleton";
+	import { onDestroy, onMount } from "svelte";
 	import { flip } from "svelte/animate";
 	import { cubicOut } from "svelte/easing";
 	import { tweened } from "svelte/motion";
 	import { fade, fly } from "svelte/transition";
 
 	// Main state variable
-	let state:GameState = {
+	let state: GameState = {
 		playedCards: [],
 		handCards: [],
 		jokers: [],
@@ -30,36 +34,40 @@
 		round: 1,
 		minScore: 100000,
 		handType: 1,
-		blueScore:0,
-		redScore:0,
-		hands:3,
-		discards:3,
-		pot:5,
-		money:10,
-		deckSize:52,
-		deckLeft:44,
-		timeLeft:30,
+		blueScore: 0,
+		redScore: 0,
+		hands: 3,
+		discards: 3,
+		pot: 5,
+		money: 10,
+		deckSize: 52,
+		deckLeft: 44,
+		timeLeft: 30,
 	};
 
 	// To know what jocker has the user clicked
 	let pickedJoker: number = -1;
 
 	// If true it disables the button controls
-	let actionBlocked:boolean = false; 
+	let actionBlocked: boolean = false;
 
 	// For the play animation
-	const playAnimSpeed:number = 750; //ms
-	const playAnimDelay:number = 200; //ms
-	let indexToPlayAnim:number = -1;
-	let scorePlayAnim:number = 0;
+	const playAnimSpeed: number = 750; //ms
+	const playAnimDelay: number = 200; //ms
+	let indexToPlayAnim: number = -1;
+	let scorePlayAnim: number = 0;
 
 	// To draw the deck
-	let dummyCard:Card = {
-		rank:"A",
-		suit:"h",
-		overlay:0,
-		faceUp:false
-	}
+	let dummyCard: Card = {
+		rank: "A",
+		suit: "h",
+		overlay: 0,
+		faceUp: false,
+	};
+
+	// Styles tag that repeat
+	const infoChip:string = "card text-center variant-filled-surface p-3 grid grid-rows-[25%_75%] gap-2";
+	const infoChipCard:string = "card text-5xl-r content-center";
 
 	// Modal and drawer variables
 
@@ -74,162 +82,208 @@
 	};
 
 	const leaveGameModal: ModalSettings = {
-		type: 'component',
-		component: 'leaveGameModal'
-	}
+		type: "component",
+		component: "leaveGameModal",
+	};
 
 	const handInfoModal: ModalSettings = {
-		type: 'component',
-		meta: {levels:state.handLevels},
-		component: 'handInfoModal'
-	}
+		type: "component",
+		meta: { levels: state.handLevels },
+		component: "handInfoModal",
+	};
 
 	// Reactivity animations
 
 	const minScoreText = tweened(state.minScore, {
 		duration: 400,
-		easing: cubicOut
+		easing: cubicOut,
 	});
 	$: minScoreText.set(state.minScore);
 
 	const blueScoreText = tweened(state.blueScore, {
 		duration: 400,
-		easing: cubicOut
+		easing: cubicOut,
 	});
 	$: blueScoreText.set(state.blueScore);
 
 	const redScoreText = tweened(state.redScore, {
 		duration: 400,
-		easing: cubicOut
+		easing: cubicOut,
 	});
 	$: redScoreText.set(state.redScore);
 
-	
-
-
-	function onClickJoker(index:number){
-		if(actionBlocked) return;
+	/**
+	 * Handles the click event on the joker card, updating the state of the hand cards.
+	 * If the action is blocked, it prevents any changes.
+	 * Resets the `picked` status of all hand cards and sets the picked joker card index.
+	 * @param index  of the joker card that was clicked.
+	 */
+	function onClickJoker(index: number) {
+		if (actionBlocked) return;
 
 		for (const card of state.handCards) card.picked = false;
 
 		if (index !== pickedJoker) {
-			const anyPicked = state.handCards.some(card => card.picked);
+			const anyPicked = state.handCards.some((card) => card.picked);
 			if (!anyPicked) pickedJoker = index;
 		} else {
 			pickedJoker = -1;
 		}
 	}
 
-	function onPlay(){
-		if(actionBlocked) return;
+	/**
+	 * Handles the play action, where the selected cards are played and added to the `playedCards` array.
+	 * - If no action is blocked and a joker card is not picked, it checks the number of selected cards.
+	 * - If the number of selected cards is between 1 and 5 (inclusive), it moves the picked cards to the played cards and updates the hand cards.
+	 * - It also triggers animations and updates the scores of the blue and red teams at random.
+	 * - Once the play is complete, it resets the state and allows further actions.
+	 */
+	function onPlay() {
+		if (actionBlocked) return;
 
 		if (pickedJoker !== -1) return;
 
-		const pickedCards = state.handCards.filter(card => card.picked);
+		const pickedCards = state.handCards.filter((card) => card.picked);
 		const count = pickedCards.length;
 
 		if (count > 0 && count < 6) {
 			const played = pickedCards.map(({ card }) => ({
 				key: getNextKey(),
 				card,
-				picked: false
+				picked: false,
 			}));
 
 			state.playedCards.push(...played);
-			state.handCards = state.handCards.filter(card => !card.picked);
+			state.handCards = state.handCards.filter((card) => !card.picked);
 			pickedJoker = -1;
 			state.playedCards = [...state.playedCards];
 			actionBlocked = true;
 
-			for(let i=0; i<state.playedCards.length; i++){
-				setTimeout(() => {
-					indexToPlayAnim = i;
-					scorePlayAnim = Math.floor(Math.random() * 12);
-					state.blueScore += Math.floor(Math.random() * 1000);
-					state.redScore += Math.floor(Math.random() * 100);
-				}, playAnimSpeed * i + playAnimDelay);
+			// Animation. TODO put real values
+
+			for (let i = 0; i < state.playedCards.length; i++) {
+				setTimeout(
+					() => {
+						indexToPlayAnim = i;
+						scorePlayAnim = Math.floor(Math.random() * 12);
+						state.blueScore += Math.floor(Math.random() * 1000);
+						state.redScore += Math.floor(Math.random() * 100);
+					},
+					playAnimSpeed * i + playAnimDelay,
+				);
 			}
 
 			setTimeout(() => {
-					indexToPlayAnim = -1;
-					actionBlocked = false;
-					state.playedCards = [];
-					state.minScore -= 10000;
-				}, playAnimSpeed * state.playedCards.length);
-			
+				indexToPlayAnim = -1;
+				actionBlocked = false;
+				state.playedCards = [];
+				state.minScore -= 10000;
+			}, playAnimSpeed * state.playedCards.length);
 		}
 	}
 
+	/**
+	 * Handles the action triggered by the left arrow key.
+	 * - If no action is blocked and no joker card is picked, it swaps the selected card with the one to its left.
+	 * - If a joker card is picked, it swaps the joker card with the one to its left in the `jokers` array.
+	 * This function ensures that the picked card can only be swapped with the card immediately to the left,
+	 * and updates the state of the hand cards or jokers accordingly.
+	 */
 	function onArrowLeft() {
-		if(actionBlocked) return;
+		if (actionBlocked) return;
 
 		if (pickedJoker === -1) {
-			let pickedIndex = state.handCards.findIndex(card => card.picked);
-			if (pickedIndex > 0 && state.handCards.filter(c => c.picked).length === 1) {
+			let pickedIndex = state.handCards.findIndex((card) => card.picked);
+			if (
+				pickedIndex > 0 &&
+				state.handCards.filter((c) => c.picked).length === 1
+			) {
 				// Swap
-				[state.handCards[pickedIndex - 1], state.handCards[pickedIndex]] =
-					[state.handCards[pickedIndex], state.handCards[pickedIndex - 1]];
+				[
+					state.handCards[pickedIndex - 1],
+					state.handCards[pickedIndex],
+				] = [
+					state.handCards[pickedIndex],
+					state.handCards[pickedIndex - 1],
+				];
 				state.handCards = [...state.handCards];
 			}
 		} else if (pickedJoker > 0) {
 			// Swap
-			[state.jokers[pickedJoker - 1], state.jokers[pickedJoker]] =
-				[state.jokers[pickedJoker], state.jokers[pickedJoker - 1]];
+			[state.jokers[pickedJoker - 1], state.jokers[pickedJoker]] = [
+				state.jokers[pickedJoker],
+				state.jokers[pickedJoker - 1],
+			];
 			pickedJoker--;
 		}
 	}
 
-
+	/**
+	 * Handles the action triggered by the right arrow key.
+	 * - If no action is blocked and no joker card is picked, it swaps the selected card with the one to its right.
+	 * - If a joker card is picked, it swaps the joker card with the one to its right in the `jokers` array.
+	 * This function ensures that the picked card can only be swapped with the card immediately to the right,
+	 * and updates the state of the hand cards or jokers accordingly.
+	 */
 	function onArrowRight() {
-		if(actionBlocked) return;
+		if (actionBlocked) return;
 
 		if (pickedJoker === -1) {
-			let pickedIndex = state.handCards.findIndex(card => card.picked);
+			let pickedIndex = state.handCards.findIndex((card) => card.picked);
 			if (
 				pickedIndex !== -1 &&
 				pickedIndex < state.handCards.length - 1 &&
-				state.handCards.filter(c => c.picked).length === 1
+				state.handCards.filter((c) => c.picked).length === 1
 			) {
 				// Swap
-				[state.handCards[pickedIndex + 1], state.handCards[pickedIndex]] =
-					[state.handCards[pickedIndex], state.handCards[pickedIndex + 1]];
+				[
+					state.handCards[pickedIndex + 1],
+					state.handCards[pickedIndex],
+				] = [
+					state.handCards[pickedIndex],
+					state.handCards[pickedIndex + 1],
+				];
 				state.handCards = [...state.handCards];
 			}
 		} else if (pickedJoker < state.jokers.length - 1) {
 			// Swap
-			[state.jokers[pickedJoker + 1], state.jokers[pickedJoker]] =
-				[state.jokers[pickedJoker], state.jokers[pickedJoker + 1]];
+			[state.jokers[pickedJoker + 1], state.jokers[pickedJoker]] = [
+				state.jokers[pickedJoker],
+				state.jokers[pickedJoker + 1],
+			];
 			pickedJoker++;
 		}
 	}
 
-	function onDiscard(){
-		if(actionBlocked) return;
-		state.handCards = state.handCards.filter(cardItem => !cardItem.picked);
-		state.playedCards = [];
+	/**
+	 * Handles the discard action, removing all picked cards from the hand.
+	 * - If no action is blocked, it filters out the picked cards from the `handCards` array, effectively discarding them.
+	 * - This function is used to remove selected cards from the player's hand once they are discarded.
+	 */
+	function onDiscard() {
+		if (actionBlocked) return;
+		state.handCards = state.handCards.filter(
+			(cardItem) => !cardItem.picked,
+		);
 	}
 
-	function onHandInfo(){
+	function onHandInfo() {
 		modalStore.trigger(handInfoModal);
 	}
 
-	function onChat(){
+	function onChat() {
 		drawerStore.open(settingsChat);
 	}
 
-	function onExit(){
+	function onExit() {
 		modalStore.trigger(leaveGameModal);
 	}
 
-	function onDeck(){
-		state.handCards.push({ key: getNextKey(), card: generateCard(true, true), picked:false });
-		state.handCards = state.handCards
-	}
-
 	// Interval for timer, aux variable
-	let interval:any;
+	let interval: any;
 
 	onMount(() => {
+		// Interval for the Time left clock
 		interval = setInterval(() => {
 			if (state.timeLeft > 0) {
 				state.timeLeft--;
@@ -245,12 +299,30 @@
 
 	// ==== MOCKUP FUNCTIONS ====
 
+	// Function just to get more cards and play around
+	function onDeck() {
+		state.handCards.push({
+			key: getNextKey(),
+			card: generateCard(true, true),
+			picked: false,
+		});
+		state.handCards = state.handCards;
+	}
+
 	for (let i = 0; i < 0; i++) {
-		state.playedCards.push({ key: getNextKey(), card: generateCard(true, true), picked:false });
+		state.playedCards.push({
+			key: getNextKey(),
+			card: generateCard(true, true),
+			picked: false,
+		});
 	}
 
 	for (let i = 0; i < 8; i++) {
-		state.handCards.push({ key: getNextKey(), card: generateCard(true, true), picked:false });
+		state.handCards.push({
+			key: getNextKey(),
+			card: generateCard(true, true),
+			picked: false,
+		});
 	}
 
 	for (let j = 0; j < 5; j++) {
@@ -294,7 +366,11 @@
 		const newEdition = Math.floor(
 			Math.random() * jokerEditionsDirectory.length,
 		);
-		state.jokers.push({ key: getNextKey(), id: newJoker, edition: newEdition });
+		state.jokers.push({
+			key: getNextKey(),
+			id: newJoker,
+			edition: newEdition,
+		});
 		state.jokers = state.jokers;
 	}
 
@@ -304,18 +380,18 @@
 		state.activeBouchers = state.activeBouchers;
 	}
 
-
 	function onClickHand(index: number) {
 		pickedJoker = -1;
 		const card = state.handCards[index];
 		card.picked = !card.picked;
 		state.handCards = [...state.handCards];
 	}
-
 </script>
 
 <!-- Main body -->
-<div class="grid grid-cols-[30%_50%_14%] h-full w-full tv-filter gap-[3%] game-div">
+<div
+	class="grid grid-cols-[30%_50%_14%] h-full w-full tv-filter gap-[3%] game-div"
+>
 	<!-- Info column -->
 	<div class="h-[100vh] ml-[20%] card rounded-none text-left p-[5%]">
 		<!--Title-->
@@ -344,17 +420,29 @@
 			class="card variant-filled-surface w-full h-[8%] mt-[3%] text-center grid grid-cols-[30%_70%] gap-2"
 		>
 			<div class="h-full text-3xl-r content-center p-3">Round score</div>
-			<div class="card h-[6vh] text-5xl-r content-center align-middle mt-[3%] mr-[5%] p-0">{$minScoreText.toFixed()}</div>
+			<div
+				class="card h-[6vh] text-5xl-r content-center align-middle mt-[3%] mr-[5%] p-0"
+			>
+				{$minScoreText.toFixed()}
+			</div>
 		</div>
 
 		<!--Score-->
 		<!-- svelte-ignore a11y-no-static-element-interactions -->
-		<div class="card w-full h-[15%] mt-[3%] text-center border-2 p-2">
-			<!-- svelte-ignore a11y-click-events-have-key-events -->
-			<div class="h-[45%] text-4xl-r content-center" on:click={onHandInfo}>
-				{state.handLevels[state.handType].name} lvl {state.handLevels[state.handType].lvl}
+		<!-- svelte-ignore a11y-click-events-have-key-events -->
+		<div
+			class="card w-full h-[15%] mt-[3%] text-center border-2 p-2"
+			on:click={onHandInfo}
+		>
+			<!--Hand type-->
+			<div class="h-[45%] text-4xl-r content-center">
+				{#if state.handType >= 0}
+					{state.handLevels[state.handType].name} lvl {state
+						.handLevels[state.handType].lvl}
+				{/if}
 			</div>
 
+			<!--Score chips-->
 			<div
 				class="flex h-[45%] justify-between text-5xl-r m-3 gap-0 items-center"
 			>
@@ -374,35 +462,31 @@
 
 		<!--Info chips-->
 		<div class="h-[25%] mt-[3%] grid grid-cols-2 gap-3">
-			<div
-				class="card text-center variant-filled-surface p-3 grid grid-rows-[25%_75%] gap-2"
-			>
+			<!--Hands-->
+			<div class={infoChip}>
 				<div class="text-2xl-r">Hands</div>
-				<div class="card text-5xl-r content-center text-tertiary-300">
+				<div class="{infoChipCard} text-tertiary-300">
 					{state.hands}
 				</div>
 			</div>
-			<div
-				class="card text-center variant-filled-surface p-3 grid grid-rows-[25%_75%] gap-2"
-			>
+			<!--Discards-->
+			<div class={infoChip}>
 				<div class="text-2xl-r">Discards</div>
-				<div class="card text-5xl-r content-center text-error-300">
+				<div class="{infoChipCard} text-error-300">
 					{state.discards}
 				</div>
 			</div>
-			<div
-				class="card text-center variant-filled-surface p-3 grid grid-rows-[25%_75%] gap-2"
-			>
+			<!--Pot-->
+			<div class={infoChip}>
 				<div class="text-2xl-r">Pot</div>
-				<div class="card text-5xl-r content-center">
+				<div class={infoChipCard}>
 					{state.pot}$
 				</div>
 			</div>
-			<div
-				class="card text-center variant-filled-surface p-3 grid grid-rows-[25%_75%] gap-2"
-			>
+			<!--Money-->
+			<div class={infoChip}>
 				<div class="text-2xl-r">Money</div>
-				<div class="card text-5xl-r content-center text-warning-300">
+				<div class="{infoChipCard} text-warning-300">
 					{state.money}$
 				</div>
 			</div>
@@ -419,10 +503,11 @@
 			{#each state.jokers as joker, index (joker.key)}
 				<!-- svelte-ignore a11y-click-events-have-key-events -->
 				<!-- svelte-ignore a11y-no-static-element-interactions -->
-				<div 
-					animate:flip={{duration:100}}
-					class={`w-1 transition-all duration-[100ms] ease-in-out ${index === pickedJoker ? 'mt-[5%]' : ''}`}
-					on:click={() => onClickJoker(index)}>
+				<div
+					animate:flip={{ duration: 100 }}
+					class={`w-1 transition-all duration-[100ms] ease-in-out ${index === pickedJoker ? "mt-[5%]" : ""}`}
+					on:click={() => onClickJoker(index)}
+				>
 					<div class="absolute">
 						<JokerCard
 							width="w-[16vh]"
@@ -437,17 +522,17 @@
 		<div class="text-left text-2xl-r">{state.jokers.length}/5</div>
 
 		<!--Played cards-->
-		<div class="flex justify-between ml-[10%] mr-[10%]" style="width: calc(80% - 14vh);">
+		<div
+			class="flex justify-between ml-[10%] mr-[10%]"
+			style="width: calc(80% - 14vh);"
+		>
 			{#each state.playedCards as card, index (card.key)}
-				
-				<div 
-				transition:fly={{ y: 100, duration: 500 }}
-				class="w-1">
+				<div transition:fly={{ y: 100, duration: 500 }} class="w-1">
 					{#if index === indexToPlayAnim}
 						<div
-						in:fly={{ y: 150, duration: 300 }}
-						out:fade={{ duration: 300 }}
-						class="w-[14vh] text-center absolute mt-[-4vh] text-warning-300 text-3xl-r"
+							in:fly={{ y: 150, duration: 300 }}
+							out:fade={{ duration: 300 }}
+							class="w-[14vh] text-center absolute mt-[-4vh] text-warning-300 text-3xl-r"
 						>
 							+{scorePlayAnim}
 						</div>
@@ -469,8 +554,8 @@
 				<!-- svelte-ignore a11y-click-events-have-key-events -->
 				<!-- svelte-ignore a11y-no-static-element-interactions -->
 				<div
-					animate:flip={{duration:100}}
-					class={`w-1 transition-all duration-[100ms] ease-in-out ${card.picked ? 'mt-[-5%]' : ''}`}
+					animate:flip={{ duration: 100 }}
+					class={`w-1 transition-all duration-[100ms] ease-in-out ${card.picked ? "mt-[-5%]" : ""}`}
 					on:click={() => onClickHand(index)}
 				>
 					<div class="absolute">
@@ -481,14 +566,14 @@
 						/>
 					</div>
 				</div>
-			
 			{/each}
 		</div>
-		
 
 		<!--Action buttons-->
 		<div class="flex justify-center gap-[4%]">
-			<button class="btn variant-filled-tertiary w-[35%] text-5xl-r" on:click={onPlay}
+			<button
+				class="btn variant-filled-tertiary w-[35%] text-5xl-r"
+				on:click={onPlay}
 				>Play
 			</button>
 			<div class="flex w-[15%]">
@@ -503,7 +588,9 @@
 					>&gt;
 				</button>
 			</div>
-			<button class="btn variant-filled-error w-[35%] text-5xl-r" on:click={onDiscard}
+			<button
+				class="btn variant-filled-error w-[35%] text-5xl-r"
+				on:click={onDiscard}
 				>Discard
 			</button>
 		</div>
@@ -515,10 +602,20 @@
 		<div>
 			<!--Chat and leave buttons-->
 			<div class="flex justify-end gap-4">
-				<button class="card w-[25%] aspect-square content-center" on:click={onChat}>
-					<img src="icons/chat2.png" alt="chat" class="w-[50%] min-w-[12px] mx-auto" />
+				<button
+					class="card w-[25%] aspect-square content-center"
+					on:click={onChat}
+				>
+					<img
+						src="icons/chat2.png"
+						alt="chat"
+						class="w-[50%] min-w-[12px] mx-auto"
+					/>
 				</button>
-				<button class="card w-[25%] aspect-square text-4xl-r" on:click={onExit}>
+				<button
+					class="card w-[25%] aspect-square text-4xl-r"
+					on:click={onExit}
+				>
 					X
 				</button>
 			</div>
@@ -531,15 +628,15 @@
 		<div>
 			<div class="relative w-full h-[22vh]">
 				<div class="absolute top-[10%] left-[10%]">
-					<GameCard width="w-[14vh]" card={dummyCard}/>
+					<GameCard width="w-[14vh]" card={dummyCard} />
 				</div>
 				<div class="absolute top-[5%] left-[5%]">
-					<GameCard width="w-[14vh]" card={dummyCard}/>
+					<GameCard width="w-[14vh]" card={dummyCard} />
 				</div>
 				<!-- svelte-ignore a11y-click-events-have-key-events -->
 				<!-- svelte-ignore a11y-no-static-element-interactions -->
 				<div class="absolute" on:click={onDeck}>
-					<GameCard width="w-[14vh]" card={dummyCard}/>
+					<GameCard width="w-[14vh]" card={dummyCard} />
 				</div>
 			</div>
 			<div class="w-full text-right text-2xl-r mt-[10%]">
