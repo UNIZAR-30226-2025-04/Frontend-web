@@ -7,33 +7,40 @@ import type { LobbyInfo, LobbyDisplay } from "$lib/interfaces";
 
 /**
  * Sends a POST request to the server to create a lobby
+ * @param isPublic Define if the lobby is public or not
  * @async
  */
-export async function createLobbyFetch(): Promise<boolean> {
+export async function createLobbyFetch(isPublic: boolean = false): Promise<boolean> {
     try {
+        const formData = new URLSearchParams();
+        formData.append('public', isPublic ? 'true' : 'false');
 
         const response = await fetch(createLobbyPath, {
             method: 'POST',
             headers: {
                 'accept': 'application/json',
+                'Content-Type': 'application/x-www-form-urlencoded',
                 'Authorization': 'Bearer ' + get(userDataStore).token,
-            }
+            },
+            body: formData
         });
 
         if (!response.ok) {
+            console.error(`Error creating lobby: ${response.status} ${response.statusText}`);
             throw new Error("Error creating a lobby");
         }
 
         const data = await response.json();
-        const lobbyCode = data["lobby_id"];
+        console.log("API response (create a lobby):", data);
+        const lobbyCode = data.lobby_id;
 
         lobbyStore.set({
             code: lobbyCode,
             host: true,
-            players:[]
+            players: [],
+            isPublic: isPublic
         });
         
-        console.log("API response (create a lobby):", data);
         return await joinLobbyFetch(lobbyCode);
     } catch (err: any) {
         console.log("API error (create a lobby):", err);
@@ -60,14 +67,16 @@ export async function joinLobbyFetch(lobbyCode: string): Promise<boolean> {
             throw new Error("Error inserting the user into the lobby");
         }
 
-        lobbyStore.update(() => ({
-            code: lobbyCode,
-            host: false,
-            players:[]
-        }));
-
         const data = await response.json();
         console.log("API response (insert the user into the lobby):", data);
+        
+        lobbyStore.update(lobby => ({
+            ...lobby,
+            code: lobbyCode,
+            // Keep the host property
+            players: []
+        }));
+        
         return true;
     } catch (err: any) {
         console.log("API error (insert the user into the lobby):", err);

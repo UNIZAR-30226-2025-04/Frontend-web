@@ -1,4 +1,3 @@
-
 // All user data and information
 export interface UserData {
     username: string
@@ -33,6 +32,7 @@ export interface Lobby {
     code: string
     host: boolean
     players: Player[]
+    isPublic?: boolean
 }
 
 // INBOX AND FRIENDS interfaces

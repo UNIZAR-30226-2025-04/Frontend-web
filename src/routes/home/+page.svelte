@@ -55,7 +55,8 @@
     const defaultLobby:Lobby = {
       code: "0000",
       host:false,
-      players:[]
+      players:[],
+      isPublic: false
     }
     lobbyStore.set(defaultLobby);
   });

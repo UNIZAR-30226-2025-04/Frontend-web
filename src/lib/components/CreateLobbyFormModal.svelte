@@ -16,25 +16,35 @@
 
     const modalStore = getModalStore();
 
+    let isPublic = false;
+    let isLoading = false;    
     let publicValue = true;
 
-    /**
-     * Function to switch the public value
-     */
-    function onSwitchPublic(){
-        publicValue = !publicValue;
-        console.log(publicValue);
-    }
- 
+/**
+ * Function to switch the public value
+ */
+function onSwitchPublic(){
+    publicValue = !publicValue;
+    console.log(publicValue);
+}
+
+
     /**
      * Function to create a lobby
      * @async
      */
-    async function onCreateLobby(){
-        if(await createLobbyFetch()){
-            goto(base+"/lobby");
+    async function onCreateLobby() {
+        isLoading = true;
+        const result = await createLobbyFetch(isPublic);
+        isLoading = false;
+        
+        if (result) {
+            parent.onClose();
+            goto(base + "/lobby");
+        } else {
+            // Manejar el error
+            console.error("No se pudo crear el lobby");
         }
-        modalStore.close();
     }
 
     
@@ -50,9 +60,14 @@
         <p style="font-size:108%">Lorem ipsum dolor sit amet, consectetur adipiscing elit, <br>sed do
             eiusmod tempor incididunt ut</p>
 
-        <div class='publicLobby' style="display: flex; align-items: center; gap: 3%;">
-            <p style="font-size:120%">Public lobby</p>
-            <SlideToggle name="slider-large" bind:value={publicValue} on:click={onSwitchPublic} active="bg-primary-500 block h-[32px]" checked/>
+        <div class="form-control">
+            <label class="flex items-center space-x-2">
+                <input class="checkbox" type="checkbox" bind:checked={isPublic} />
+                <p>Public lobby</p>
+            </label>
+            <p class="text-sm opacity-70">
+                Public lobbies will appear in the public list so other players can join directly.
+            </p>
         </div>
         
         <!--Button section-->
@@ -60,7 +75,13 @@
 			<button style="font-size:112%"class="block btn {parent.buttonNeutral} w-full" on:click={parent.onClose}>Vs AI</button>
 			<button style="font-size:112%" class="block btn {parent.buttonPositive} w-full" on:click={parent.onClose}>Cancel</button>
         </div>
-        <button style="font-size:112%" class="block btn {parent.buttonNeutral} w-full" type="button" on:click={onCreateLobby}>Create</button>
+        <button style="font-size:112%" class="block btn {parent.buttonNeutral} w-full" type="button" on:click={onCreateLobby} disabled={isLoading}>
+            {#if isLoading}
+                Creating...
+            {:else}
+                Create Lobby
+            {/if}
+        </button>
     </div>
     
 {/if}
