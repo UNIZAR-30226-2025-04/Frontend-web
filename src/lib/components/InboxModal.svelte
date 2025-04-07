@@ -61,10 +61,6 @@
      */
     async function acceptInvitation(index:number, key:number) {
         if (await joinLobbyFetch(invitations[index].code)) {
-            lobbyStore.update(() => ({
-                code: invitations[index].code,
-                host: false
-            }));
             goto(base+"/lobby");
             parent.onClose();
         }

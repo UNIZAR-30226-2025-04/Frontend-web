@@ -45,16 +45,10 @@
 
   // Function to join a lobby
   async function handleJoinLobby(lobbyId: string) {
-    await joinLobbyFetch(lobbyId);
-    
-    // Update the store with the lobby code
-    lobbyStore.update(() => ({
-      code: lobbyId,
-      host: false
-    }));
-    
-    // Redirect to the lobby page
-    goto(base + "/lobby");
+    if( await joinLobbyFetch(lobbyId)){  
+      // Redirect to the lobby page
+      goto(base + "/lobby");
+    }
   }
 
   function clickOnInsertCode() {

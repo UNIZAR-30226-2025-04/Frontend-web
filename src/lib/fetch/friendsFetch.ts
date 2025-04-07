@@ -121,13 +121,13 @@ export async function fetchDeleteSentFriendRequest(username:string): Promise<boo
         });
 
         if (!response.ok) {
-            throw new Error("Error removing friend from list:");
+            throw new Error("Error removing friend request:");
         }
         const data = await response.json();
-        console.log("API response (delete friend):", data);
+        console.log("API response (delete friend request):", data);
         return true;
     } catch (err:any) {
-        console.log("API error (remove friend):", err);
+        console.log("API error (delete friend request):", err);
         return false;
     }
 }
@@ -153,7 +153,7 @@ export async function fetchDeleteFriend(username:string): Promise<boolean> {
         console.log("API response (delete friend):", data);
         return true;
     } catch (err:any) {
-        console.log("API error (remove friend):", err);
+        console.log("API error (delete friend):", err);
         return false;
     }
 }
