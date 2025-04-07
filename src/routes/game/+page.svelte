@@ -483,13 +483,13 @@
 	@keyframes textflicker {
 		from {
 			text-shadow:
-				1px 0 0 #ea36af,
-				-2px 0 0 #75fa69;
+				0.25vh 0 0 #ea36af,
+				-0.5px 0 0 #75fa69;
 		}
 		to {
 			text-shadow:
-				2px 0.5px 2px #ea36af,
-				-1px -0.5px 2px #75fa69;
+				0.5vh 0.12vh 0.5vh #ea36af,
+				-0.25vh -0.12vh 0.5vh #75fa69;
 		}
 	}
 </style>
