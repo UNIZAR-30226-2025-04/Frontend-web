@@ -27,6 +27,8 @@
     import ChatDrawer from '$lib/components/ChatDrawer.svelte';
     import LeaveGameModal from '$lib/components/LeaveGameModal.svelte';
     import HandInfoModal from '$lib/components/HandInfoModal.svelte';
+    import { loadingStore } from '$lib/stores/loadingStore';
+    import LoadingScreen from '$lib/components/LoadingScreen.svelte';
 
 	// For all singletons
 	initializeStores();
@@ -55,6 +57,11 @@
 	{/if}
 </Drawer>
 <Modal components={modalRegistry}/>
+
+{#if $loadingStore.isLoading}
+    <LoadingScreen message={$loadingStore.message} />
+{/if}
+
 <slot />
 
 

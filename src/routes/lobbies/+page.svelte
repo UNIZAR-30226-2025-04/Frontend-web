@@ -6,6 +6,7 @@
   import { onMount } from 'svelte';
   import { getAllLobbiesFetch, joinLobbyFetch } from "$lib/fetch/lobbyFetch";
   import { lobbyStore } from "$lib/stores";
+  import { loadingStore } from "$lib/stores/loadingStore";
   import type { LobbyDisplay } from "$lib/interfaces";
 
   const modalStore = getModalStore();
@@ -23,7 +24,6 @@
 
   // List of lobbies
   let lobbies: LobbyDisplay[] = [];
-  let isLoading = true;
   let error = '';
 
   // Load lobbies when mounting the component
@@ -34,20 +34,23 @@
   // Function to refresh the list of lobbies
   async function refreshLobbies() {
     try {
-      isLoading = true;
+      loadingStore.startLoading('Buscando lobbies disponibles...');
       lobbies = await getAllLobbiesFetch();
     } catch (err: any) {
       error = err.message;
     } finally {
-      isLoading = false;
+      loadingStore.stopLoading();
     }
   }
 
   // Function to join a lobby
   async function handleJoinLobby(lobbyId: string) {
-    if( await joinLobbyFetch(lobbyId)){  
+    loadingStore.startLoading('Uniéndose al lobby...');
+    if (await joinLobbyFetch(lobbyId)) {  
       // Redirect to the lobby page
       goto(base + "/lobby");
+    } else {
+      loadingStore.stopLoading();
     }
   }
 
@@ -78,7 +81,7 @@
 
 <!-- Lobbies -->
 <div class="w-[85vw] mt-[8vh] overflow-y-auto h-[60vh] rounded-lg">
-  {#if isLoading}
+  {#if loadingStore.isLoading}
     <div class="flex justify-center items-center h-full">
       <p class="text-[4vmin]">Cargando lobbies...</p>
     </div>

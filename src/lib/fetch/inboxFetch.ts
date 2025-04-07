@@ -2,6 +2,7 @@ import { addFriendPath, deleteReceivedInvitationPath, deleteReceivedRequestsPath
 import { userDataStore } from "$lib/stores";
 import { get } from "svelte/store";
 import type { invitation, request } from '$lib/interfaces'
+import { loadingStore } from "$lib/stores/loadingStore";
 
 /**
  * Gets all the friendship invitations sent to the user
@@ -10,6 +11,7 @@ import type { invitation, request } from '$lib/interfaces'
  */
 export async function fetchReceivedFriendshipRequests(pendingRequests:request[]) {
     try {
+        loadingStore.startLoading('Cargando solicitudes...');
         const response = await fetch(receivedFriendshipRequestsPath, {
             method: 'GET',
             headers: {
@@ -39,6 +41,8 @@ export async function fetchReceivedFriendshipRequests(pendingRequests:request[])
         console.log("API response (friend request list):", data);
     } catch (err:any) {
         console.log("API error (friend request list):", err);
+    } finally {
+        loadingStore.stopLoading();
     }
 }
 
@@ -76,6 +80,7 @@ export async function fetchDeleteFriendRequest(posibleFriend:string): Promise<bo
  */
 export async function fetchAcceptFriendshipRequest(posibleFriend:string): Promise<boolean> {
     try {
+        loadingStore.startLoading('Aceptando solicitud...');
         const formData = new FormData();
         formData.append('friendUsername', posibleFriend);
 
@@ -98,6 +103,8 @@ export async function fetchAcceptFriendshipRequest(posibleFriend:string): Promis
     } catch (err:any) {
         console.log("API error (accept a friendship request):", err.message);
         return false;
+    } finally {
+        loadingStore.stopLoading();
     }
 }
 
@@ -108,6 +115,7 @@ export async function fetchAcceptFriendshipRequest(posibleFriend:string): Promis
  */
 export async function fetchReceivedGameInvitations(invitations:invitation[]) {
     try {
+        loadingStore.startLoading('Cargando invitaciones...');
         const response = await fetch(recievedGameInvitations, {
             method: 'GET',
             headers: {
@@ -142,6 +150,8 @@ export async function fetchReceivedGameInvitations(invitations:invitation[]) {
         console.log("API response (recieved invitations list):", data);
     } catch (err:any) {
         console.log("API error (recieved invitations list):", err);
+    } finally {
+        loadingStore.stopLoading();
     }
 }
 

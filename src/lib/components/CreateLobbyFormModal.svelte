@@ -7,6 +7,7 @@
     import { apiBase, createLobbyPath, joinLobbyPath } from '$lib/paths';
     import { get } from 'svelte/store';
     import { userDataStore, lobbyStore } from '$lib/stores';
+    import { loadingStore } from '$lib/stores/loadingStore';
     import { createLobbyFetch } from "$lib/fetch/lobbyFetch";
     
 
@@ -34,9 +35,8 @@ function onSwitchPublic(){
      * @async
      */
     async function onCreateLobby() {
-        isLoading = true;
+        loadingStore.startLoading('Creando lobby...');
         const result = await createLobbyFetch(isPublic);
-        isLoading = false;
         
         if (result) {
             parent.onClose();
@@ -44,6 +44,7 @@ function onSwitchPublic(){
         } else {
             // Manejar el error
             console.error("No se pudo crear el lobby");
+            loadingStore.stopLoading();
         }
     }
 

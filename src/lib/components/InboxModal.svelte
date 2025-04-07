@@ -1,7 +1,8 @@
 <script lang="ts">
     import { onMount, type SvelteComponent } from "svelte";
     import { lobbyStore, userDataStore } from '$lib/stores';
-    import  AvatarDisplay  from "./AvatarDisplay.svelte";
+    import { loadingStore } from '$lib/stores/loadingStore';
+    import AvatarDisplay from "./AvatarDisplay.svelte";
     import { avatarDirectory } from "$lib/avatarsDirectory";
 	import { flip } from 'svelte/animate';
     import { get } from 'svelte/store';
@@ -20,21 +21,24 @@
     // Array of pending friend requests, name
     let pendingRequests: request[] = [];
 
-
-    // Fetches the list of friend requests from the server using a GET request
-    
-
     // Loads both the lobby invitations and the pending friend requests in parallel
     async function loadData() {
-        await Promise.all([
-            fetchReceivedGameInvitations(invitations),
-            fetchReceivedFriendshipRequests(pendingRequests)
-        ]);
-        pendingRequests = pendingRequests;
-        invitations = invitations;
+        loadingStore.startLoading('Cargando notificaciones...');
+        try {
+            await Promise.all([
+                fetchReceivedGameInvitations(invitations),
+                fetchReceivedFriendshipRequests(pendingRequests)
+            ]);
+            pendingRequests = pendingRequests;
+            invitations = invitations;
+        } finally {
+            loadingStore.stopLoading();
+        }
     }
 
-    loadData();
+    onMount(() => {
+        loadData();
+    });
 
     /**
      * Removes from the invitations list the index that has the key

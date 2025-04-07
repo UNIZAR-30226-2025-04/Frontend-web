@@ -1,6 +1,7 @@
 import type { userItem } from "$lib/interfaces";
 import { deleteFriendPath, friendsPath, sendFriendshipRequestPath, sentRequestsPath, deleteSentRequestPath } from "$lib/paths";
-import { lobbyStore, userDataStore } from "$lib/stores";
+import { userDataStore } from "$lib/stores";
+import { loadingStore } from "$lib/stores/loadingStore";
 import { get } from "svelte/store";
 
 
@@ -11,6 +12,7 @@ import { get } from "svelte/store";
  */
 export async function fetchFriends(savedFriends:userItem[]) {
     try {
+        loadingStore.startLoading('Cargando amigos...');
         const response = await fetch(friendsPath, {
             method: 'GET',
             headers: {
@@ -34,6 +36,8 @@ export async function fetchFriends(savedFriends:userItem[]) {
         console.log("API response (friend list):", data);
     } catch (err:any) {
         console.log("API error (friend list):", err);
+    } finally {
+        loadingStore.stopLoading();
     }
 }
 
@@ -44,6 +48,7 @@ export async function fetchFriends(savedFriends:userItem[]) {
  */
 export async function fetchSentRequests(pendingRequests:userItem[]) {
     try {
+        loadingStore.startLoading('Cargando solicitudes enviadas...');
         const response = await fetch(sentRequestsPath, {
             method: 'GET',
             headers: {
@@ -70,6 +75,8 @@ export async function fetchSentRequests(pendingRequests:userItem[]) {
         console.log("API response (friend request list):", data);
     } catch (err:any) {
         console.log("API error (friend request list):", err);
+    } finally {
+        loadingStore.stopLoading();
     }
 }
 
@@ -81,6 +88,7 @@ export async function fetchSentRequests(pendingRequests:userItem[]) {
  */
 export async function fetchSendFriendshipRequest(username:string): Promise<boolean> {
     try {
+        loadingStore.startLoading('Enviando solicitud de amistad...');
         const formData = new FormData();
         formData.append('friendUsername', username);
 
@@ -103,6 +111,8 @@ export async function fetchSendFriendshipRequest(username:string): Promise<boole
     } catch (err:any) {
         console.log("API error (send a friendship request):", err);
         return false;
+    } finally {
+        loadingStore.stopLoading();
     }
 }
 
@@ -112,6 +122,7 @@ export async function fetchSendFriendshipRequest(username:string): Promise<boole
  */
 export async function fetchDeleteSentFriendRequest(username:string): Promise<boolean> {
     try {
+        loadingStore.startLoading('Eliminando solicitud...');
         const response = await fetch(deleteSentRequestPath + username, {
             method: 'DELETE',
             headers: {
@@ -129,6 +140,8 @@ export async function fetchDeleteSentFriendRequest(username:string): Promise<boo
     } catch (err:any) {
         console.log("API error (delete friend request):", err);
         return false;
+    } finally {
+        loadingStore.stopLoading();
     }
 }
 
@@ -138,6 +151,7 @@ export async function fetchDeleteSentFriendRequest(username:string): Promise<boo
  */
 export async function fetchDeleteFriend(username:string): Promise<boolean> {
     try {
+        loadingStore.startLoading('Eliminando amigo...');
         const response = await fetch(deleteFriendPath + username, {
             method: 'DELETE',
             headers: {
@@ -155,5 +169,7 @@ export async function fetchDeleteFriend(username:string): Promise<boolean> {
     } catch (err:any) {
         console.log("API error (delete friend):", err);
         return false;
+    } finally {
+        loadingStore.stopLoading();
     }
 }

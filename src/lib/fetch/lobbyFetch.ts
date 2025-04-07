@@ -1,9 +1,9 @@
-import type { inviteItem } from "$lib/interfaces";
-import { allLobbiesPath, createLobbyPath, deleteSentLobbyInvitationsPath, exitLobbyPath, joinLobbyPath, sendLobbyInvitationsPath, sentLobbyInvitationsPath, recievedGameInvitations, apiBase, deleteReceivedInvitationPath } from "$lib/paths";
+import type { inviteItem, LobbyInfo, LobbyDisplay } from "$lib/interfaces";
+import { allLobbiesPath, createLobbyPath, deleteSentLobbyInvitationsPath, exitLobbyPath, joinLobbyPath, sendLobbyInvitationsPath, sentLobbyInvitationsPath, recievedGameInvitations, deleteReceivedInvitationPath } from "$lib/paths";
 import { lobbyStore, userDataStore } from "$lib/stores";
 import { get } from "svelte/store";
-import type { LobbyInfo, LobbyDisplay } from "$lib/interfaces";
 import { fetchDeleteGameInvitation } from "$lib/fetch/inboxFetch";
+import { loadingStore } from '$lib/stores/loadingStore';
 
 /**
  * Sends a POST request to the server to create a lobby
@@ -55,6 +55,9 @@ export async function createLobbyFetch(isPublic: boolean = false): Promise<boole
  */
 export async function joinLobbyFetch(lobbyCode: string): Promise<boolean> {
     try {
+        // Start the loading with a specific message
+        loadingStore.startLoading('Uniéndose al lobby...');
+        
         const response = await fetch(joinLobbyPath + lobbyCode, {
             method: 'POST',
             headers: {
@@ -79,6 +82,8 @@ export async function joinLobbyFetch(lobbyCode: string): Promise<boolean> {
         
         // After successfully joining, check for pending invitations to this lobby
         try {
+            loadingStore.startLoading('Limpiando invitaciones pendientes...');
+            
             // Get all received invitations
             const invitationsResponse = await fetch(recievedGameInvitations, {
                 method: 'GET',
@@ -105,12 +110,18 @@ export async function joinLobbyFetch(lobbyCode: string): Promise<boolean> {
         } catch (error) {
             // Just log the error but don't fail the join operation
             console.error("Error cleaning up invitations:", error);
+        } finally {
+            // Ensure to stop the loading even if there's an error
+            loadingStore.stopLoading();
         }
         
         return true;
     } catch (err: any) {
         console.log("API error (insert the user into the lobby):", err);
         return false;
+    } finally {
+        // Ensure to stop the loading even if there's an error
+        loadingStore.stopLoading();
     }
 }
 
@@ -316,12 +327,12 @@ export async function fetchLobbyInfo(lobbyId: string): Promise<any> {
         
         const data = await response.json();
         
-        // Mostrar la respuesta completa sin procesar
+        // Show the full response
         console.log("%c RESPUESTA COMPLETA DE LA API:", "background: #222; color: #bada55; font-size: 16px");
         console.log(JSON.stringify(data, null, 2));
-        console.dir(data); // Muestra el objeto de manera interactiva
+        console.dir(data); // Shows the object interatively
         
-        // Si la respuesta no contiene players, agregamos un array vacío
+        // If the response doesn't contain players, add an empty array
         if (!data.players) {
             console.warn("La API no devolvió un array de jugadores, usando array vacío");
             data.players = [];
