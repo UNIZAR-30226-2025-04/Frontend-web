@@ -1,8 +1,9 @@
 <script lang="ts">
     import AvatarDisplay from "./AvatarDisplay.svelte";
     import { chatFeedElem, chatStore } from "$lib/stores";
-    import { onMount } from "svelte";
+    import { onMount, afterUpdate } from "svelte";
     import { sendMessage } from "$lib/sockets-utils/lobbySocket";
+    import { getDrawerStore } from '@skeletonlabs/skeleton';
     
     let elemChat: HTMLElement;
     let currentMessage = "";
@@ -20,9 +21,28 @@
         }
     }
 
+    function scrollToBottom() {
+        if (elemChat) {
+            elemChat.scrollTop = elemChat.scrollHeight;
+        }
+    }
+
     onMount(() => {
+        // Whenever we mount the component (when the drawer is opened), we set the chat feed element
         chatFeedElem.set(elemChat);
+        scrollToBottom();
     });
+
+    afterUpdate(() => {
+        // Whenever we update the component (when a new message is added), we scroll to the bottom
+        scrollToBottom();
+    });
+
+    const drawerStore = getDrawerStore();
+
+    $: if ($drawerStore.open && $drawerStore.id === 'chat') {
+        setTimeout(scrollToBottom, 50);
+    }
 
 </script>
 
