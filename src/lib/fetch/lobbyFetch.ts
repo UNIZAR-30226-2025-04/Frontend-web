@@ -262,3 +262,46 @@ export async function getAllLobbiesFetch(): Promise<LobbyDisplay[]> {
     }));
 
 }
+
+/**
+ * Fetches the information of a lobby, including the list of current players.
+ * @param lobbyId - The ID of the lobby.
+ * @returns an object containing the lobby info (with property players) or null on error.
+ * @async
+ */
+export async function fetchLobbyInfo(lobbyId: string): Promise<any> {
+    try {
+        console.log(`Intentando obtener información del lobby: ${lobbyId}`);
+        
+        const response = await fetch(`https://nogler.ddns.net:443/auth/lobbyInfo/${lobbyId}`, {
+            method: 'GET',
+            headers: {
+                'accept': 'application/json',
+                'Authorization': 'Bearer ' + get(userDataStore).token,
+            }
+        });
+        
+        if (!response.ok) {
+            console.error(`Error fetchLobbyInfo: ${response.status} ${response.statusText}`);
+            throw new Error(`Error fetchLobbyInfo: ${response.status} ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        
+        // Mostrar la respuesta completa sin procesar
+        console.log("%c RESPUESTA COMPLETA DE LA API:", "background: #222; color: #bada55; font-size: 16px");
+        console.log(JSON.stringify(data, null, 2));
+        console.dir(data); // Muestra el objeto de manera interactiva
+        
+        // Si la respuesta no contiene players, agregamos un array vacío
+        if (!data.players) {
+            console.warn("La API no devolvió un array de jugadores, usando array vacío");
+            data.players = [];
+        }
+        
+        return data;
+    } catch (err: any) {
+        console.error("Error grave en fetchLobbyInfo:", err);
+        return null;
+    }
+}
