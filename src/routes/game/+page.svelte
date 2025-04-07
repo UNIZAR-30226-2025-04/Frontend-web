@@ -261,13 +261,13 @@
 				class="flex h-[45%] justify-between text-5xl-r m-3 gap-0 items-center"
 			>
 				<div
-					class="w-[45%] h-full card text-right p-2 variant-filled-tertiary content-center"
+					class="w-[45%] h-full card text-right p-0 pr-[3%] variant-filled-tertiary content-center align-middle"
 				>
 					90
 				</div>
 				<div>X</div>
 				<div
-					class="w-[45%] h-full card text-left p-2 variant-filled-error content-center"
+					class="w-[45%] h-full card text-left p-0 pl-[3%] variant-filled-error content-center align-middle"
 				>
 					90
 				</div>
@@ -403,8 +403,8 @@
 		<div>
 			<!--Chat and leave buttons-->
 			<div class="flex justify-end gap-4">
-				<button class="card w-[25%] aspect-square p-4" on:click={onChat}>
-					<img src="icons/chat2.png" alt="chat" class="w-full" />
+				<button class="card w-[25%] aspect-square content-center" on:click={onChat}>
+					<img src="icons/chat2.png" alt="chat" class="w-[50%] min-w-[20px] mx-auto" />
 				</button>
 				<button class="card w-[25%] aspect-square text-4xl-r" on:click={onExit}>
 					X
@@ -467,7 +467,7 @@
 
 	.text-4xl-r {
 		font-size: 3vh;
-		line-height: 2.5rem;
+		line-height: 1;
 	}
 
 	.text-3xl-r {
@@ -477,7 +477,7 @@
 
 	.text-2xl-r {
 		font-size: 2vh;
-		line-height: 2rem;
+		line-height: 1;
 	}
 
 	@keyframes textflicker {
