@@ -1,45 +1,75 @@
 <script lang="ts">
 	import {
-		boucherDirectory,
-		jokerDirectory,
-		jokerEditionsDirectory,
-		overlayDirectory,
-		suitDirectory,
+	    boucherDirectory,
+	    jokerDirectory,
+	    jokerEditionsDirectory,
+	    overlayDirectory,
+	    suitDirectory,
 	} from "$lib/cardDirectory";
 	import BoucherCard from "$lib/components/BoucherCard.svelte";
 	import GameCard from "$lib/components/GameCard.svelte";
 	import JokerCard from "$lib/components/JokerCard.svelte";
-	import type { Card } from "$lib/interfaces";
-    import { flip } from "svelte/animate";
-    import { quintOut } from "svelte/easing";
-    import { fade, fly, slide } from "svelte/transition";
+	import { HandTypesBase, type BoucherItem, type Card, type CardItem, type GameState, type JokerItem } from "$lib/interfaces";
+	import { getNextKey } from "$lib/keyGenerator";
+    import { getDrawerStore, getModalStore, type DrawerSettings, type ModalSettings } from "@skeletonlabs/skeleton";
+    import { stat } from "fs";
+    import { onDestroy, onMount } from "svelte";
+	import { flip } from "svelte/animate";
+	import { cubicOut } from "svelte/easing";
+	import { tweened } from "svelte/motion";
+	import { fly } from "svelte/transition";
 
-	type CardItem = {
-		key: number,
-		card: Card,
-		picked: boolean,
+	// Main state variable
+	let state:GameState = {
+		playedCards: [],
+		handCards: [],
+		jokers: [],
+		activeBouchers: [],
+		bouchers: [],
+		handLevels: structuredClone(HandTypesBase),
+		round: 1,
+		minScore: 1000,
+		handType: 1,
+		blueScore:0,
+		redScore:0,
+		hands:3,
+		discards:3,
+		pot:5,
+		money:10,
+		deckSize:52,
+		deckLeft:44,
+		timeLeft:30,
 	};
 
-	type JokerItem = {
-		key: number,
-		id: number,
-		edition: number
+	
+
+	const modalStore = getModalStore();
+	const drawerStore = getDrawerStore();
+
+	const settingsChat: DrawerSettings = {
+		id: "chat",
+		position: "right",
+		width: "w-[40%]",
+		padding: "p-4",
 	};
 
-	type BoucherItem = {
-		key: number,
-		id: number
-	};
+	const leaveGameModal: ModalSettings = {
+		type: 'component',
+		component: 'leaveGameModal'
+	}
 
-	let nextKey: number = 0;
+	const handInfoModal: ModalSettings = {
+		type: 'component',
+		meta: {levels:state.handLevels},
+		component: 'handInfoModal'
+	}
 
-	let playedCards: CardItem[] = [];
-	let handCards: CardItem[] = [];
-	let jokers: JokerItem[] = [];
-	let bouchers: BoucherItem[] = [];
+	
 
+	// To know what jocker has the user clicked
 	let pickedJoker: number = -1;
 
+	// To draw the deck
 	let dummyCard:Card = {
 		rank:"A",
 		suit:"h",
@@ -47,12 +77,34 @@
 		faceUp:false
 	}
 
+	// Reactivity animations
+
+	const minScoreText = tweened(state.minScore, {
+		duration: 400,
+		easing: cubicOut
+	});
+	$: minScoreText.set(state.minScore);
+
+	const blueScoreText = tweened(state.blueScore, {
+		duration: 400,
+		easing: cubicOut
+	});
+	$: blueScoreText.set(state.blueScore);
+
+	const redScoreText = tweened(state.redScore, {
+		duration: 400,
+		easing: cubicOut
+	});
+	$: redScoreText.set(state.redScore);
+
+	// ==== MOCKUP FUNCTIONS ====
+
 	for (let i = 0; i < 0; i++) {
-		playedCards.push({ key: getNextKey(), card: generateCard(true, true), picked:false });
+		state.playedCards.push({ key: getNextKey(), card: generateCard(true, true), picked:false });
 	}
 
 	for (let i = 0; i < 8; i++) {
-		handCards.push({ key: getNextKey(), card: generateCard(true, true), picked:false });
+		state.handCards.push({ key: getNextKey(), card: generateCard(true, true), picked:false });
 	}
 
 	for (let j = 0; j < 5; j++) {
@@ -96,137 +148,145 @@
 		const newEdition = Math.floor(
 			Math.random() * jokerEditionsDirectory.length,
 		);
-		jokers.push({ key: getNextKey(), id: newJoker, edition: newEdition });
-		jokers = jokers;
+		state.jokers.push({ key: getNextKey(), id: newJoker, edition: newEdition });
+		state.jokers = state.jokers;
 	}
 
 	function onAddBoucher() {
 		const newBoucher = Math.floor(Math.random() * boucherDirectory.length);
-		bouchers.push({ key: getNextKey(), id: newBoucher });
-		bouchers = bouchers;
-	}
-
-	function getNextKey(): number {
-		nextKey++;
-		return nextKey;
+		state.activeBouchers.push({ key: getNextKey(), id: newBoucher });
+		state.activeBouchers = state.activeBouchers;
 	}
 
 
-	function onClickHand(index:number){
+	function onClickHand(index: number) {
 		pickedJoker = -1;
-		handCards[index].picked = !handCards[index].picked;
-		handCards = handCards;
+		const card = state.handCards[index];
+		card.picked = !card.picked;
+		state.handCards = [...state.handCards];
 	}
+
+	// ==== MOCKUP FUNCTIONS ====
+
 
 	function onClickJoker(index:number){
-		for(let i=0; i<handCards.length; i++){
-			handCards[i].picked = false;
-		}
-		if(index !== pickedJoker){
-			let nPicked:number = 0;
-			for(let i=0; i<handCards.length; i++){
-				if(handCards[i].picked){
-					nPicked++;
-				}
-			}
-			if(nPicked === 0){
-				pickedJoker = index;
-			}
-		}else{
+		for (const card of state.handCards) card.picked = false;
+
+		if (index !== pickedJoker) {
+			const anyPicked = state.handCards.some(card => card.picked);
+			if (!anyPicked) pickedJoker = index;
+		} else {
 			pickedJoker = -1;
 		}
 	}
 
 	function onPlay(){
-		if(pickedJoker === -1){
-			let nPicked:number = 0;
-			for(let i=0; i<handCards.length; i++){
-				if(handCards[i].picked){
-					nPicked++;
-				}
-			}
-			if(nPicked>0 && nPicked<6){
-				for(let i=0; i<handCards.length; i++){
-					if(handCards[i].picked){
-						playedCards.push({key:getNextKey(),card:handCards[i].card,picked:false});
-					}
-				}
-				handCards = handCards.filter(cardItem => !cardItem.picked)
-				playedCards = playedCards;
-			}
+		if (pickedJoker !== -1) return;
+
+		const pickedCards = state.handCards.filter(card => card.picked);
+		const count = pickedCards.length;
+
+		if (count > 0 && count < 6) {
+			const played = pickedCards.map(({ card }) => ({
+				key: getNextKey(),
+				card,
+				picked: false
+			}));
+
+			state.playedCards.push(...played);
+			state.handCards = state.handCards.filter(card => !card.picked);
+			state.playedCards = [...state.playedCards];
 		}
 	}
 
-	function onArrowLeft(){
-		if(pickedJoker === -1){
-			let nPicked:number = 0;
-			let index:number = 0;
-			for(let i=0; i<handCards.length; i++){
-				if(handCards[i].picked){
-					nPicked++;
-					index=i;
-				}
+	function onArrowLeft() {
+		if (pickedJoker === -1) {
+			let pickedIndex = state.handCards.findIndex(card => card.picked);
+			if (pickedIndex > 0 && state.handCards.filter(c => c.picked).length === 1) {
+				// Swap
+				[state.handCards[pickedIndex - 1], state.handCards[pickedIndex]] =
+					[state.handCards[pickedIndex], state.handCards[pickedIndex - 1]];
+				state.handCards = [...state.handCards];
 			}
-			if(nPicked === 1 && index > 0){
-				let aux:CardItem = handCards[index-1];
-				handCards[index-1] = handCards[index];
-				handCards[index] = aux;
-			}
-			handCards = handCards;
-		}else if(pickedJoker>0){
-			let aux:JokerItem = jokers[pickedJoker-1];
-			jokers[pickedJoker-1] = jokers[pickedJoker];
-			jokers[pickedJoker] = aux;
+		} else if (pickedJoker > 0) {
+			// Swap
+			[state.jokers[pickedJoker - 1], state.jokers[pickedJoker]] =
+				[state.jokers[pickedJoker], state.jokers[pickedJoker - 1]];
 			pickedJoker--;
 		}
 	}
 
-	function onArrowRight(){
-		if(pickedJoker === -1){
-			let nPicked:number = 0;
-			let index:number = handCards.length;
-			for(let i=0; i<handCards.length; i++){
-				if(handCards[i].picked){
-					nPicked++;
-					index=i;
-				}
-			}
-			if(nPicked === 1 && index < handCards.length-1){
-				let aux:CardItem = handCards[index+1];
-				handCards[index+1] = handCards[index];
-				handCards[index] = aux;
-			}
-			handCards = handCards;
-		}else if(pickedJoker < jokers.length-1){
-			let aux:JokerItem = jokers[pickedJoker+1];
-			jokers[pickedJoker+1] = jokers[pickedJoker];
-			jokers[pickedJoker] = aux;
-			pickedJoker++;
+
+	function onArrowRight() {
+	if (pickedJoker === -1) {
+		let pickedIndex = state.handCards.findIndex(card => card.picked);
+		if (
+			pickedIndex !== -1 &&
+			pickedIndex < state.handCards.length - 1 &&
+			state.handCards.filter(c => c.picked).length === 1
+		) {
+			// Swap
+			[state.handCards[pickedIndex + 1], state.handCards[pickedIndex]] =
+				[state.handCards[pickedIndex], state.handCards[pickedIndex + 1]];
+			state.handCards = [...state.handCards];
 		}
+	} else if (pickedJoker < state.jokers.length - 1) {
+		// Swap
+		[state.jokers[pickedJoker + 1], state.jokers[pickedJoker]] =
+			[state.jokers[pickedJoker], state.jokers[pickedJoker + 1]];
+		pickedJoker++;
 	}
+}
 
 	function onDiscard(){
-		handCards = handCards.filter(cardItem => !cardItem.picked)
+		state.handCards = state.handCards.filter(cardItem => !cardItem.picked);
+		state.playedCards = [];
+	}
+
+	function onHandInfo(){
+		modalStore.trigger(handInfoModal);
 	}
 
 	function onChat(){
-		playedCards = [];
+		drawerStore.open(settingsChat);
 	}
 
 	function onExit(){
-		handCards.push({ key: getNextKey(), card: generateCard(true, true), picked:false });
-		handCards = handCards
+		modalStore.trigger(leaveGameModal);
 	}
+
+	function onDeck(){
+		state.handCards.push({ key: getNextKey(), card: generateCard(true, true), picked:false });
+		state.handCards = state.handCards
+	}
+
+	// Interval for timer, aux variable
+	let interval:any;
+
+	onMount(() => {
+		interval = setInterval(() => {
+			if (state.timeLeft > 0) {
+				state.timeLeft--;
+			} else {
+				state.timeLeft = 30;
+			}
+		}, 1000);
+	});
+
+	onDestroy(() => {
+		clearInterval(interval);
+	});
+
 
 </script>
 
 <!-- Main body -->
-<div class="grid grid-cols-[30%_50%_14%] h-full w-full tv-filter gap-[3%]">
+<div class="grid grid-cols-[30%_50%_14%] h-full w-full tv-filter gap-[3%] game-div">
 	<!-- Info column -->
 	<div class="h-[100vh] ml-[20%] card rounded-none text-left p-[5%]">
 		<!--Title-->
 		<div class="text-5xl-r h-[12%] card variant-filled-surface p-5">
-			Round 1/10
+			Round {state.round}/10
 		</div>
 
 		<!--Bouchers label-->
@@ -236,7 +296,7 @@
 			class="flex h-[20%] mt-[3%] justify-between"
 			style="width: calc(100% - 12vh);"
 		>
-			{#each bouchers as boucher (boucher.key)}
+			{#each state.activeBouchers as boucher (boucher.key)}
 				<div class="w-0">
 					<div class="absolute">
 						<BoucherCard width="w-[12vh]" boucherId={boucher.id} />
@@ -250,12 +310,16 @@
 			class="card variant-filled-surface w-full h-[8%] mt-[3%] text-center grid grid-cols-[30%_70%] gap-2"
 		>
 			<div class="h-full text-3xl-r content-center p-3">Round score</div>
-			<div class="card h-[6vh] text-5xl-r content-center align-middle mt-[3%] mr-[5%] p-0">9000</div>
+			<div class="card h-[6vh] text-5xl-r content-center align-middle mt-[3%] mr-[5%] p-0">{$minScoreText.toFixed()}</div>
 		</div>
 
 		<!--Score-->
+		<!-- svelte-ignore a11y-no-static-element-interactions -->
 		<div class="card w-full h-[15%] mt-[3%] text-center border-2 p-2">
-			<div class="h-[45%] text-4xl-r content-center">Full house lvl 2</div>
+			<!-- svelte-ignore a11y-click-events-have-key-events -->
+			<div class="h-[45%] text-4xl-r content-center" on:click={onHandInfo}>
+				{state.handLevels[state.handType].name} lvl {state.handLevels[state.handType].lvl}
+			</div>
 
 			<div
 				class="flex h-[45%] justify-between text-5xl-r m-3 gap-0 items-center"
@@ -263,13 +327,13 @@
 				<div
 					class="w-[45%] h-full card text-right p-0 pr-[3%] variant-filled-tertiary content-center align-middle"
 				>
-					90
+					{$blueScoreText.toFixed()}
 				</div>
 				<div>X</div>
 				<div
 					class="w-[45%] h-full card text-left p-0 pl-[3%] variant-filled-error content-center align-middle"
 				>
-					90
+					{$redScoreText.toFixed()}
 				</div>
 			</div>
 		</div>
@@ -281,27 +345,31 @@
 			>
 				<div class="text-2xl-r">Hands</div>
 				<div class="card text-5xl-r content-center text-tertiary-300">
-					3
+					{state.hands}
 				</div>
 			</div>
 			<div
 				class="card text-center variant-filled-surface p-3 grid grid-rows-[25%_75%] gap-2"
 			>
 				<div class="text-2xl-r">Discards</div>
-				<div class="card text-5xl-r content-center text-error-300">1</div>
+				<div class="card text-5xl-r content-center text-error-300">
+					{state.discards}
+				</div>
 			</div>
 			<div
 				class="card text-center variant-filled-surface p-3 grid grid-rows-[25%_75%] gap-2"
 			>
 				<div class="text-2xl-r">Pot</div>
-				<div class="card text-5xl-r content-center">3$</div>
+				<div class="card text-5xl-r content-center">
+					{state.pot}$
+				</div>
 			</div>
 			<div
 				class="card text-center variant-filled-surface p-3 grid grid-rows-[25%_75%] gap-2"
 			>
 				<div class="text-2xl-r">Money</div>
 				<div class="card text-5xl-r content-center text-warning-300">
-					3$
+					{state.money}$
 				</div>
 			</div>
 		</div>
@@ -314,7 +382,7 @@
 			class="flex justify-between mt-[3%]"
 			style="width: calc(100% - 16vh);"
 		>
-			{#each jokers as joker, index (joker.key)}
+			{#each state.jokers as joker, index (joker.key)}
 				<!-- svelte-ignore a11y-click-events-have-key-events -->
 				<!-- svelte-ignore a11y-no-static-element-interactions -->
 				<div 
@@ -332,11 +400,11 @@
 				</div>
 			{/each}
 		</div>
-		<div class="text-left text-2xl-r">{jokers.length}/5</div>
+		<div class="text-left text-2xl-r">{state.jokers.length}/5</div>
 
 		<!--Played cards-->
 		<div class="flex justify-between ml-[10%] mr-[10%]" style="width: calc(80% - 14vh);">
-			{#each playedCards as card (card.key)}
+			{#each state.playedCards as card (card.key)}
 				<div 
 				transition:fly={{ y: 100, duration: 500 }}
 				class="w-1">
@@ -353,7 +421,7 @@
 
 		<!--Hand-->
 		<div class="flex justify-between" style="width: calc(100% - 14vh);">
-			{#each handCards as card, index (card.key)}
+			{#each state.handCards as card, index (card.key)}
 				<!-- svelte-ignore a11y-click-events-have-key-events -->
 				<!-- svelte-ignore a11y-no-static-element-interactions -->
 				<div
@@ -404,14 +472,14 @@
 			<!--Chat and leave buttons-->
 			<div class="flex justify-end gap-4">
 				<button class="card w-[25%] aspect-square content-center" on:click={onChat}>
-					<img src="icons/chat2.png" alt="chat" class="w-[50%] min-w-[20px] mx-auto" />
+					<img src="icons/chat2.png" alt="chat" class="w-[50%] min-w-[12px] mx-auto" />
 				</button>
 				<button class="card w-[25%] aspect-square text-4xl-r" on:click={onExit}>
 					X
 				</button>
 			</div>
 			<div class="w-full card text-5xl-r text-right p-4 mt-[5%]">
-				30s
+				{state.timeLeft}s
 			</div>
 		</div>
 
@@ -424,19 +492,21 @@
 				<div class="absolute top-[5%] left-[5%]">
 					<GameCard width="w-[14vh]" card={dummyCard}/>
 				</div>
-				<div class="absolute">
+				<!-- svelte-ignore a11y-click-events-have-key-events -->
+				<!-- svelte-ignore a11y-no-static-element-interactions -->
+				<div class="absolute" on:click={onDeck}>
 					<GameCard width="w-[14vh]" card={dummyCard}/>
 				</div>
 			</div>
 			<div class="w-full text-right text-2xl-r mt-[10%]">
-				41/52
+				{state.deckLeft}/{state.deckSize}
 			</div>
 		</div>
 	</div>
 </div>
 
 <style>
-	:global(body) {
+	.game-div {
 		background-image: url("/fondo_juego.png") !important;
 		background-size: cover;
 		background-position: center;
