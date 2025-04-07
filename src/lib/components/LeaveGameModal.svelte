@@ -1,10 +1,8 @@
 <script lang="ts">
     import type { SvelteComponent } from "svelte";
     import { getModalStore } from "@skeletonlabs/skeleton";
-    import { SlideToggle } from '@skeletonlabs/skeleton';
     import { goto } from '$app/navigation';
     import { base } from '$app/paths';
-    import { createLobbyFetch } from "$lib/fetch/lobbyFetch";
     
 
     // Props
@@ -13,7 +11,6 @@
 
     const modalStore = getModalStore();
 
-    
     /**
      * Function to create a lobby
      * @async
@@ -23,12 +20,8 @@
         modalStore.close();
     }
 
-    
-
-
 </script>
 
-<!-- @component This creates a form with built-in function to create a lobby. -->
 
 {#if $modalStore[0]}
     <div class="modal-form card p-4 w-400 shadow-xl space-y-4">

@@ -9,7 +9,7 @@
 	import BoucherCard from "$lib/components/BoucherCard.svelte";
 	import GameCard from "$lib/components/GameCard.svelte";
 	import JokerCard from "$lib/components/JokerCard.svelte";
-	import { HandTypesBase, type BoucherItem, type Card, type CardItem, type GameState, type JokerItem } from "$lib/interfaces";
+	import { HandTypesBase, type Card, type GameState } from "$lib/interfaces";
 	import { getNextKey } from "$lib/keyGenerator";
     import { getDrawerStore, getModalStore, type DrawerSettings, type ModalSettings } from "@skeletonlabs/skeleton";
     import { stat } from "fs";
@@ -17,7 +17,7 @@
 	import { flip } from "svelte/animate";
 	import { cubicOut } from "svelte/easing";
 	import { tweened } from "svelte/motion";
-	import { fly } from "svelte/transition";
+	import { fade, fly } from "svelte/transition";
 
 	// Main state variable
 	let state:GameState = {
@@ -28,7 +28,7 @@
 		bouchers: [],
 		handLevels: structuredClone(HandTypesBase),
 		round: 1,
-		minScore: 1000,
+		minScore: 100000,
 		handType: 1,
 		blueScore:0,
 		redScore:0,
@@ -41,7 +41,27 @@
 		timeLeft:30,
 	};
 
-	
+	// To know what jocker has the user clicked
+	let pickedJoker: number = -1;
+
+	// If true it disables the button controls
+	let actionBlocked:boolean = false; 
+
+	// For the play animation
+	const playAnimSpeed:number = 750; //ms
+	const playAnimDelay:number = 200; //ms
+	let indexToPlayAnim:number = -1;
+	let scorePlayAnim:number = 0;
+
+	// To draw the deck
+	let dummyCard:Card = {
+		rank:"A",
+		suit:"h",
+		overlay:0,
+		faceUp:false
+	}
+
+	// Modal and drawer variables
 
 	const modalStore = getModalStore();
 	const drawerStore = getDrawerStore();
@@ -64,19 +84,6 @@
 		component: 'handInfoModal'
 	}
 
-	
-
-	// To know what jocker has the user clicked
-	let pickedJoker: number = -1;
-
-	// To draw the deck
-	let dummyCard:Card = {
-		rank:"A",
-		suit:"h",
-		overlay:0,
-		faceUp:false
-	}
-
 	// Reactivity animations
 
 	const minScoreText = tweened(state.minScore, {
@@ -96,6 +103,145 @@
 		easing: cubicOut
 	});
 	$: redScoreText.set(state.redScore);
+
+	
+
+
+	function onClickJoker(index:number){
+		if(actionBlocked) return;
+
+		for (const card of state.handCards) card.picked = false;
+
+		if (index !== pickedJoker) {
+			const anyPicked = state.handCards.some(card => card.picked);
+			if (!anyPicked) pickedJoker = index;
+		} else {
+			pickedJoker = -1;
+		}
+	}
+
+	function onPlay(){
+		if(actionBlocked) return;
+
+		if (pickedJoker !== -1) return;
+
+		const pickedCards = state.handCards.filter(card => card.picked);
+		const count = pickedCards.length;
+
+		if (count > 0 && count < 6) {
+			const played = pickedCards.map(({ card }) => ({
+				key: getNextKey(),
+				card,
+				picked: false
+			}));
+
+			state.playedCards.push(...played);
+			state.handCards = state.handCards.filter(card => !card.picked);
+			pickedJoker = -1;
+			state.playedCards = [...state.playedCards];
+			actionBlocked = true;
+
+			for(let i=0; i<state.playedCards.length; i++){
+				setTimeout(() => {
+					indexToPlayAnim = i;
+					scorePlayAnim = Math.floor(Math.random() * 12);
+					state.blueScore += Math.floor(Math.random() * 1000);
+					state.redScore += Math.floor(Math.random() * 100);
+				}, playAnimSpeed * i + playAnimDelay);
+			}
+
+			setTimeout(() => {
+					indexToPlayAnim = -1;
+					actionBlocked = false;
+					state.playedCards = [];
+					state.minScore -= 10000;
+				}, playAnimSpeed * state.playedCards.length);
+			
+		}
+	}
+
+	function onArrowLeft() {
+		if(actionBlocked) return;
+
+		if (pickedJoker === -1) {
+			let pickedIndex = state.handCards.findIndex(card => card.picked);
+			if (pickedIndex > 0 && state.handCards.filter(c => c.picked).length === 1) {
+				// Swap
+				[state.handCards[pickedIndex - 1], state.handCards[pickedIndex]] =
+					[state.handCards[pickedIndex], state.handCards[pickedIndex - 1]];
+				state.handCards = [...state.handCards];
+			}
+		} else if (pickedJoker > 0) {
+			// Swap
+			[state.jokers[pickedJoker - 1], state.jokers[pickedJoker]] =
+				[state.jokers[pickedJoker], state.jokers[pickedJoker - 1]];
+			pickedJoker--;
+		}
+	}
+
+
+	function onArrowRight() {
+		if(actionBlocked) return;
+
+		if (pickedJoker === -1) {
+			let pickedIndex = state.handCards.findIndex(card => card.picked);
+			if (
+				pickedIndex !== -1 &&
+				pickedIndex < state.handCards.length - 1 &&
+				state.handCards.filter(c => c.picked).length === 1
+			) {
+				// Swap
+				[state.handCards[pickedIndex + 1], state.handCards[pickedIndex]] =
+					[state.handCards[pickedIndex], state.handCards[pickedIndex + 1]];
+				state.handCards = [...state.handCards];
+			}
+		} else if (pickedJoker < state.jokers.length - 1) {
+			// Swap
+			[state.jokers[pickedJoker + 1], state.jokers[pickedJoker]] =
+				[state.jokers[pickedJoker], state.jokers[pickedJoker + 1]];
+			pickedJoker++;
+		}
+	}
+
+	function onDiscard(){
+		if(actionBlocked) return;
+		state.handCards = state.handCards.filter(cardItem => !cardItem.picked);
+		state.playedCards = [];
+	}
+
+	function onHandInfo(){
+		modalStore.trigger(handInfoModal);
+	}
+
+	function onChat(){
+		drawerStore.open(settingsChat);
+	}
+
+	function onExit(){
+		modalStore.trigger(leaveGameModal);
+	}
+
+	function onDeck(){
+		state.handCards.push({ key: getNextKey(), card: generateCard(true, true), picked:false });
+		state.handCards = state.handCards
+	}
+
+	// Interval for timer, aux variable
+	let interval:any;
+
+	onMount(() => {
+		interval = setInterval(() => {
+			if (state.timeLeft > 0) {
+				state.timeLeft--;
+			} else {
+				state.timeLeft = 30;
+			}
+		}, 1000);
+	});
+
+	onDestroy(() => {
+		clearInterval(interval);
+	});
 
 	// ==== MOCKUP FUNCTIONS ====
 
@@ -165,118 +311,6 @@
 		card.picked = !card.picked;
 		state.handCards = [...state.handCards];
 	}
-
-	// ==== MOCKUP FUNCTIONS ====
-
-
-	function onClickJoker(index:number){
-		for (const card of state.handCards) card.picked = false;
-
-		if (index !== pickedJoker) {
-			const anyPicked = state.handCards.some(card => card.picked);
-			if (!anyPicked) pickedJoker = index;
-		} else {
-			pickedJoker = -1;
-		}
-	}
-
-	function onPlay(){
-		if (pickedJoker !== -1) return;
-
-		const pickedCards = state.handCards.filter(card => card.picked);
-		const count = pickedCards.length;
-
-		if (count > 0 && count < 6) {
-			const played = pickedCards.map(({ card }) => ({
-				key: getNextKey(),
-				card,
-				picked: false
-			}));
-
-			state.playedCards.push(...played);
-			state.handCards = state.handCards.filter(card => !card.picked);
-			state.playedCards = [...state.playedCards];
-		}
-	}
-
-	function onArrowLeft() {
-		if (pickedJoker === -1) {
-			let pickedIndex = state.handCards.findIndex(card => card.picked);
-			if (pickedIndex > 0 && state.handCards.filter(c => c.picked).length === 1) {
-				// Swap
-				[state.handCards[pickedIndex - 1], state.handCards[pickedIndex]] =
-					[state.handCards[pickedIndex], state.handCards[pickedIndex - 1]];
-				state.handCards = [...state.handCards];
-			}
-		} else if (pickedJoker > 0) {
-			// Swap
-			[state.jokers[pickedJoker - 1], state.jokers[pickedJoker]] =
-				[state.jokers[pickedJoker], state.jokers[pickedJoker - 1]];
-			pickedJoker--;
-		}
-	}
-
-
-	function onArrowRight() {
-	if (pickedJoker === -1) {
-		let pickedIndex = state.handCards.findIndex(card => card.picked);
-		if (
-			pickedIndex !== -1 &&
-			pickedIndex < state.handCards.length - 1 &&
-			state.handCards.filter(c => c.picked).length === 1
-		) {
-			// Swap
-			[state.handCards[pickedIndex + 1], state.handCards[pickedIndex]] =
-				[state.handCards[pickedIndex], state.handCards[pickedIndex + 1]];
-			state.handCards = [...state.handCards];
-		}
-	} else if (pickedJoker < state.jokers.length - 1) {
-		// Swap
-		[state.jokers[pickedJoker + 1], state.jokers[pickedJoker]] =
-			[state.jokers[pickedJoker], state.jokers[pickedJoker + 1]];
-		pickedJoker++;
-	}
-}
-
-	function onDiscard(){
-		state.handCards = state.handCards.filter(cardItem => !cardItem.picked);
-		state.playedCards = [];
-	}
-
-	function onHandInfo(){
-		modalStore.trigger(handInfoModal);
-	}
-
-	function onChat(){
-		drawerStore.open(settingsChat);
-	}
-
-	function onExit(){
-		modalStore.trigger(leaveGameModal);
-	}
-
-	function onDeck(){
-		state.handCards.push({ key: getNextKey(), card: generateCard(true, true), picked:false });
-		state.handCards = state.handCards
-	}
-
-	// Interval for timer, aux variable
-	let interval:any;
-
-	onMount(() => {
-		interval = setInterval(() => {
-			if (state.timeLeft > 0) {
-				state.timeLeft--;
-			} else {
-				state.timeLeft = 30;
-			}
-		}, 1000);
-	});
-
-	onDestroy(() => {
-		clearInterval(interval);
-	});
-
 
 </script>
 
@@ -404,10 +438,20 @@
 
 		<!--Played cards-->
 		<div class="flex justify-between ml-[10%] mr-[10%]" style="width: calc(80% - 14vh);">
-			{#each state.playedCards as card (card.key)}
+			{#each state.playedCards as card, index (card.key)}
+				
 				<div 
 				transition:fly={{ y: 100, duration: 500 }}
 				class="w-1">
+					{#if index === indexToPlayAnim}
+						<div
+						in:fly={{ y: 150, duration: 300 }}
+						out:fade={{ duration: 300 }}
+						class="w-[14vh] text-center absolute mt-[-4vh] text-warning-300 text-3xl-r"
+						>
+							+{scorePlayAnim}
+						</div>
+					{/if}
 					<div class="absolute">
 						<GameCard
 							width="w-[14vh]"
