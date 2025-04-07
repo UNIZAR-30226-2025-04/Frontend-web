@@ -10,14 +10,14 @@
 <script lang="ts">
 	import '../app.postcss';
 
-	// Floating UI for Popups
-	import { computePosition, autoUpdate, flip, shift, offset, arrow } from '@floating-ui/dom';
+	// Floating UI for Popup
+	import { computePosition, autoUpdate, offset, shift, flip, arrow } from '@floating-ui/dom';
 	import { storePopup, type ModalComponent } from '@skeletonlabs/skeleton';
-	import CreateLobbyFormModal from '$lib/components/CreateLobbyFormModal.svelte';
 	storePopup.set({ computePosition, autoUpdate, flip, shift, offset, arrow });
 
 	// Modal signleton setup, once per proyect
 	import { initializeStores, Modal, Drawer, getDrawerStore } from '@skeletonlabs/skeleton';
+	import CreateLobbyFormModal from '$lib/components/CreateLobbyFormModal.svelte';
 	import JoinLobbyCodeModal from '$lib/components/JoinLobbyCodeModal.svelte';
     import FriendsModal from '$lib/components/FriendsModal.svelte';
     import InboxModal from '$lib/components/InboxModal.svelte';
@@ -25,7 +25,9 @@
 	import MatchMakingModal from '$lib/components/MatchMakingModal.svelte';
 	import ShareModal from '$lib/components/ShareModal.svelte';
     import ChatDrawer from '$lib/components/ChatDrawer.svelte';
-	
+    import LeaveGameModal from '$lib/components/LeaveGameModal.svelte';
+    import HandInfoModal from '$lib/components/HandInfoModal.svelte';
+
 	// For all singletons
 	initializeStores();
 
@@ -39,8 +41,9 @@
 		joinLobbyCodeModal: {ref: JoinLobbyCodeModal},
 		matchMakingModal: {ref: MatchMakingModal},
 		shareModal: {ref: ShareModal},
+		leaveGameModal: {ref :LeaveGameModal},
+		handInfoModal: {ref: HandInfoModal},
 	};
-
   
 </script>
 
@@ -68,4 +71,5 @@
 		color: black;
 		font-family: 'Pixelify Sans';
 	}
+
 </style>

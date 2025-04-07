@@ -1,678 +1,713 @@
 <script lang="ts">
-  import GameCard from "$lib/components/GameCard.svelte";
+	import {
+		boucherDirectory,
+		jokerDirectory,
+		jokerEditionsDirectory,
+		overlayDirectory,
+		suitDirectory,
+	} from "$lib/cardDirectory";
+	import BoucherCard from "$lib/components/BoucherCard.svelte";
+	import GameCard from "$lib/components/GameCard.svelte";
+	import JokerCard from "$lib/components/JokerCard.svelte";
+	import { HandTypesBase, type Card, type GameState } from "$lib/interfaces";
+	import { getNextKey } from "$lib/keyGenerator";
+	import {
+		getDrawerStore,
+		getModalStore,
+		type DrawerSettings,
+		type ModalSettings,
+	} from "@skeletonlabs/skeleton";
+	import { onDestroy, onMount } from "svelte";
+	import { flip } from "svelte/animate";
+	import { cubicOut } from "svelte/easing";
+	import { tweened } from "svelte/motion";
+	import { fade, fly } from "svelte/transition";
 
-  // Estado del juego
-  let round = 3;
-  let totalRounds = 10;
-  let money = 2435;
-  let roundPot = 10;
-  let buyIn = 10;
-  let discards = 4;
-  let timeLeft = 30;
-  let fullHouse = {
-    name: "Full House",
-    level: 2,
-    value: 90,
-    multiplier: 8
-  };
+	// Main state variable
+	let state: GameState = {
+		playedCards: [],
+		handCards: [],
+		jokers: [],
+		activeBouchers: [],
+		bouchers: [],
+		handLevels: structuredClone(HandTypesBase),
+		round: 1,
+		minScore: 100000,
+		handType: 1,
+		blueScore: 0,
+		redScore: 0,
+		hands: 3,
+		discards: 3,
+		pot: 5,
+		money: 10,
+		deckSize: 52,
+		deckLeft: 44,
+		timeLeft: 30,
+	};
 
-  // Estado para el modal de salida
-  let showExitModal = false;
-  let showWinModal = false;
-  let showLoseModal = false;
+	// To know what jocker has the user clicked
+	let pickedJoker: number = -1;
 
-  // Consumibles usados con imágenes de mock
-  const usedConsumables = [
-    { name: "Mod 1", description: "Modificador de cartas", icon: "/icons/pxArt(1).png" },
-    { name: "Mod 2", description: "Modificador de cartas", icon: "/icons/pxArt(2).png" },
-    { name: "Mod 3", description: "Modificador de cartas", icon: "/icons/pxArt(3).png" },
-    { name: "Mod 4", description: "Modificador de cartas", icon: "/icons/pxArt(4).png" },
-    { name: "Mod 5", description: "Modificador de cartas", icon: "/icons/pxArt(5).png" },
-    { name: "Mod 6", description: "Modificador de cartas", icon: "/icons/pxArt(6).png" }
-  ];
+	// If true it disables the button controls
+	let actionBlocked: boolean = false;
 
-  // Progreso de la barra de consumibles (15%)
-  let progressPercentage = 15;
+	// For the play animation
+	const playAnimSpeed: number = 750; //ms
+	const playAnimDelay: number = 200; //ms
+	let indexToPlayAnim: number = -1;
+	let scorePlayAnim: number = 0;
 
-  // Imágenes para las cartas
-  const suitImages = {
-    "♠": "/icons/spade.png",
-    "♥": "/icons/heart.png",
-    "♦": "/icons/diamond.png",
-    "♣": "/icons/club.png"
-  };
-  
-  // Imágenes de arte para el centro de las cartas
-  const artImages = [
-    "/icons/pxArt(1).png",
-    "/icons/pxArt(2).png",
-    "/icons/pxArt(3).png",
-    "/icons/pxArt(4).png",
-    "/icons/pxArt(5).png",
-    "/icons/pxArt(6).png",
-    "/icons/pxArt(7).png",
-    "/icons/pxArt(8).png"
-  ];
+	// To draw the deck
+	let dummyCard: Card = {
+		rank: "A",
+		suit: "h",
+		overlay: 0,
+		faceUp: false,
+	};
 
-  // Jokers en la parte superior con imagen
-  const jokers = [
-    { name: "Joker", description: "Comodín que puede sustituir cualquier carta", image: "/icons/pxArt(1).png" },
-    { name: "Joker", description: "Comodín que puede sustituir cualquier carta", image: "/icons/pxArt(2).png" },
-    { name: "Joker", description: "Comodín que puede sustituir cualquier carta", image: "/icons/pxArt(3).png" },
-    { name: "Joker", description: "Comodín que puede sustituir cualquier carta", image: "/icons/pxArt(4).png" }
-  ];
-  
-  // Total de jokers disponibles en el juego
-  let totalJokers = 8;
+	// Styles tag that repeat
+	const infoChip:string = "card text-center variant-filled-surface p-3 grid grid-rows-[25%_75%] gap-2";
+	const infoChipCard:string = "card text-5xl-r content-center";
 
-  const tableCards = [
-    { name: "J", value: 11, suit: "♠", image: artImages[0] },
-    { name: "Q", value: 12, suit: "♥", image: artImages[1] },
-    { name: "K", value: 13, suit: "♦", image: artImages[2] },
-    { name: "A", value: 14, suit: "♣", image: artImages[3] },
-  ];
+	// Modal and drawer variables
 
-  // Añadimos más cartas para el jugador para demostrar el desplazamiento
-  const playerCards = [
-    { name: "7", value: 7, suit: "♠", image: artImages[4] },
-    { name: "8", value: 8, suit: "♥", image: artImages[5] },
-    { name: "9", value: 9, suit: "♦", image: artImages[6] },
-    { name: "10", value: 10, suit: "♣", image: artImages[7] },
-    { name: "J", value: 11, suit: "♠", image: artImages[0] },
-    { name: "Q", value: 12, suit: "♥", image: artImages[1] },
-    { name: "K", value: 13, suit: "♦", image: artImages[2] },
-    { name: "A", value: 14, suit: "♣", image: artImages[3] },
-  ];
+	const modalStore = getModalStore();
+	const drawerStore = getDrawerStore();
 
-  // Contador de cartas
-  let cardsRemaining = 41;
-  let totalCards = 52;
+	const settingsChat: DrawerSettings = {
+		id: "chat",
+		position: "right",
+		width: "w-[40%]",
+		padding: "p-4",
+	};
 
-  // Inputs para la interfaz
-  let inputValue = "";
-  let selectedOption = "";
-  const options = ["Opción 1", "Opción 2", "Opción 3"];
-  
-  // Funciones para los botones de chat y salir
-  function openChat() {
-    alert("Abriendo chat");
-  }
-  
-  function exitGame() {
-    showExitModal = true;
-  }
-  
-  function confirmExit() {
-    window.location.href = "/lobbies";
-  }
-  
-  function cancelExit() {
-    showExitModal = false;
-  }
-  
-  // Funciones para los botones de acción
-  function playCards() {
-    alert("Jugando cartas");
-  }
-  
-  function discardCards() {
-    alert("Descartando cartas");
-  }
-  
-  function prevOption() {
-    alert("Opción anterior");
-  }
-  
-  function nextOption() {
-    alert("Siguiente opción");
-  }
+	const leaveGameModal: ModalSettings = {
+		type: "component",
+		component: "leaveGameModal",
+	};
 
-  // Función para mostrar el modal de victoria
-  function youWinDemo() {
-    showWinModal = true;
-  }
-  
-  // Función para cerrar el modal de victoria
-  function closeWinModal() {
-    showWinModal = false;
-  }
+	const handInfoModal: ModalSettings = {
+		type: "component",
+		meta: { levels: state.handLevels },
+		component: "handInfoModal",
+	};
 
-  // Función para mostrar el modal de derrota
-  function youLoseDemo() {
-    showLoseModal = true;
-  }
-  
-  // Función para cerrar el modal de derrota
-  function closeLoseModal() {
-    showLoseModal = false;
-  }
-  
-  function goToMainMenu() {
-    window.location.href = "/lobbies";
-  }
+	// Reactivity animations
 
-  // Estado para la tienda
-  let showShop = false;
-  let shopItems = [
-    { name: "Mod", price: 14, icon: "/icons/pxArt(1).png" },
-    { name: "Card", price: 2, icon: "/icons/pxArt(2).png" },
-    { name: "Card pack", price: 5, icon: "/icons/pxArt(3).png" },
-    { name: "Cool pack", price: 30, icon: "/icons/pxArt(4).png" }
-  ];
+	const minScoreText = tweened(state.minScore, {
+		duration: 400,
+		easing: cubicOut,
+	});
+	$: minScoreText.set(state.minScore);
 
-  function toggleShop() {
-    showShop = !showShop;
-  }
+	const blueScoreText = tweened(state.blueScore, {
+		duration: 400,
+		easing: cubicOut,
+	});
+	$: blueScoreText.set(state.blueScore);
+
+	const redScoreText = tweened(state.redScore, {
+		duration: 400,
+		easing: cubicOut,
+	});
+	$: redScoreText.set(state.redScore);
+
+	/**
+	 * Handles the click event on the joker card, updating the state of the hand cards.
+	 * If the action is blocked, it prevents any changes.
+	 * Resets the `picked` status of all hand cards and sets the picked joker card index.
+	 * @param index  of the joker card that was clicked.
+	 */
+	function onClickJoker(index: number) {
+		if (actionBlocked) return;
+
+		for (const card of state.handCards) card.picked = false;
+
+		if (index !== pickedJoker) {
+			const anyPicked = state.handCards.some((card) => card.picked);
+			if (!anyPicked) pickedJoker = index;
+		} else {
+			pickedJoker = -1;
+		}
+	}
+
+	/**
+	 * Handles the play action, where the selected cards are played and added to the `playedCards` array.
+	 * - If no action is blocked and a joker card is not picked, it checks the number of selected cards.
+	 * - If the number of selected cards is between 1 and 5 (inclusive), it moves the picked cards to the played cards and updates the hand cards.
+	 * - It also triggers animations and updates the scores of the blue and red teams at random.
+	 * - Once the play is complete, it resets the state and allows further actions.
+	 */
+	function onPlay() {
+		if (actionBlocked) return;
+
+		if (pickedJoker !== -1) return;
+
+		const pickedCards = state.handCards.filter((card) => card.picked);
+		const count = pickedCards.length;
+
+		if (count > 0 && count < 6) {
+			const played = pickedCards.map(({ card }) => ({
+				key: getNextKey(),
+				card,
+				picked: false,
+			}));
+
+			state.playedCards.push(...played);
+			state.handCards = state.handCards.filter((card) => !card.picked);
+			pickedJoker = -1;
+			state.playedCards = [...state.playedCards];
+			actionBlocked = true;
+
+			// Animation. TODO put real values
+
+			for (let i = 0; i < state.playedCards.length; i++) {
+				setTimeout(
+					() => {
+						indexToPlayAnim = i;
+						scorePlayAnim = Math.floor(Math.random() * 12);
+						state.blueScore += Math.floor(Math.random() * 1000);
+						state.redScore += Math.floor(Math.random() * 100);
+					},
+					playAnimSpeed * i + playAnimDelay,
+				);
+			}
+
+			setTimeout(() => {
+				indexToPlayAnim = -1;
+				actionBlocked = false;
+				state.playedCards = [];
+				state.minScore -= 10000;
+			}, playAnimSpeed * state.playedCards.length);
+		}
+	}
+
+	/**
+	 * Handles the action triggered by the left arrow key.
+	 * - If no action is blocked and no joker card is picked, it swaps the selected card with the one to its left.
+	 * - If a joker card is picked, it swaps the joker card with the one to its left in the `jokers` array.
+	 * This function ensures that the picked card can only be swapped with the card immediately to the left,
+	 * and updates the state of the hand cards or jokers accordingly.
+	 */
+	function onArrowLeft() {
+		if (actionBlocked) return;
+
+		if (pickedJoker === -1) {
+			let pickedIndex = state.handCards.findIndex((card) => card.picked);
+			if (
+				pickedIndex > 0 &&
+				state.handCards.filter((c) => c.picked).length === 1
+			) {
+				// Swap
+				[
+					state.handCards[pickedIndex - 1],
+					state.handCards[pickedIndex],
+				] = [
+					state.handCards[pickedIndex],
+					state.handCards[pickedIndex - 1],
+				];
+				state.handCards = [...state.handCards];
+			}
+		} else if (pickedJoker > 0) {
+			// Swap
+			[state.jokers[pickedJoker - 1], state.jokers[pickedJoker]] = [
+				state.jokers[pickedJoker],
+				state.jokers[pickedJoker - 1],
+			];
+			pickedJoker--;
+		}
+	}
+
+	/**
+	 * Handles the action triggered by the right arrow key.
+	 * - If no action is blocked and no joker card is picked, it swaps the selected card with the one to its right.
+	 * - If a joker card is picked, it swaps the joker card with the one to its right in the `jokers` array.
+	 * This function ensures that the picked card can only be swapped with the card immediately to the right,
+	 * and updates the state of the hand cards or jokers accordingly.
+	 */
+	function onArrowRight() {
+		if (actionBlocked) return;
+
+		if (pickedJoker === -1) {
+			let pickedIndex = state.handCards.findIndex((card) => card.picked);
+			if (
+				pickedIndex !== -1 &&
+				pickedIndex < state.handCards.length - 1 &&
+				state.handCards.filter((c) => c.picked).length === 1
+			) {
+				// Swap
+				[
+					state.handCards[pickedIndex + 1],
+					state.handCards[pickedIndex],
+				] = [
+					state.handCards[pickedIndex],
+					state.handCards[pickedIndex + 1],
+				];
+				state.handCards = [...state.handCards];
+			}
+		} else if (pickedJoker < state.jokers.length - 1) {
+			// Swap
+			[state.jokers[pickedJoker + 1], state.jokers[pickedJoker]] = [
+				state.jokers[pickedJoker],
+				state.jokers[pickedJoker + 1],
+			];
+			pickedJoker++;
+		}
+	}
+
+	/**
+	 * Handles the discard action, removing all picked cards from the hand.
+	 * - If no action is blocked, it filters out the picked cards from the `handCards` array, effectively discarding them.
+	 * - This function is used to remove selected cards from the player's hand once they are discarded.
+	 */
+	function onDiscard() {
+		if (actionBlocked) return;
+		state.handCards = state.handCards.filter(
+			(cardItem) => !cardItem.picked,
+		);
+	}
+
+	function onHandInfo() {
+		modalStore.trigger(handInfoModal);
+	}
+
+	function onChat() {
+		drawerStore.open(settingsChat);
+	}
+
+	function onExit() {
+		modalStore.trigger(leaveGameModal);
+	}
+
+	// Interval for timer, aux variable
+	let interval: any;
+
+	onMount(() => {
+		// Interval for the Time left clock
+		interval = setInterval(() => {
+			if (state.timeLeft > 0) {
+				state.timeLeft--;
+			} else {
+				state.timeLeft = 30;
+			}
+		}, 1000);
+	});
+
+	onDestroy(() => {
+		clearInterval(interval);
+	});
+
+	// ==== MOCKUP FUNCTIONS ====
+
+	// Function just to get more cards and play around
+	function onDeck() {
+		state.handCards.push({
+			key: getNextKey(),
+			card: generateCard(true, true),
+			picked: false,
+		});
+		state.handCards = state.handCards;
+	}
+
+	for (let i = 0; i < 0; i++) {
+		state.playedCards.push({
+			key: getNextKey(),
+			card: generateCard(true, true),
+			picked: false,
+		});
+	}
+
+	for (let i = 0; i < 8; i++) {
+		state.handCards.push({
+			key: getNextKey(),
+			card: generateCard(true, true),
+			picked: false,
+		});
+	}
+
+	for (let j = 0; j < 5; j++) {
+		onAddJoker();
+	}
+
+	for (let j = 0; j < 6; j++) {
+		onAddBoucher();
+	}
+
+	function generateCard(withOverlay: boolean, faceUp: boolean): Card {
+		const ranks: string[] = [
+			"A",
+			"K",
+			"Q",
+			"J",
+			"10",
+			"9",
+			"8",
+			"7",
+			"6",
+			"5",
+			"4",
+			"3",
+			"2",
+		];
+		return {
+			rank: ranks[Math.floor(Math.random() * ranks.length)],
+			suit: suitDirectory[
+				Math.floor(Math.random() * suitDirectory.length)
+			].name,
+			faceUp: faceUp,
+			overlay: withOverlay
+				? Math.floor(Math.random() * overlayDirectory.length)
+				: 0,
+		};
+	}
+
+	function onAddJoker() {
+		const newJoker = Math.floor(Math.random() * jokerDirectory.length);
+		const newEdition = Math.floor(
+			Math.random() * jokerEditionsDirectory.length,
+		);
+		state.jokers.push({
+			key: getNextKey(),
+			id: newJoker,
+			edition: newEdition,
+		});
+		state.jokers = state.jokers;
+	}
+
+	function onAddBoucher() {
+		const newBoucher = Math.floor(Math.random() * boucherDirectory.length);
+		state.activeBouchers.push({ key: getNextKey(), id: newBoucher });
+		state.activeBouchers = state.activeBouchers;
+	}
+
+	function onClickHand(index: number) {
+		pickedJoker = -1;
+		const card = state.handCards[index];
+		card.picked = !card.picked;
+		state.handCards = [...state.handCards];
+	}
 </script>
 
-<div class="h-screen flex">
-  <!-- Panel lateral blanco - con margen a la izquierda -->
-  <div class="w-[250px] min-w-[350px] bg-white p-6 flex flex-col left-8 absolute h-full z-10 rounded-lg shadow-lg">
-    <h2 class="text-xl mb-8 font-pixelify text-black font-bold">Round {round}/{totalRounds}</h2>
-    
-    <div class="mb-12">
-      <h3 class="mb-3 font-pixelify text-black font-bold">Active consumables</h3>
-      <!-- Contenedor con desplazamiento horizontal -->
-      <div class="overflow-x-auto pb-2">
-        <div class="flex gap-3 min-w-max">
-          {#each usedConsumables as consumable}
-            <div class="w-24 h-32 border-2 border-black rounded-lg flex flex-col items-center justify-center bg-white shrink-0">
-              <img src={consumable.icon} alt={consumable.name} class="w-10 h-10 object-contain mb-1" />
-              <span class="font-pixelify text-black text-xs font-medium">{consumable.name}</span>
-            </div>
-          {/each}
-        </div>
-      </div>
-    </div>
-
-    <div class="border-2 border-black rounded-lg p-4 mb-14">
-      <h4 class="font-pixelify text-center mb-4 text-black font-bold">{fullHouse.name} lvl {fullHouse.level}</h4>
-      <div class="flex justify-between font-pixelify">
-        <div class="border-2 border-black rounded-lg py-1 px-3 text-center w-[45%]">
-          <span class="text-xl text-black font-bold">{fullHouse.value}</span>
-        </div>
-        <div class="flex items-center justify-center">
-          <span class="text-xl text-black font-bold">X</span>
-        </div>
-        <div class="border-2 border-black rounded-lg py-1 px-3 text-center w-[45%]">
-          <span class="text-xl text-black font-bold">{fullHouse.multiplier}</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="grid grid-cols-2 gap-5">
-      {#each [
-        ['Discards', discards], 
-        ['Your money', `$${money}`]
-      ] as [label, value], i}
-        <div class="border-2 border-black rounded-lg p-2">
-          <div class="font-pixelify text-sm text-black font-medium">{label}</div>
-          <div class="font-pixelify text-lg border-t border-black pt-1 text-center text-black font-bold">{value}</div>
-        </div>
-      {/each}
-    </div>
-    
-    <div class="grid grid-cols-2 gap-5 mt-8">
-      {#each [
-        ['Buy-in', `$${buyIn}`], 
-        ['Round\'s pot', `$${roundPot}`]
-      ] as [label, value], i}
-        <div class="border-2 border-black rounded-lg p-2">
-          <div class="font-pixelify text-sm text-black font-medium">{label}</div>
-          <div class="font-pixelify text-lg border-t border-black pt-1 text-center text-black font-bold">{value}</div>
-        </div>
-      {/each}
-    </div>
-  </div>
-
-  <!-- Área de juego - expandida y centrada -->
-  <div class="ml-[190px] flex-1 p-8 relative">
-    <!-- Controles superiores: Chat, Timer y Exit - Posicionados a la derecha del todo de la pantalla -->
-    <div class="fixed top-4 right-4 flex flex-col items-end gap-2 z-20">
-      <div class="flex gap-2">
-        <!-- Botón de chat con imagen -->
-        <button 
-          class="bg-white rounded-lg p-2 font-pixelify flex items-center justify-center w-12 h-12 border-2 border-black"
-          on:click={openChat}
-        >
-          <img src="/icons/chat.png" alt="Chat" class="w-8 h-8" />
-        </button>
-        
-        <!-- Botón de salir (X) -->
-        <button 
-          class="bg-white rounded-lg p-2 font-pixelify flex items-center justify-center w-12 h-12 border-2 border-black"
-          on:click={exitGame}
-        >
-          <span class="text-black font-bold text-2xl">X</span>
-        </button>
-      </div>
-      
-      <!-- Timer - Debajo de los botones -->
-      <div class="bg-white rounded-lg px-6 py-2 font-pixelify border-2 border-black w-full text-center">
-        <span class="text-black font-bold text-xl">{timeLeft} s</span>
-      </div>
-    </div>
-
-    <!-- Estructura de tres secciones para el área de juego -->
-    <div class="h-full flex flex-col">
-      <!-- Jokers en la parte superior con contador - alineados a la izquierda -->
-      <div class="mt-4 relative">
-        <!-- Contenedor con el mismo ancho que las cartas del jugador -->
-        <div class="mx-auto" style="width: calc(145px * 5 + 16px * 4);">
-          <div class="flex gap-4 justify-start">
-            {#each jokers as joker, i}
-              <div class="w-[145px] h-[193px] bg-white rounded-lg border-2 border-black relative overflow-hidden shrink-0">
-                <div class="absolute top-2 left-2 text-base font-bold z-10 text-purple-700">
-                  Joker
-                </div>
-                <div class="flex items-center justify-center h-full">
-                  <img src={joker.image} alt="Joker" class="w-16 h-16 object-contain" />
-                </div>
-                <div class="absolute bottom-2 right-2 text-base font-bold rotate-180 z-10 text-purple-700">
-                  Joker
-                </div>
-              </div>
-            {/each}
-          </div>
-          
-          <!-- Contador de jokers debajo a la izquierda del primer joker -->
-          <div class="absolute -bottom-6 left-0">
-            <span class="text-white font-pixelify font-bold">{jokers.length}/{totalJokers}</span>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Cartas de la mesa (tableCards) - CENTRADAS HORIZONTALMENTE Y MOVIDAS HACIA ARRIBA -->
-      <div class="absolute top-[40%] left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex justify-center gap-4 w-full max-w-[1200px]">
-        {#each tableCards as card, i}
-          <div class="w-[130px] h-[173px] bg-white rounded-lg border-2 border-black relative overflow-hidden">
-            <div class="absolute top-2 left-2 text-lg font-bold z-10" class:text-red-500={card.suit === "♥" || card.suit === "♦"} class:text-black={card.suit === "♠" || card.suit === "♣"}>
-              {card.name}{card.suit}
-            </div>
-            <div class="flex items-center justify-center h-full">
-              <img src={card.image} alt={card.suit} class="w-16 h-16 object-contain" />
-            </div>
-            <div class="absolute bottom-2 right-2 text-lg font-bold rotate-180 z-10" class:text-red-500={card.suit === "♥" || card.suit === "♦"} class:text-black={card.suit === "♠" || card.suit === "♣"}>
-              {card.name}{card.suit}
-            </div>
-          </div>
-        {/each}
-      </div>
-      
-      <!-- Espacio inferior con las cartas del jugador -->
-      <div class="flex-1 flex flex-col justify-end">
-        <!-- Cartas del jugador - en la parte inferior con desplazamiento horizontal -->
-        <div class="mt-auto">
-          <!-- Contenedor con desplazamiento horizontal para las cartas del jugador - limitado a 5 cartas visibles -->
-          <div class="overflow-x-auto pb-2 mx-auto" style="width: calc(145px * 5 + 16px * 4);">
-            <div class="flex gap-4 min-w-max">
-              {#each playerCards as card, i}
-                <div class="w-[145px] h-[193px] bg-white rounded-lg border-2 border-black relative overflow-hidden shrink-0">
-                  <div class="absolute top-2 left-2 text-base font-bold z-10" class:text-red-500={card.suit === "♥" || card.suit === "♦"} class:text-black={card.suit === "♠" || card.suit === "♣"}>
-                    {card.name}{card.suit}
-                  </div>
-                  <div class="flex items-center justify-center h-full">
-                    <img src={card.image} alt={card.suit} class="w-16 h-16 object-contain" />
-                  </div>
-                  <div class="absolute bottom-2 right-2 text-base font-bold rotate-180 z-10" class:text-red-500={card.suit === "♥" || card.suit === "♦"} class:text-black={card.suit === "♠" || card.suit === "♣"}>
-                    {card.name}{card.suit}
-                  </div>
-                </div>
-              {/each}
-            </div>
-          </div>
-          
-          <!-- Controles de juego estilo pixelado -->
-          <div class="flex justify-center items-center gap-2 mt-6 mb-8">
-            <button 
-              class="bg-white rounded-full py-2 px-10 font-pixelify text-black font-bold text-base border-2 border-black hover:bg-gray-100"
-              on:click={playCards}
-            >
-              Play
-            </button>
-            
-            <div class="flex border-2 border-black rounded-md">
-              <button 
-                class="bg-white py-2 px-4 font-pixelify text-black font-bold hover:bg-gray-100 border-r border-black"
-                on:click={prevOption}
-              >
-                ←
-              </button>
-              <button 
-                class="bg-white py-2 px-4 font-pixelify text-black font-bold hover:bg-gray-100"
-                on:click={nextOption}
-              >
-                →
-              </button>
-            </div>
-            
-            <button 
-              class="bg-white rounded-full py-2 px-10 font-pixelify text-black font-bold text-base border-2 border-black hover:bg-gray-100"
-              on:click={discardCards}
-            >
-              Discard
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Mazo de cartas apiladas en la esquina inferior derecha de la pantalla -->
-    <div class="fixed bottom-8 right-8 z-20">
-      <div class="relative">
-        <!-- Carta 3 (la de más atrás) -->
-        <div class="absolute -right-3 -bottom-3 w-28 h-40 bg-white rounded-lg border-2 border-black">
-          <!-- Patrón de cruces azules en los bordes -->
-          <div class="absolute inset-0 p-1">
-            <div class="border-2 border-dashed border-blue-400 h-full w-full rounded-md flex items-center justify-center">
-              <!-- Círculo verde en el centro -->
-              <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
-                <span class="text-white font-bold text-lg">×</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Carta 2 (en medio) -->
-        <div class="absolute -right-1.5 -bottom-1.5 w-28 h-40 bg-white rounded-lg border-2 border-black">
-          <!-- Patrón de cruces azules en los bordes -->
-          <div class="absolute inset-0 p-1">
-            <div class="border-2 border-dashed border-blue-400 h-full w-full rounded-md"></div>
-          </div>
-        </div>
-        
-        <!-- Carta 1 (la de más adelante) -->
-        <div class="relative w-28 h-40 bg-white rounded-lg border-2 border-black">
-          <!-- Patrón de cruces azules en los bordes -->
-          <div class="absolute inset-0 p-1">
-            <div class="border-2 border-dashed border-blue-400 h-full w-full rounded-md"></div>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Contador de cartas debajo del mazo -->
-      <div class="mt-2 text-center bg-transparent">
-        <span class="text-white font-pixelify font-bold">{cardsRemaining}/{totalCards}</span>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Botones para demostración -->
-<div class="fixed bottom-4 left-4 flex gap-2 z-50">
-  <button 
-    class="bg-white rounded-lg p-2 font-pixelify text-black font-bold border-2 border-black"
-    on:click={youWinDemo}
-  >
-    youwindemo
-  </button>
-  
-  <button 
-    class="bg-white rounded-lg p-2 font-pixelify text-black font-bold border-2 border-black"
-    on:click={youLoseDemo}
-  >
-    youlosedemo
-  </button>
-</div>
-
-<!-- Botón de tienda -->
-<button 
-  class="fixed bottom-4 right-4 bg-white rounded-lg p-2 font-pixelify text-black font-bold border-2 border-black z-50"
-  on:click={toggleShop}
+<!-- Main body -->
+<div
+	class="grid grid-cols-[30%_50%_14%] h-full w-full tv-filter gap-[3%] game-div"
 >
-  Shop
-</button>
+	<!-- Info column -->
+	<div class="h-[100vh] ml-[20%] card rounded-none text-left p-[5%]">
+		<!--Title-->
+		<div class="text-5xl-r h-[12%] card variant-filled-surface p-5">
+			Round {state.round}/10
+		</div>
 
-<!-- Modal de victoria -->
-{#if showWinModal}
-  <div class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
-    <div class="bg-white rounded-xl w-96 overflow-hidden border-4 border-black text-center p-6">
-      <h2 class="font-pixelify text-center text-5xl font-bold text-black mb-6">YOU WIN!</h2>
-      
-      <div class="border-2 border-black rounded-lg p-4 mb-6">
-        <p class="font-pixelify text-black text-xl mb-2">Round reward</p>
-        <p class="font-pixelify text-black text-3xl font-bold">$720</p>
-      </div>
-      
-      <div class="border-2 border-black rounded-lg p-4 mb-8">
-        <div class="flex justify-between items-center">
-          <div class="w-1/2 border-r border-black pr-4">
-            <p class="font-pixelify text-black text-lg">Your money</p>
-            <p class="font-pixelify text-black text-2xl font-bold">$3155</p>
-          </div>
-          <div class="w-1/2 pl-4">
-            <p class="font-pixelify text-black text-lg">Next round</p>
-            <p class="font-pixelify text-black text-2xl font-bold">4/10</p>
-          </div>
-        </div>
-      </div>
-      
-      <button 
-        class="bg-white rounded-full py-3 px-12 font-pixelify text-black font-bold text-xl border-2 border-black hover:bg-gray-100"
-        on:click={closeWinModal}
-      >
-        CONTINUE
-      </button>
-    </div>
-  </div>
-{/if}
+		<!--Bouchers label-->
+		<div class="text-2xl-r mt-[3%]">Active consumables</div>
+		<!--Bouchers-->
+		<div
+			class="flex h-[20%] mt-[3%] justify-between"
+			style="width: calc(100% - 12vh);"
+		>
+			{#each state.activeBouchers as boucher (boucher.key)}
+				<div class="w-0">
+					<div class="absolute">
+						<BoucherCard width="w-[12vh]" boucherId={boucher.id} />
+					</div>
+				</div>
+			{/each}
+		</div>
 
-<!-- Modal de derrota (Game Over) -->
-{#if showLoseModal}
-  <div class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
-    <div class="bg-white rounded-xl w-96 overflow-hidden border-4 border-black text-center p-6">
-      <!-- Icono de bufón -->
-      <div class="mb-4">
-        <img src="/icons/jester.png" alt="Jester" class="w-16 h-16 mx-auto" />
-      </div>
-      
-      <h2 class="font-pixelify text-center text-4xl font-bold text-black mb-6">GAME OVER</h2>
-      
-      <!-- Estadísticas del juego -->
-      <div class="border-2 border-black rounded-lg p-4 mb-4">
-        <p class="font-pixelify text-black text-xl font-bold">XXXXXXXX</p>
-      </div>
-      
-      <div class="border-2 border-black rounded-lg p-4 mb-4">
-        <p class="font-pixelify text-black text-xl font-bold">XXXXXXXX</p>
-      </div>
-      
-      <div class="border-2 border-black rounded-lg p-4 mb-8">
-        <p class="font-pixelify text-black text-xl font-bold">XXXXXXXX</p>
-      </div>
-      
-      <button 
-        class="bg-white rounded-full py-3 px-12 font-pixelify text-black font-bold text-xl border-2 border-black hover:bg-gray-100"
-        on:click={goToMainMenu}
-      >
-        Main menu
-      </button>
-    </div>
-  </div>
-{/if}
+		<!--Score to beat-->
+		<div
+			class="card variant-filled-surface w-full h-[8%] mt-[3%] text-center grid grid-cols-[30%_70%] gap-2"
+		>
+			<div class="h-full text-3xl-r content-center p-3">Round score</div>
+			<div
+				class="card h-[6vh] text-5xl-r content-center align-middle mt-[3%] mr-[5%] p-0"
+			>
+				{$minScoreText.toFixed()}
+			</div>
+		</div>
 
-<!-- Modal de confirmación para salir -->
-{#if showExitModal}
-  <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-    <div class="bg-white rounded-xl w-80 overflow-hidden border-2 border-black">
-      <!-- Título del modal -->
-      <div class="border-b-2 border-black p-3">
-        <h2 class="font-pixelify text-center text-2xl font-bold tracking-wider text-black">EXIT</h2>
-      </div>
-      
-      <!-- Botones de confirmación -->
-      <div class="flex justify-center gap-6 p-4">
-        <button 
-          class="bg-white rounded-full py-2 px-8 font-pixelify text-black font-bold text-lg border-2 border-black hover:bg-gray-100"
-          on:click={confirmExit}
-        >
-          YES
-        </button>
-        
-        <button 
-          class="bg-white rounded-full py-2 px-8 font-pixelify text-black font-bold text-lg border-2 border-black hover:bg-gray-100"
-          on:click={cancelExit}
-        >
-          NO
-        </button>
-      </div>
-    </div>
-  </div>
-{/if}
+		<!--Score-->
+		<!-- svelte-ignore a11y-no-static-element-interactions -->
+		<!-- svelte-ignore a11y-click-events-have-key-events -->
+		<div
+			class="card w-full h-[15%] mt-[3%] text-center border-2 p-2"
+			on:click={onHandInfo}
+		>
+			<!--Hand type-->
+			<div class="h-[45%] text-4xl-r content-center">
+				{#if state.handType >= 0}
+					{state.handLevels[state.handType].name} lvl {state
+						.handLevels[state.handType].lvl}
+				{/if}
+			</div>
 
-<!-- Modal de tienda -->
-{#if showShop}
-  <!-- Botón Leave Shop - Ahora fuera del modal -->
-  <button 
-    class="fixed top-4 right-4 bg-white rounded-lg p-2 font-pixelify text-black font-bold border-2 border-black z-[60]"
-    on:click={toggleShop}
-  >
-    Leave shop
-  </button>
+			<!--Score chips-->
+			<div
+				class="flex h-[45%] justify-between text-5xl-r m-3 gap-0 items-center"
+			>
+				<div
+					class="w-[45%] h-full card text-right p-0 pr-[3%] variant-filled-tertiary content-center align-middle"
+				>
+					{$blueScoreText.toFixed()}
+				</div>
+				<div>X</div>
+				<div
+					class="w-[45%] h-full card text-left p-0 pl-[3%] variant-filled-error content-center align-middle"
+				>
+					{$redScoreText.toFixed()}
+				</div>
+			</div>
+		</div>
 
-  <div class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
-    <div class="bg-white rounded-xl w-[900px] h-[700px] overflow-hidden border-4 border-black p-8 relative">
-      <!-- Botones superiores izquierdos -->
-      <div class="absolute top-8 left-8 flex flex-col gap-4">
-        <button class="bg-white rounded-xl py-3 px-6 font-pixelify text-black font-bold border-2 border-black w-40">
-          Next Round
-        </button>
-        <button class="bg-white rounded-xl py-3 px-6 font-pixelify text-black font-bold border-2 border-black w-40">
-          Reroll 6$
-        </button>
-      </div>
+		<!--Info chips-->
+		<div class="h-[25%] mt-[3%] grid grid-cols-2 gap-3">
+			<!--Hands-->
+			<div class={infoChip}>
+				<div class="text-2xl-r">Hands</div>
+				<div class="{infoChipCard} text-tertiary-300">
+					{state.hands}
+				</div>
+			</div>
+			<!--Discards-->
+			<div class={infoChip}>
+				<div class="text-2xl-r">Discards</div>
+				<div class="{infoChipCard} text-error-300">
+					{state.discards}
+				</div>
+			</div>
+			<!--Pot-->
+			<div class={infoChip}>
+				<div class="text-2xl-r">Pot</div>
+				<div class={infoChipCard}>
+					{state.pot}$
+				</div>
+			</div>
+			<!--Money-->
+			<div class={infoChip}>
+				<div class="text-2xl-r">Money</div>
+				<div class="{infoChipCard} text-warning-300">
+					{state.money}$
+				</div>
+			</div>
+		</div>
+	</div>
 
-      <!-- Jokers superiores derechos -->
-      <div class="absolute top-8 right-8 flex gap-6">
-        {#each jokers.slice(0, 3) as joker, i}
-          <div class="relative">
-            <div class="w-[160px] h-[213px] bg-white border-2 border-black rounded-lg flex flex-col items-center justify-center relative overflow-hidden">
-              <div class="absolute top-2 left-2 text-base font-bold z-10 text-purple-700">
-                Joker
-              </div>
-              <div class="flex items-center justify-center h-full">
-                <img src={joker.image} alt="Joker" class="w-16 h-16 object-contain" />
-              </div>
-              <div class="absolute bottom-2 right-2 text-base font-bold rotate-180 z-10 text-purple-700">
-                Joker
-              </div>
-              </div>
-            <div class="mt-2 text-center">
-              <div class="bg-white border-2 border-black rounded-lg px-3 py-1 inline-block">
-                <span class="font-pixelify text-black font-bold">${i === 0 ? '7' : '8'}</span>
-              </div>
-            </div>
-          </div>
-        {/each}
-      </div>
+	<!-- Playing mat -->
+	<div class="h-[100vh] grid grid-rows-[20%_5%_20%_20%_8%] gap-[6%]">
+		<!--Jokers-->
+		<div
+			class="flex justify-between mt-[3%]"
+			style="width: calc(100% - 16vh);"
+		>
+			{#each state.jokers as joker, index (joker.key)}
+				<!-- svelte-ignore a11y-click-events-have-key-events -->
+				<!-- svelte-ignore a11y-no-static-element-interactions -->
+				<div
+					animate:flip={{ duration: 100 }}
+					class={`w-1 transition-all duration-[100ms] ease-in-out ${index === pickedJoker ? "mt-[5%]" : ""}`}
+					on:click={() => onClickJoker(index)}
+				>
+					<div class="absolute">
+						<JokerCard
+							width="w-[16vh]"
+							jokerId={joker.id}
+							editionId={joker.edition}
+							animateCard={true}
+						/>
+					</div>
+				</div>
+			{/each}
+		</div>
+		<div class="text-left text-2xl-r">{state.jokers.length}/5</div>
 
-      <!-- Contenido inferior con proporción 4:3 -->
-      <div class="absolute bottom-8 inset-x-8 flex justify-between">
-        <!-- Consumible izquierdo -->
-        <div class="relative">
-          <div class="w-[145px] h-[193px] bg-white border-2 border-black rounded-lg flex flex-col items-center justify-center relative overflow-hidden">
-            <div class="absolute top-2 left-2 text-base font-bold z-10 text-black">
-              A♠
-            </div>
-            <span class="font-pixelify text-black text-xl">Mod</span>
-            <div class="absolute bottom-2 right-2 text-base font-bold rotate-180 z-10 text-black">
-              A♠
-            </div>
-          </div>
-          <div class="mt-2 text-center">
-            <div class="bg-white border-2 border-black rounded-lg px-3 py-1 inline-block">
-              <span class="font-pixelify text-black font-bold">14$</span>
-            </div>
-          </div>
-        </div>
+		<!--Played cards-->
+		<div
+			class="flex justify-between ml-[10%] mr-[10%]"
+			style="width: calc(80% - 14vh);"
+		>
+			{#each state.playedCards as card, index (card.key)}
+				<div transition:fly={{ y: 100, duration: 500 }} class="w-1">
+					{#if index === indexToPlayAnim}
+						<div
+							in:fly={{ y: 150, duration: 300 }}
+							out:fade={{ duration: 300 }}
+							class="w-[14vh] text-center absolute mt-[-4vh] text-warning-300 text-3xl-r"
+						>
+							+{scorePlayAnim}
+						</div>
+					{/if}
+					<div class="absolute">
+						<GameCard
+							width="w-[14vh]"
+							card={card.card}
+							animateCard={true}
+						/>
+					</div>
+				</div>
+			{/each}
+		</div>
 
-        <!-- Paquetes derechos -->
-        <div class="flex gap-6">
-          <!-- Card (ahora sin selección) -->
-          <div class="relative">
-            <div class="w-[160px] h-[213px] bg-white border-2 border-black rounded-lg flex flex-col items-center justify-center relative overflow-hidden">
-              <div class="absolute top-2 left-2 text-base font-bold z-10 text-red-500">
-                K♥
-              </div>
-              <span class="font-pixelify text-black text-xl">Card</span>
-              <div class="absolute bottom-2 right-2 text-base font-bold rotate-180 z-10 text-red-500">
-                K♥
-              </div>
-            </div>
-            <div class="mt-2 text-center">
-              <div class="bg-white border-2 border-black rounded-lg px-3 py-1 inline-block">
-                <span class="font-pixelify text-black font-bold">2$</span>
-              </div>
-            </div>
-          </div>
+		<!--Hand-->
+		<div class="flex justify-between" style="width: calc(100% - 14vh);">
+			{#each state.handCards as card, index (card.key)}
+				<!-- svelte-ignore a11y-click-events-have-key-events -->
+				<!-- svelte-ignore a11y-no-static-element-interactions -->
+				<div
+					animate:flip={{ duration: 100 }}
+					class={`w-1 transition-all duration-[100ms] ease-in-out ${card.picked ? "mt-[-5%]" : ""}`}
+					on:click={() => onClickHand(index)}
+				>
+					<div class="absolute">
+						<GameCard
+							width="w-[14vh]"
+							card={card.card}
+							animateCard={true}
+						/>
+					</div>
+				</div>
+			{/each}
+		</div>
 
-          <!-- Card pack -->
-          <div class="relative">
-            <div class="w-[160px] h-[213px] bg-white border-2 border-black rounded-lg flex flex-col items-center justify-center relative overflow-hidden">
-              <div class="absolute top-2 left-2 text-base font-bold z-10 text-black">Q♠</div>
-              <div class="absolute top-2 right-2 text-base font-bold z-10 text-red-500 -rotate-45">J♥</div>
-              <span class="font-pixelify text-black text-xl">Card pack</span>
-              <div class="absolute bottom-2 left-2 text-base font-bold z-10 text-red-500 rotate-45">10♦</div>
-              <div class="absolute bottom-2 right-2 text-base font-bold z-10 text-black rotate-[135deg]">A♣</div>
-            </div>
-            <div class="mt-2 text-center">
-              <div class="bg-white border-2 border-black rounded-lg px-3 py-1 inline-block">
-                <span class="font-pixelify text-black font-bold">5$</span>
-              </div>
-            </div>
-          </div>
+		<!--Action buttons-->
+		<div class="flex justify-center gap-[4%]">
+			<button
+				class="btn variant-filled-tertiary w-[35%] text-5xl-r"
+				on:click={onPlay}
+				>Play
+			</button>
+			<div class="flex w-[15%]">
+				<button
+					class="btn variant-filled-surface rounded-l-md rounded-r-none w-full text-5xl-r"
+					on:click={onArrowLeft}
+					>&lt;
+				</button>
+				<button
+					class="btn variant-filled-surface rounded-r-md rounded-l-none w-full text-5xl-r"
+					on:click={onArrowRight}
+					>&gt;
+				</button>
+			</div>
+			<button
+				class="btn variant-filled-error w-[35%] text-5xl-r"
+				on:click={onDiscard}
+				>Discard
+			</button>
+		</div>
+	</div>
 
-          <!-- Cool pack -->
-          <div class="relative">
-            <div class="w-[160px] h-[213px] bg-white border-2 border-black rounded-lg flex flex-col items-center justify-center relative overflow-hidden">
-              <div class="absolute inset-0 flex flex-wrap justify-around p-2">
-                {#each Array(6) as _, i}
-                  <div class="text-xs font-bold" class:text-red-500={i % 2 === 0} class:text-black={i % 2 !== 0}>
-                    {['A♠', 'K♥', 'Q♦', 'J♣', '10♥', '9♠'][i]}
-                  </div>
-                {/each}
-              </div>
-              <span class="font-pixelify text-black text-xl">Cool pack</span>
-            </div>
-            <div class="mt-2 text-center">
-              <div class="bg-white border-2 border-black rounded-lg px-3 py-1 inline-block">
-                <span class="font-pixelify text-black font-bold">30$</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-{/if}
+	<!-- Options and deck -->
+	<div class="flex flex-col justify-between h-screen p-10">
+		<!--Info group-->
+		<div>
+			<!--Chat and leave buttons-->
+			<div class="flex justify-end gap-4">
+				<button
+					class="card w-[25%] aspect-square content-center"
+					on:click={onChat}
+				>
+					<img
+						src="icons/chat2.png"
+						alt="chat"
+						class="w-[50%] min-w-[12px] mx-auto"
+					/>
+				</button>
+				<button
+					class="card w-[25%] aspect-square text-4xl-r"
+					on:click={onExit}
+				>
+					X
+				</button>
+			</div>
+			<div class="w-full card text-5xl-r text-right p-4 mt-[5%]">
+				{state.timeLeft}s
+			</div>
+		</div>
+
+		<!--Deck-->
+		<div>
+			<div class="relative w-full h-[22vh]">
+				<div class="absolute top-[10%] left-[10%]">
+					<GameCard width="w-[14vh]" card={dummyCard} />
+				</div>
+				<div class="absolute top-[5%] left-[5%]">
+					<GameCard width="w-[14vh]" card={dummyCard} />
+				</div>
+				<!-- svelte-ignore a11y-click-events-have-key-events -->
+				<!-- svelte-ignore a11y-no-static-element-interactions -->
+				<div class="absolute" on:click={onDeck}>
+					<GameCard width="w-[14vh]" card={dummyCard} />
+				</div>
+			</div>
+			<div class="w-full text-right text-2xl-r mt-[10%]">
+				{state.deckLeft}/{state.deckSize}
+			</div>
+		</div>
+	</div>
+</div>
 
 <style>
-  :global(body) {
-    margin: 0;
-    padding: 0;
-  }
-  
-  .font-pixelify {
-    font-family: 'Pixelify Sans', sans-serif;
-    text-shadow: 0px 0px 1px rgba(0,0,0,0.5);
-  }
-  
-  /* Estilo para la barra de desplazamiento horizontal */
-  .overflow-x-auto::-webkit-scrollbar {
-    height: 6px;
-  }
-  
-  .overflow-x-auto::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 3px;
-  }
-  
-  .overflow-x-auto::-webkit-scrollbar-thumb {
-    background: #888;
-    border-radius: 3px;
-  }
-  
-  .overflow-x-auto::-webkit-scrollbar-thumb:hover {
-    background: #555;
-  }
+	.game-div {
+		background-image: url("/fondo_juego.png") !important;
+		background-size: cover;
+		background-position: center;
+		background-repeat: no-repeat;
+	}
+
+	/*
+	Filter taken from https://github.com/D3nn7/crt-css
+	License says: "I love Open Source and decide that this small project don't need a license. 
+	You can use it without any restrictions."
+	Thank you Danny Schapeit!
+	*/
+
+	.tv-filter {
+		text-shadow:
+			0.06rem 0 0.06rem #ea36af,
+			-0.125rem 0 0.06rem #75fa69;
+		animation-duration: 0.01s;
+		animation-name: textflicker;
+		animation-iteration-count: infinite;
+		animation-direction: alternate;
+	}
+
+	@media (max-height: 640px) {
+		.tv-filter {
+			text-shadow: none;
+			animation: none;
+		}
+	}
+
+	.text-5xl-r {
+		font-size: 4.5vh;
+		line-height: 1;
+	}
+
+	.text-4xl-r {
+		font-size: 3vh;
+		line-height: 1;
+	}
+
+	.text-3xl-r {
+		font-size: 2.5vh;
+		line-height: 1;
+	}
+
+	.text-2xl-r {
+		font-size: 2vh;
+		line-height: 1;
+	}
+
+	@keyframes textflicker {
+		from {
+			text-shadow:
+				1px 0 0 #ea36af,
+				-2px 0 0 #75fa69;
+		}
+		to {
+			text-shadow:
+				2px 0.5px 2px #ea36af,
+				-1px -0.5px 2px #75fa69;
+		}
+	}
 </style>

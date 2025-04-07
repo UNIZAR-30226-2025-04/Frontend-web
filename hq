@@ -1,0 +1,173 @@
+[33m3d3cce4[m[33m ([m[1;36mHEAD -> [m[1;32mmain[m[33m)[m Merge branch 'main' of github.com:UNIZAR-30226-2025-04/Frontend-web
+[33mdc8416c[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Fixed new connection events and bugs
+[33m880fc3c[m Fixed bug in AvatarDisplay
+[33mb3b3fba[m Merge branch 'chat-drawer'
+[33mbd333b3[m[33m ([m[1;31morigin/chat-drawer[m[33m, [m[1;32mchat-drawer[m[33m)[m Cleaner code, refactor and bug fixes
+[33m75c4a96[m Kick event
+[33m0efbfde[m forgot to update the store on last commit
+[33m8fca6c9[m Exit event
+[33mbd8ee2a[m Join and new user events
+[33m7cbd595[m[33m ([m[1;31morigin/game-interface[m[33m, [m[1;32mgame-interface[m[33m)[m We have a shop mock now
+[33med7bf6a[m You loose :(
+[33mb190cdf[m You win!
+[33m3748567[m Exit mesage
+[33m5b1979e[m Almost finished
+[33mf94b67f[m More accurate
+[33m8163003[m Added mocks on top and botton right
+[33md884391[m We now show info in the left bar
+[33m013b5ea[m More accurate design. Getting closer to mockup
+[33m2bad228[m Much more atractive interface
+[33mdb77a4f[m First approach to a functional game interface mock
+[33m385f8cf[m Smooth scroll on new message
+[33m3562af5[m Fixed bug involving closing chat and not recieving new messages
+[33m75582d3[m Messaging now works with usernames and icons, Yippie!
+[33me70815a[m Upgraded promt element
+[33m019c40f[m Message event works, mostly
+[33m3119093[m Connects to websockets
+[33m3965405[m number of players in game invitation
+[33mbea6b28[m Global style to all pages
+[33m30b2922[m Chat drawer, frist ui version
+[33mf586abb[m Merge branch 'main' of github.com:UNIZAR-30226-2025-04/Frontend-web
+[33m22a0b93[m Merge pull request #45 from UNIZAR-30226-2025-04/get-and-join-lobbies
+[33ma297c1e[m[33m ([m[1;31morigin/get-and-join-lobbies[m[33m)[m We can now see the pfp of the creator of the lobby
+[33m46d285d[m[33m ([m[1;31morigin/share-modal[m[33m, [m[1;32mshare-modal[m[33m)[m Delete recieved invitation and join with invitation
+[33m3842168[m Send and remove sent invitation
+[33m1fe285c[m Added the requested improvements
+[33m571fc3a[m Functionality for invitations inbox
+[33m028ef5d[m Fix bugs on filter and find of share modal
+[33mcfdc9b8[m We can get all lobbies now
+[33maa455b2[m General rework of all modals and fetch with promises
+[33m7247e9e[m File organization standar and bug fixes on friends modal
+[33mf3f2373[m Merge branch 'insert-and-remove-user-from-lobby'
+[33m5479d99[m[33m ([m[1;31morigin/insert-and-remove-user-from-lobby[m[33m, [m[1;32minsert-and-remove-user-from-lobby[m[33m)[m Moved functions to fetch directory
+[33mb0a8c06[m paste code in join by code modal
+[33md072952[m change comment
+[33m25ab456[m fix bug on friend request
+[33m58421e8[m Hot fix for inbox
+[33md1204f7[m join with code
+[33mdd9e82b[m create and leave the lobby
+[33m2b3927c[m[33m ([m[1;31morigin/responsive-lobbies[m[33m, [m[1;32mresponsive-lobbies[m[33m)[m Responsive lobby page
+[33m6b87b4b[m Fixed responsivenes of lobiies page
+[33mf4dd4a9[m Merge branch 'fetch-inbox'
+[33m32d3ac5[m[33m ([m[1;31morigin/fetch-inbox[m[33m)[m Moved all fetch functions to src/lib/fetch/inboxFetch.ts
+[33mada2f0f[m lobby code fixed
+[33mf1bcbeb[m[33m ([m[1;32mfetch-inbox[m[33m)[m OnMount call
+[33m5216bc0[m Setting up inbox fetch
+[33m2d198ed[m create a lobby and pass the code through the link
+[33md45a68d[m 3º hot fix, last one
+[33mb68e62a[m 2º hot fix
+[33mc7e754c[m Hot fix on Avatar Display
+[33m1797a82[m Added number guard to AvatarDisplay
+[33me9f4cca[m Merge branch 'fetch-friends'
+[33m9c22132[m[33m ([m[1;31morigin/fetch-friends[m[33m, [m[1;32mfetch-friends[m[33m)[m some more bugs fixed
+[33m9afca25[m fixed api calls errors
+[33m2445fe1[m api calls in FriendsModal finished
+[33me516f62[m finished api calls in friendsModal
+[33mbb45efe[m error message that the user does not exist
+[33m870ebc2[m draft of the function to send a friendship request
+[33ma6a29eb[m get friends list, request friend list and delete friend
+[33m6873a1c[m[33m ([m[1;31morigin/information-change-form[m[33m, [m[1;32minformation-change-form[m[33m)[m Information change fetch first version
+[33m5353629[m[33m ([m[1;32mremember-me-function[m[33m)[m Made the loginFecth into a lib function, now / auto logs in the user if it has the remember = true
+[33m17c19df[m Fixed logout bug
+[33m754a209[m[33m ([m[1;32mLog-in-form[m[33m)[m Fixed remember me bug
+[33m0af0658[m[33m ([m[1;31morigin/Log-in-form[m[33m)[m Login works and fixed bugs and inconsistencies
+[33m5cccd03[m[33m ([m[1;31morigin/Register-form[m[33m, [m[1;32mRegister-form[m[33m)[m Fetch for signup works
+[33m6062d02[m Paths
+[33m14d8184[m Merge branch 'main' into Log-in-form
+[33m2bcf9f8[m Small changes to login fetch
+[33m8c75b43[m adjust css in lobby page
+[33m5d04419[m[33m ([m[1;31morigin/inbox[m[33m, [m[1;32minbox[m[33m)[m First verion of inboc modal
+[33mc123081[m First working version of fetch /login
+[33m47fb001[m Update branch with latest stuff
+[33m0aea750[m[33m ([m[1;31morigin/bugs[m[33m, [m[1;32mbugs[m[33m)[m Fixed removing friends bug
+[33mc3099cc[m SaveD friends typo
+[33mbdf904b[m Now cards do line up
+[33m52af567[m Fix Join button
+[33m87830dd[m Merge branch 'join-lobbies-page'
+[33m44d9fd8[m[33m ([m[1;31morigin/join-lobbies-page[m[33m, [m[1;32mjoin-lobbies-page[m[33m)[m adjust css
+[33mbeb7f2f[m change comment
+[33madc7cb1[m adjust css and matchmaking popup
+[33mf128467[m variable name correction
+[33m1ccd638[m popup to insert code
+[33mb079485[m Update logo image for white outline
+[33m7978b6c[m list of public lobbies
+[33m60337b4[m fix last merge
+[33mc418ca9[m Merge branch 'lobby-page-for-hosts'
+[33m27bb4ad[m[33m ([m[1;31morigin/lobby-page-for-hosts[m[33m)[m chat and leave buttons
+[33m20cccab[m[33m ([m[1;32mlobby-page-for-hosts[m[33m)[m lobby for guest
+[33mff93e29[m[33m ([m[1;31morigin/remember-me-function[m[33m)[m Basic testing works with persistent store
+[33m43c2191[m Ok, final conf
+[33m7e603c7[m One more test on base url
+[33m31bfd68[m Now it's for real
+[33mbb62f67[m Fixed, finally, routing errors and deployment
+[33m874d741[m Fixed path for log off
+[33m54cff19[m Fixed path for create lobby
+[33mff86125[m Merge branch 'lobby-page-for-hosts'
+[33mff7a9a7[m Added coments, animations and aux functions
+[33m124d875[m[33m ([m[1;31morigin/friends-modal[m[33m, [m[1;32mfriends-modal[m[33m)[m Fixed animations by adding key to lists items
+[33m7ad3cf7[m First version, lookiing good
+[33me3ae721[m leave and start buttons
+[33m943f222[m kick players system
+[33md8f4a8c[m Initial structure for modal
+[33m669df72[m Forgot a few things
+[33m6f43c51[m Responsiveness for mobile in /home
+[33m7358940[m basic header and player cards
+[33mba16c8f[m[33m ([m[1;31morigin/responsive-home[m[33m, [m[1;32mresponsive-home[m[33m)[m Somewhat responsive for desktop
+[33m664ceb5[m Fixed slide toggle
+[33mccb773f[m Merge branch 'create-lobby-form'
+[33m53a63a6[m[33m ([m[1;31morigin/create-lobby-form[m[33m, [m[1;32mcreate-lobby-form[m[33m)[m Fixed modal singleton usage and configuration
+[33med8a2da[m[33m ([m[1;32mresponsive-landing-page[m[33m)[m Good enough responsiveness
+[33mc482b59[m create lobby modal
+[33m1060948[m adjust css login and register form
+[33m674e536[m Fixed incorrectly named icon in avatarDirectory
+[33m80e4be0[m Default placeholder name for viewing purposes
+[33mccd5e40[m Comments and minor changes, added log off functionality
+[33m0270267[m Merge branch 'Register-form'
+[33mb2a91ad[m New avatar icons
+[33m1c69b7c[m Merge branch 'information-change-form'
+[33m50c48b2[m Final touches of the info change form
+[33m7c3ed03[m Added avatar component
+[33mac9ac0c[m Register button
+[33m894177e[m Progress on from, only minor visual changes left
+[33m684b761[m register form with password check
+[33m7a133a4[m white arrow on "How to play"
+[33m2b45c87[m Example modal now works
+[33m62d2b86[m Now buttons are really buttons, and added support for example modals
+[33m42950e1[m Rm static build files
+[33ma79d64c[m[33m ([m[1;31morigin/home[m[33m, [m[1;32mhome[m[33m)[m Buttons are the same length
+[33m37b64fe[m First revision of the page
+[33mcd6553d[m New branch, and cleanup
+[33mfda58d0[m removed unused wallpapers
+[33m6d87196[m Fixed routing, hopefully
+[33m2044558[m github pages
+[33m20a1e86[m login-page
+[33m57dbfa1[m Now absolute src works and routing is done like a SPA
+[33m793694a[m Fixed image not loading correctly
+[33m7a6ca61[m Fixed wrong configuration on svelte.config.js and now it prerenders correctly to index.htm
+[33m05faa62[m Fixed past three trash commits, git is hard
+[33mb00b8a9[m Revert " wallpapers"
+[33mf566a50[m Fixed svelte.config.js for correct github-pages deploy
+[33mfba54b2[m Fixed not prerendering correctly
+[33md01106a[m[33m ([m[1;31morigin/landing-page-for-new-users[m[33m)[m  wallpapers
+[33ma03e165[m fix css and js
+[33m3b4f8eb[m login js test
+[33mb82fd08[m login-form
+[33m944bb6e[m Update +page.svelte
+[33mc1a6636[m landing page for new users
+[33mfe0ddec[m Changed page but didn't build, test
+[33m746a864[m Added text to index to see if gith actions works :P
+[33mb29d67e[m Changed deployment so npm set ups correctly, hopefully
+[33m0df073a[m Changed npm version oon deployment
+[33mfdbf1ef[m Create static.yml
+[33m10c6e6e[m Let's try that again
+[33mcffdd62[m even more deployment changes
+[33mbdd6edf[m new changes to the deployment
+[33m91041e6[m update the deploy.yaml
+[33m46e7f08[m more testing for automatic deployment
+[33m93e981d[m Testing automatic deployment
+[33m64f1802[m static adpater
+[33mbad43e5[m Added inital structure, this time for real with skeleton UI
+[33m91b9265[m Ups
+[33m696423f[m Initial file structure for sveltekit
+[33md78ea6d[m gitignore for Svelte
+[33ma8c4519[m Added readme

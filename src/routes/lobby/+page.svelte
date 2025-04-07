@@ -50,6 +50,7 @@
 	function onStart() {
 		goto(base + "/game");
 	}
+	
 	// Function to copy code to clipboard
 	function onCopyCode() {
 		navigator.clipboard.writeText($lobbyStore.code);
