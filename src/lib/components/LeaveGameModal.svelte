@@ -12,7 +12,7 @@
     const modalStore = getModalStore();
 
     function onExit(){
-        goto(base+"home");
+        goto(base+"/home");
         modalStore.close();
     }
 
