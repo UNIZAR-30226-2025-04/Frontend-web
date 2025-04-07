@@ -1,9 +1,9 @@
 import type { inviteItem } from "$lib/interfaces";
-import { allLobbiesPath, createLobbyPath, deleteSentLobbyInvitationsPath, exitLobbyPath, joinLobbyPath, sendLobbyInvitationsPath, sentLobbyInvitationsPath } from "$lib/paths";
+import { allLobbiesPath, createLobbyPath, deleteSentLobbyInvitationsPath, exitLobbyPath, joinLobbyPath, sendLobbyInvitationsPath, sentLobbyInvitationsPath, recievedGameInvitations, apiBase, deleteReceivedInvitationPath } from "$lib/paths";
 import { lobbyStore, userDataStore } from "$lib/stores";
 import { get } from "svelte/store";
 import type { LobbyInfo, LobbyDisplay } from "$lib/interfaces";
-
+import { fetchDeleteGameInvitation } from "$lib/fetch/inboxFetch";
 
 /**
  * Sends a POST request to the server to create a lobby
@@ -50,11 +50,11 @@ export async function createLobbyFetch(isPublic: boolean = false): Promise<boole
 
 /**
  * Sends a POST request to the server to insert a user into a lobby
+ * and cleans up any pending invitations for that lobby
  * @async
  */
 export async function joinLobbyFetch(lobbyCode: string): Promise<boolean> {
     try {
-
         const response = await fetch(joinLobbyPath + lobbyCode, {
             method: 'POST',
             headers: {
@@ -77,14 +77,42 @@ export async function joinLobbyFetch(lobbyCode: string): Promise<boolean> {
             players: []
         }));
         
+        // After successfully joining, check for pending invitations to this lobby
+        try {
+            // Get all received invitations
+            const invitationsResponse = await fetch(recievedGameInvitations, {
+                method: 'GET',
+                headers: {
+                    'accept': 'application/json',
+                    'Authorization': 'Bearer ' + get(userDataStore).token,
+                }
+            });
+            
+            if (invitationsResponse.ok) {
+                const invitationsData = await invitationsResponse.json();
+                
+                // Check if there's an invitation for this lobby
+                if (invitationsData.received_game_lobby_invitations) {
+                    for (const invitation of invitationsData.received_game_lobby_invitations) {
+                        if (invitation.lobby_id === lobbyCode) {
+                            // Found an invitation for this lobby, delete it
+                            console.log("Found pending invitation for joined lobby, deleting it");
+                            await fetchDeleteGameInvitation(lobbyCode, invitation.username);
+                        }
+                    }
+                }
+            }
+        } catch (error) {
+            // Just log the error but don't fail the join operation
+            console.error("Error cleaning up invitations:", error);
+        }
+        
         return true;
     } catch (err: any) {
         console.log("API error (insert the user into the lobby):", err);
         return false;
     }
 }
-
-
 
 /**
  * Sends a POST request to the server to remove the user from the lobby
@@ -314,7 +342,7 @@ export async function fetchLobbyInfo(lobbyId: string): Promise<any> {
  */
 export async function deleteReceivedInvitation(lobbyId: string, senderUsername: string): Promise<boolean> {
     try {
-        const response = await fetch(`${apiBase}/auth/received_lobby_invitation/${lobbyId}/${senderUsername}`, {
+        const response = await fetch(deleteReceivedInvitationPath + lobbyId + "/" + senderUsername, {
             method: 'DELETE',
             headers: {
                 'accept': 'application/json',
