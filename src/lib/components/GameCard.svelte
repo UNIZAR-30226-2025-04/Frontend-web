@@ -46,13 +46,13 @@
 	// If overlay is valid we extract the data and enable the pop up
 	if (card.overlay < 0 || card.overlay >= overlayDirectory.length) {
 		overlay = overlayDirectory[0];
+	} else {
+		overlay = overlayDirectory[card.overlay];
 		popupHover = {
 			event: "hover",
 			target: overlay.name + salt,
 			placement: "top",
 		};
-	} else {
-		overlay = overlayDirectory[card.overlay];
 	}
 
 
