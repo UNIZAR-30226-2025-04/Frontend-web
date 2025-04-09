@@ -22,6 +22,7 @@
 	import { cubicOut } from "svelte/easing";
 	import { tweened } from "svelte/motion";
 	import { fade, fly } from "svelte/transition";
+	import { initializeSocket } from "$lib/sockets-utils/lobbySocket";
 
 	// Main state variable
 	let state: GameState = {
@@ -283,6 +284,9 @@
 	let interval: any;
 
 	onMount(() => {
+		// We initialize the socket
+		initializeSocket();
+		
 		// Interval for the Time left clock
 		interval = setInterval(() => {
 			if (state.timeLeft > 0) {
