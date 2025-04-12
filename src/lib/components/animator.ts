@@ -1,6 +1,5 @@
 export interface AnimatorOptions {
-    elem1: HTMLElement;
-    elem2?: HTMLElement;
+    elements: HTMLElement[];
     rotateXSpeed?: number;
     rotateYSpeed?: number;
     rotateZSpeed?: number;
@@ -28,8 +27,7 @@ export interface AnimatorOptions {
  * @returns {Function} A function that, when called, cancels the animation.
  */
 export function cardAnimation({ 
-    elem1, 
-    elem2, 
+    elements, 
     rotateXSpeed = 3000, 
     rotateYSpeed = 4000, 
     rotateZSpeed = 2500,
@@ -48,13 +46,11 @@ export function cardAnimation({
         const rotateY = rotateYAmmount * Math.sin(time / rotateYSpeed);   
         const rotateZ = rotateZAmmount * Math.sin(time / rotateZSpeed);   
 
-        if (elem1) {
-            elem1.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) rotateZ(${rotateZ}deg)`;
-        }
-
-        if (elem2) {
-            elem2.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) rotateZ(${rotateZ}deg)`;
-        }
+        elements.map((e:HTMLElement) => {
+            if(e){
+                e.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) rotateZ(${rotateZ}deg)`;
+            }
+        });
 
         animationFrameId = requestAnimationFrame(animate);
     }

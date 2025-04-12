@@ -59,8 +59,7 @@
 	onMount(() => {
 		if (animateCard) {
 			stopAnimation = cardAnimation({
-				elem1: cardImage,
-				elem2: overlayImage,
+				elements: [cardImage,overlayImage]
 			});
 		}
 	});

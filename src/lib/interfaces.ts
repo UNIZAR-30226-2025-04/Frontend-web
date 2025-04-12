@@ -142,8 +142,8 @@ export type JokerEdition = {
     tooltip:string
 }
 
-// Boucher data
-export type Boucher = {
+// Voucher data
+export type Voucher = {
     name:string,
     image:string,
     tooltip:string,
@@ -156,10 +156,11 @@ export type GameState = {
     playedCards: CardItem[],
 	handCards: CardItem[],
 	jokers: JokerItem[],
-	activeBouchers: BoucherItem[],
-	bouchers: BoucherItem[],
+	activeVouchers: VoucherItem[],
+	vouchers: VoucherItem[],
     handLevels: HandType[],
     round: number,
+    phase: number, // 0 Play - 1 Shop - 2 Boucher
     minScore: number,
     handType:number,
     blueScore:number,
@@ -185,7 +186,7 @@ export type JokerItem = {
     edition: number
 };
 
-export type BoucherItem = {
+export type VoucherItem = {
     key: number,
     id: number
 };

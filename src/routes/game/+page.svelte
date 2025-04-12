@@ -1,12 +1,12 @@
 <script lang="ts">
 	import {
-		boucherDirectory,
+		voucherDirectory,
 		jokerDirectory,
 		jokerEditionsDirectory,
 		overlayDirectory,
 		suitDirectory,
 	} from "$lib/cardDirectory";
-	import BoucherCard from "$lib/components/BoucherCard.svelte";
+	import VoucherCard from "$lib/components/VoucherCard.svelte";
 	import GameCard from "$lib/components/GameCard.svelte";
 	import JokerCard from "$lib/components/JokerCard.svelte";
 	import { HandTypesBase, type Card, type GameState } from "$lib/interfaces";
@@ -17,6 +17,7 @@
 		type DrawerSettings,
 		type ModalSettings,
 	} from "@skeletonlabs/skeleton";
+    import { stat } from "fs";
 	import { onDestroy, onMount } from "svelte";
 	import { flip } from "svelte/animate";
 	import { cubicOut } from "svelte/easing";
@@ -28,10 +29,11 @@
 		playedCards: [],
 		handCards: [],
 		jokers: [],
-		activeBouchers: [],
-		bouchers: [],
+		activeVouchers: [],
+		vouchers: [],
 		handLevels: structuredClone(HandTypesBase),
 		round: 1,
+		phase: 0,
 		minScore: 100000,
 		handType: 1,
 		blueScore: 0,
@@ -330,7 +332,7 @@
 	}
 
 	for (let j = 0; j < 6; j++) {
-		onAddBoucher();
+		onAddVoucher();
 	}
 
 	function generateCard(withOverlay: boolean, faceUp: boolean): Card {
@@ -374,10 +376,10 @@
 		state.jokers = state.jokers;
 	}
 
-	function onAddBoucher() {
-		const newBoucher = Math.floor(Math.random() * boucherDirectory.length);
-		state.activeBouchers.push({ key: getNextKey(), id: newBoucher });
-		state.activeBouchers = state.activeBouchers;
+	function onAddVoucher() {
+		const newVoucher = Math.floor(Math.random() * voucherDirectory.length);
+		state.activeVouchers.push({ key: getNextKey(), id: newVoucher });
+		state.activeVouchers = state.activeVouchers;
 	}
 
 	function onClickHand(index: number) {
@@ -386,6 +388,15 @@
 		card.picked = !card.picked;
 		state.handCards = [...state.handCards];
 	}
+
+	function onNextPhase(){
+		if(state.phase === 1){
+			state.phase = 0;
+		}else{
+			state.phase++;
+		}
+	}
+
 </script>
 
 <!-- Main body -->
@@ -395,21 +406,27 @@
 	<!-- Info column -->
 	<div class="h-[100vh] ml-[20%] card rounded-none text-left p-[5%]">
 		<!--Title-->
-		<div class="text-5xl-r h-[12%] card variant-filled-surface p-5">
-			Round {state.round}/10
-		</div>
+		{#if state.phase === 0}
+			<div class="text-5xl-r h-[12%] card variant-filled-surface p-5">
+				<button on:click={onNextPhase}>Round {state.round}/10</button>
+			</div>
+		{:else if state.phase === 1}
+			<div class="text-5xl-r h-[12%] card variant-filled-surface p-5">
+				<button on:click={onNextPhase}>SHOP</button>
+			</div>
+		{/if}
 
-		<!--Bouchers label-->
+		<!--Vouchers label-->
 		<div class="text-2xl-r mt-[3%]">Active consumables</div>
-		<!--Bouchers-->
+		<!--Vouchers-->
 		<div
 			class="flex h-[20%] mt-[3%] justify-between"
 			style="width: calc(100% - 12vh);"
 		>
-			{#each state.activeBouchers as boucher (boucher.key)}
+			{#each state.activeVouchers as voucher (voucher.key)}
 				<div class="w-0">
 					<div class="absolute">
-						<BoucherCard width="w-[12vh]" boucherId={boucher.id} />
+						<VoucherCard width="w-[12vh]" voucherId={voucher.id} />
 					</div>
 				</div>
 			{/each}
@@ -494,107 +511,143 @@
 	</div>
 
 	<!-- Playing mat -->
-	<div class="h-[100vh] grid grid-rows-[20%_5%_20%_20%_8%] gap-[6%]">
-		<!--Jokers-->
-		<div
-			class="flex justify-between mt-[3%]"
-			style="width: calc(100% - 16vh);"
-		>
-			{#each state.jokers as joker, index (joker.key)}
-				<!-- svelte-ignore a11y-click-events-have-key-events -->
-				<!-- svelte-ignore a11y-no-static-element-interactions -->
-				<div
-					animate:flip={{ duration: 100 }}
-					class={`w-1 transition-all duration-[100ms] ease-in-out ${index === pickedJoker ? "mt-[5%]" : ""}`}
-					on:click={() => onClickJoker(index)}
-				>
-					<div class="absolute">
-						<JokerCard
-							width="w-[16vh]"
-							jokerId={joker.id}
-							editionId={joker.edition}
-							animateCard={true}
-						/>
-					</div>
-				</div>
-			{/each}
-		</div>
-		<div class="text-left text-2xl-r">{state.jokers.length}/5</div>
-
-		<!--Played cards-->
-		<div
-			class="flex justify-between ml-[10%] mr-[10%]"
-			style="width: calc(80% - 14vh);"
-		>
-			{#each state.playedCards as card, index (card.key)}
-				<div transition:fly={{ y: 100, duration: 500 }} class="w-1">
-					{#if index === indexToPlayAnim}
-						<div
-							in:fly={{ y: 150, duration: 300 }}
-							out:fade={{ duration: 300 }}
-							class="w-[14vh] text-center absolute mt-[-4vh] text-warning-300 text-3xl-r"
-						>
-							+{scorePlayAnim}
+	 {#if state.phase === 0}
+		<div class="h-[100vh] grid grid-rows-[20%_5%_20%_20%_8%] gap-[6%]">
+			<!--Jokers-->
+			<div
+				class="flex justify-between mt-[3%]"
+				style="width: calc(100% - 16vh);"
+			>
+				{#each state.jokers as joker, index (joker.key)}
+					<!-- svelte-ignore a11y-click-events-have-key-events -->
+					<!-- svelte-ignore a11y-no-static-element-interactions -->
+					<div
+						animate:flip={{ duration: 100 }}
+						class={`w-1 transition-all duration-[100ms] ease-in-out ${index === pickedJoker ? "mt-[5%]" : ""}`}
+						on:click={() => onClickJoker(index)}
+					>
+						<div class="absolute">
+							<JokerCard
+								width="w-[16vh]"
+								jokerId={joker.id}
+								editionId={joker.edition}
+								animateCard={true}
+							/>
 						</div>
-					{/if}
-					<div class="absolute">
-						<GameCard
-							width="w-[14vh]"
-							card={card.card}
-							animateCard={true}
-						/>
 					</div>
-				</div>
-			{/each}
-		</div>
+				{/each}
+			</div>
+			<div class="text-left text-2xl-r">{state.jokers.length}/5</div>
 
-		<!--Hand-->
-		<div class="flex justify-between" style="width: calc(100% - 14vh);">
-			{#each state.handCards as card, index (card.key)}
-				<!-- svelte-ignore a11y-click-events-have-key-events -->
-				<!-- svelte-ignore a11y-no-static-element-interactions -->
-				<div
-					animate:flip={{ duration: 100 }}
-					class={`w-1 transition-all duration-[100ms] ease-in-out ${card.picked ? "mt-[-5%]" : ""}`}
-					on:click={() => onClickHand(index)}
-				>
-					<div class="absolute">
-						<GameCard
-							width="w-[14vh]"
-							card={card.card}
-							animateCard={true}
-						/>
+			<!--Played cards-->
+			<div
+				class="flex justify-between ml-[10%] mr-[10%]"
+				style="width: calc(80% - 14vh);"
+			>
+				{#each state.playedCards as card, index (card.key)}
+					<div transition:fly={{ y: 100, duration: 500 }} class="w-1">
+						{#if index === indexToPlayAnim}
+							<div
+								in:fly={{ y: 150, duration: 300 }}
+								out:fade={{ duration: 300 }}
+								class="w-[14vh] text-center absolute mt-[-4vh] text-warning-300 text-3xl-r"
+							>
+								+{scorePlayAnim}
+							</div>
+						{/if}
+						<div class="absolute">
+							<GameCard
+								width="w-[14vh]"
+								card={card.card}
+								animateCard={true}
+							/>
+						</div>
 					</div>
-				</div>
-			{/each}
-		</div>
+				{/each}
+			</div>
 
-		<!--Action buttons-->
-		<div class="flex justify-center gap-[4%]">
-			<button
-				class="btn variant-filled-tertiary w-[35%] text-5xl-r"
-				on:click={onPlay}
-				>Play
-			</button>
-			<div class="flex w-[15%]">
+			<!--Hand-->
+			<div class="flex justify-between" style="width: calc(100% - 14vh);">
+				{#each state.handCards as card, index (card.key)}
+					<!-- svelte-ignore a11y-click-events-have-key-events -->
+					<!-- svelte-ignore a11y-no-static-element-interactions -->
+					<div
+						animate:flip={{ duration: 100 }}
+						class={`w-1 transition-all duration-[100ms] ease-in-out ${card.picked ? "mt-[-5%]" : ""}`}
+						on:click={() => onClickHand(index)}
+					>
+						<div class="absolute">
+							<GameCard
+								width="w-[14vh]"
+								card={card.card}
+								animateCard={true}
+							/>
+						</div>
+					</div>
+				{/each}
+			</div>
+
+			<!--Action buttons-->
+			<div class="flex justify-center gap-[4%]">
 				<button
-					class="btn variant-filled-surface rounded-l-md rounded-r-none w-full text-5xl-r"
-					on:click={onArrowLeft}
-					>&lt;
+					class="btn variant-filled-tertiary w-[35%] text-5xl-r"
+					on:click={onPlay}
+					>Play
 				</button>
+				<div class="flex w-[15%]">
+					<button
+						class="btn variant-filled-surface rounded-l-md rounded-r-none w-full text-5xl-r"
+						on:click={onArrowLeft}
+						>&lt;
+					</button>
+					<button
+						class="btn variant-filled-surface rounded-r-md rounded-l-none w-full text-5xl-r"
+						on:click={onArrowRight}
+						>&gt;
+					</button>
+				</div>
 				<button
-					class="btn variant-filled-surface rounded-r-md rounded-l-none w-full text-5xl-r"
-					on:click={onArrowRight}
-					>&gt;
+					class="btn variant-filled-error w-[35%] text-5xl-r"
+					on:click={onDiscard}
+					>Discard
 				</button>
 			</div>
-			<button
-				class="btn variant-filled-error w-[35%] text-5xl-r"
-				on:click={onDiscard}
-				>Discard
-			</button>
 		</div>
-	</div>
+	{:else if state.phase === 1}
+		<div class="h-[100vh] grid grid-rows-[20%_5%_75%] gap-[6%]">
+			<!--Jokers-->
+			<div
+				class="flex justify-between mt-[3%]"
+				style="width: calc(100% - 16vh);"
+			>
+				{#each state.jokers as joker, index (joker.key)}
+					<!-- svelte-ignore a11y-click-events-have-key-events -->
+					<!-- svelte-ignore a11y-no-static-element-interactions -->
+					<div
+						animate:flip={{ duration: 100 }}
+						class="w-1"
+						on:click={() => onClickJoker(index)}
+					>
+						
+						<div class="absolute">
+							<JokerCard
+								width="w-[16vh]"
+								jokerId={joker.id}
+								editionId={joker.edition}
+								animateCard={true}
+								sellAmount={5}
+								sellable={true}
+							/>
+						</div>
+					</div>
+				{/each}
+			</div>
+			<div class="text-left text-2xl-r">{state.jokers.length}/5</div>
+
+			<p>HOLA</p>
+
+		</div>
+	{/if}
 
 	<!-- Options and deck -->
 	<div class="flex flex-col justify-between h-screen p-10">

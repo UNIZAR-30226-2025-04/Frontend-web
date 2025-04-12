@@ -1,24 +1,30 @@
 <script lang="ts">
-    import { errorJoker, jokerDirectory, jokerEditionsDirectory } from "$lib/cardDirectory";
+    import {
+        errorJoker,
+        jokerDirectory,
+        jokerEditionsDirectory,
+    } from "$lib/cardDirectory";
     import type { Joker, JokerEdition } from "$lib/interfaces";
     import { popup, type PopupSettings } from "@skeletonlabs/skeleton";
     import { onDestroy, onMount } from "svelte";
     import { cardAnimation } from "$lib/components/animator";
 
     export let jokerId: number; // Main data to show
-    export let editionId:number; // Edition of the joker
+    export let editionId: number; // Edition of the joker
     export let width: string = "w-full"; // Width of the card
     export let ratio: number = 0.714285; // Ratio of the card
     export let animateCard: boolean = false; // If the card is animated
+    export let sellAmount: number = 0; // If the card is sellable it shows this amount when hovered
+    export let sellable: boolean = false; // If true show the sell ammount when hovered
 
     let joker: Joker;
     let edition: JokerEdition;
     // Necesary for avoiding animation errors
-    let salt:number = Math.floor(Math.random() * (100000));
+    let salt: number = Math.floor(Math.random() * 100000);
     // Animation variables
     let stopAnimation: () => void;
     let jokerImage: HTMLImageElement;
-    let editionImage:HTMLImageElement;
+    let overlayImage: HTMLImageElement;
 
     // If joker exists we extract the data
     if (jokerId < 0 || jokerId >= jokerDirectory.length) {
@@ -37,66 +43,79 @@
 
     // Pop up settings
 
-    const popupHover1: PopupSettings = {
+    const popupHover: PopupSettings = {
         event: "hover",
-        target: joker.name+salt,
+        target: joker.name + salt,
         placement: "bottom",
     };
 
-    const popupHover2: PopupSettings = {
-        event: "hover",
-        target: joker.name+edition.name+salt,
-        placement: "bottom",
-    };
-
-	onMount(() => {
-        if(animateCard){
-            stopAnimation = cardAnimation({elem1:jokerImage,elem2:editionImage});
+    onMount(() => {
+        if (animateCard) {
+            stopAnimation = cardAnimation({
+                elements: [jokerImage, overlayImage],
+            });
         }
-	});
+    });
 
     onDestroy(() => {
-		if (animateCard && stopAnimation) {
-			stopAnimation();
-		}
-	});
-
-
+        if (animateCard && stopAnimation) {
+            stopAnimation();
+        }
+    });
 </script>
 
-
-
+<!-- svelte-ignore a11y-no-static-element-interactions -->
 <div class="{width} min-w-[70px] relative z-[1]">
-
-    <!--Normal tooltip-->
-    <div class="card p-4 variant-filled-surface w-[200%] border-2" data-popup={joker.name+salt}>
-        <p>{joker.name}: {joker.tooltip}</p>
-    </div>
-    
-    <!--With edition tooltip-->
-    <div class="card p-4 variant-filled-surface w-[200%] border-2" data-popup={joker.name+edition.name+salt}>
-        <p>{joker.name}: {joker.tooltip}. {edition.name}: {edition.tooltip}</p>
+    <!--Tooltip-->
+    <div class="w-[200%]" data-popup={joker.name + salt}>
+        <!--Sell text-->
+        {#if sellable}
+            <div class="w-full grid grid-cols-[65%_33%] gap-[2%]">
+                <div class="card p-4 variant-filled-surface border-2">
+                    {#if editionId > 0}
+                        <p>{joker.name}: {joker.tooltip}.</p>
+                        <p>{edition.name}: {edition.tooltip}</p>
+                    {:else}
+                        {joker.name}: {joker.tooltip}
+                    {/if}
+                </div>
+                <div class="card border-2 border-warning-500 p-3 text-[2.5vh] leading-none text-warning-500 content-center">
+                    <p>Sell</p>
+                    <p>{sellAmount}$</p>
+                </div>
+            </div>
+        {:else}
+            <div class="w-full card p-4 variant-filled-surface border-2">
+                {#if editionId > 0}
+                    <p>
+                        {joker.name}: {joker.tooltip}. {edition.name}: {edition.tooltip}
+                    </p>
+                {:else}
+                    <p>{joker.name}: {joker.tooltip}</p>
+                {/if}
+            </div>
+        {/if}
     </div>
 
     <!--Edition image-->
     {#if editionId > 0}
-		<img
-            bind:this={editionImage}
-			src={edition.image}
-			alt={edition.name}
-			class="absolute w-full h-full object-fill top-0 z-[4] rounded-[5.46875%] opacity-50"
+        <img
+            bind:this={overlayImage}
+            src={edition.image}
+            alt={edition.name}
+            class="absolute w-full h-full object-fill top-0 z-[4] rounded-[5.46875%] opacity-50"
             style="transform-style: preserve-3d;"
-			use:popup={popupHover2}
-		/>
-	{/if}
-    
+            use:popup={popupHover}
+        />
+    {/if}
+
     <!--Joker image-->
     <img
-		bind:this={jokerImage}
-		src={joker.image}
-		alt={joker.name}
-		class="w-full h-full object-fill rounded-[5.46875%] z-[2] shadow-[5px_15px_10px_rgba(0,0,0,0.5)]"
-		style="aspect-ratio: {ratio}; transform-style: preserve-3d;"
-		use:popup={popupHover1}
-	/>
+        bind:this={jokerImage}
+        src={joker.image}
+        alt={joker.name}
+        class="w-full h-full object-fill rounded-[5.46875%] z-[2] shadow-[5px_15px_10px_rgba(0,0,0,0.5)]"
+        style="aspect-ratio: {ratio}; transform-style: preserve-3d;"
+        use:popup={popupHover}
+    />
 </div>

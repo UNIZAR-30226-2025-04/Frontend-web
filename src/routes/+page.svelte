@@ -7,6 +7,8 @@
     import { getDrawerStore, type DrawerSettings } from '@skeletonlabs/skeleton';
 
 	onMount(async () => {
+		goto(base+"/game");
+		/*
 		// If user is cached and wants to be remembered we log in and get info
 		if( $userDataStore.token !== "" && $userDataStore.remember === true){
 			try{
@@ -21,6 +23,7 @@
 				}));
 			}
 		}
+			*/
 	});
 		
 

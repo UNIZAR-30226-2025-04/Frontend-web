@@ -1,4 +1,4 @@
-import type { Boucher, Joker, JokerEdition, Overlay, Suit } from "./interfaces";
+import type { Voucher, Joker, JokerEdition, Overlay, Suit } from "./interfaces";
 
 // Regular cards
 
@@ -40,13 +40,13 @@ export const jokerEditionsDirectory:JokerEdition[] = [
     {name:"Glass",image:"cards/overlays/glassDemo3.png",tooltip:"This is a tooltip for the glass overlay!"}
 ]
 
-// Bouchers
+// Vouchers
 
-export const errorBoucher:Boucher = {
+export const errorVoucher:Voucher = {
     name:"Error boucher", image:"icons/missing.png",tooltip:"Error boucher"
 }
 
-export const boucherDirectory:Boucher[] = [
+export const voucherDirectory:Voucher[] = [
     {name:"Wheel of fortune", image:"cards/bouchers/wheel_of_fortune.png",tooltip:"It's just wheel of fortune, it looses money"},
     {name:"Average size Michael",image:"cards/jokers/AVERAGE_SIZE_MICHAEL.png",tooltip:"+15 mult, 1/15 chance of being sold each round"},
 ]
