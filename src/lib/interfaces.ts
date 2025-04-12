@@ -183,7 +183,8 @@ export type CardItem = {
 export type JokerItem = {
     key: number,
     id: number,
-    edition: number
+    edition: number,
+    sellAmount: number,
 };
 
 export type VoucherItem = {

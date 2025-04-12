@@ -114,22 +114,40 @@
 	});
 	$: redScoreText.set(state.redScore);
 
+	const moneyText = tweened(state.money, {
+		duration: 400,
+		easing: cubicOut,
+	});
+	$: moneyText.set(state.money);
+
+	const potText = tweened(state.pot, {
+		duration: 400,
+		easing: cubicOut,
+	});
+	$: potText.set(state.pot);
+
 	/**
 	 * Handles the click event on the joker card, updating the state of the hand cards.
 	 * If the action is blocked, it prevents any changes.
 	 * Resets the `picked` status of all hand cards and sets the picked joker card index.
+	 * If on shop phase it sells the joker
 	 * @param index  of the joker card that was clicked.
 	 */
 	function onClickJoker(index: number) {
 		if (actionBlocked) return;
 
-		for (const card of state.handCards) card.picked = false;
+		if(state.phase === 0){
+			for (const card of state.handCards) card.picked = false;
 
-		if (index !== pickedJoker) {
-			const anyPicked = state.handCards.some((card) => card.picked);
-			if (!anyPicked) pickedJoker = index;
-		} else {
-			pickedJoker = -1;
+			if (index !== pickedJoker) {
+				const anyPicked = state.handCards.some((card) => card.picked);
+				if (!anyPicked) pickedJoker = index;
+			} else {
+				pickedJoker = -1;
+			}
+		}else if(state.phase === 1){
+			state.money += state.jokers[index].sellAmount;
+			state.jokers.splice(index,1);
 		}
 	}
 
@@ -289,8 +307,6 @@
 		interval = setInterval(() => {
 			if (state.timeLeft > 0) {
 				state.timeLeft--;
-			} else {
-				state.timeLeft = 30;
 			}
 		}, 1000);
 	});
@@ -372,6 +388,7 @@
 			key: getNextKey(),
 			id: newJoker,
 			edition: newEdition,
+			sellAmount: Math.floor(Math.random() * 30) + 1
 		});
 		state.jokers = state.jokers;
 	}
@@ -390,6 +407,7 @@
 	}
 
 	function onNextPhase(){
+		pickedJoker = -1;
 		if(state.phase === 1){
 			state.phase = 0;
 		}else{
@@ -406,13 +424,15 @@
 	<!-- Info column -->
 	<div class="h-[100vh] ml-[20%] card rounded-none text-left p-[5%]">
 		<!--Title-->
+		<!-- svelte-ignore a11y-click-events-have-key-events -->
+		<!-- svelte-ignore a11y-no-static-element-interactions -->
 		{#if state.phase === 0}
-			<div class="text-5xl-r h-[12%] card variant-filled-surface p-5">
-				<button on:click={onNextPhase}>Round {state.round}/10</button>
+			<div class="text-5xl-r h-[12%] card variant-filled-surface p-5" on:click={onNextPhase}>
+				Round {state.round}/10
 			</div>
 		{:else if state.phase === 1}
-			<div class="text-5xl-r h-[12%] card variant-filled-surface p-5">
-				<button on:click={onNextPhase}>SHOP</button>
+			<div class="text-5xl-r h-[12%] card variant-filled-surface p-5" on:click={onNextPhase}>
+				SHOP
 			</div>
 		{/if}
 
@@ -497,48 +517,50 @@
 			<div class={infoChip}>
 				<div class="text-2xl-r">Pot</div>
 				<div class={infoChipCard}>
-					{state.pot}$
+					{$potText.toFixed()}$
 				</div>
 			</div>
 			<!--Money-->
 			<div class={infoChip}>
 				<div class="text-2xl-r">Money</div>
 				<div class="{infoChipCard} text-warning-300">
-					{state.money}$
+					{$moneyText.toFixed()}$
 				</div>
 			</div>
 		</div>
 	</div>
 
 	<!-- Playing mat -->
-	 {#if state.phase === 0}
-		<div class="h-[100vh] grid grid-rows-[20%_5%_20%_20%_8%] gap-[6%]">
-			<!--Jokers-->
-			<div
-				class="flex justify-between mt-[3%]"
-				style="width: calc(100% - 16vh);"
-			>
-				{#each state.jokers as joker, index (joker.key)}
-					<!-- svelte-ignore a11y-click-events-have-key-events -->
-					<!-- svelte-ignore a11y-no-static-element-interactions -->
-					<div
-						animate:flip={{ duration: 100 }}
-						class={`w-1 transition-all duration-[100ms] ease-in-out ${index === pickedJoker ? "mt-[5%]" : ""}`}
-						on:click={() => onClickJoker(index)}
-					>
-						<div class="absolute">
-							<JokerCard
-								width="w-[16vh]"
-								jokerId={joker.id}
-								editionId={joker.edition}
-								animateCard={true}
-							/>
-						</div>
+	 
+	<div class="h-[100vh] grid grid-rows-[20%_5%_20%_20%_8%] gap-[6%]">
+		<!--Jokers-->
+		<div
+			class="flex justify-between mt-[3%]"
+			style="width: calc(100% - 16vh);"
+		>
+			{#each state.jokers as joker, index (joker.key)}
+				<!-- svelte-ignore a11y-click-events-have-key-events -->
+				<!-- svelte-ignore a11y-no-static-element-interactions -->
+				<div
+					animate:flip={{ duration: 100 }}
+					class={`w-1 transition-all duration-[100ms] ease-in-out ${index === pickedJoker && state.phase === 0 ? "mt-[5%]" : ""}`}
+					on:click={() => onClickJoker(index)}
+				>
+					<div class="absolute">
+						<JokerCard
+							width="w-[16vh]"
+							jokerId={joker.id}
+							editionId={joker.edition}
+							animateCard={true}
+							sellAmount={joker.sellAmount}
+							sellable={state.phase === 1}
+						/>
 					</div>
-				{/each}
-			</div>
-			<div class="text-left text-2xl-r">{state.jokers.length}/5</div>
-
+				</div>
+			{/each}
+		</div>
+		<div class="text-left text-2xl-r">{state.jokers.length}/5</div>
+		{#if state.phase === 0}
 			<!--Played cards-->
 			<div
 				class="flex justify-between ml-[10%] mr-[10%]"
@@ -612,42 +634,12 @@
 					>Discard
 				</button>
 			</div>
-		</div>
-	{:else if state.phase === 1}
-		<div class="h-[100vh] grid grid-rows-[20%_5%_75%] gap-[6%]">
-			<!--Jokers-->
-			<div
-				class="flex justify-between mt-[3%]"
-				style="width: calc(100% - 16vh);"
-			>
-				{#each state.jokers as joker, index (joker.key)}
-					<!-- svelte-ignore a11y-click-events-have-key-events -->
-					<!-- svelte-ignore a11y-no-static-element-interactions -->
-					<div
-						animate:flip={{ duration: 100 }}
-						class="w-1"
-						on:click={() => onClickJoker(index)}
-					>
-						
-						<div class="absolute">
-							<JokerCard
-								width="w-[16vh]"
-								jokerId={joker.id}
-								editionId={joker.edition}
-								animateCard={true}
-								sellAmount={5}
-								sellable={true}
-							/>
-						</div>
-					</div>
-				{/each}
+		{:else if state.phase === 1}
+			<div class="h-[63vh] border-white border-2">
+				HOLA
 			</div>
-			<div class="text-left text-2xl-r">{state.jokers.length}/5</div>
-
-			<p>HOLA</p>
-
-		</div>
-	{/if}
+		{/if}
+	</div>
 
 	<!-- Options and deck -->
 	<div class="flex flex-col justify-between h-screen p-10">
