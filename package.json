@@ -32,6 +32,7 @@
   "dependencies": {
     "@floating-ui/dom": "^1.6.13",
     "socket.io-client": "^4.8.1",
+    "svelte-dnd-action": "^0.9.60",
     "svelte-persisted-store": "^0.12.0"
   }
 }

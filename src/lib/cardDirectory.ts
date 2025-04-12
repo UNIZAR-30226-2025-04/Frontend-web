@@ -2,6 +2,25 @@ import type { Voucher, Joker, JokerEdition, Overlay, Suit } from "./interfaces";
 
 // Regular cards
 
+// Function to get numerical value from a rank string
+export function getValueFromRank(rank:string):number{
+    switch(rank){
+        case "A": return 14;
+        case "K": return 13;
+        case "Q": return 12;
+        case "J": return 11;
+        default:
+            return Number(rank);
+    }
+}
+
+export function getValueFromSuit(suitName: string): number {
+	const index = suitDirectory.findIndex(suit => suit.name === suitName);
+	if (index === -1) return 0;
+	return index;
+}
+
+
 // Names and links of all the possible suits of cards
 export const suitDirectory:Suit[] = [
     {name:"h",color:0,image:"cards/suits/h.png"},

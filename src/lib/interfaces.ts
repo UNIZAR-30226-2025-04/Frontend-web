@@ -175,14 +175,14 @@ export type GameState = {
 }
 
 export type CardItem = {
-    key: number,
+    id: number,
     card: Card,
     picked: boolean,
 };
 
 export type JokerItem = {
-    key: number,
     id: number,
+    jokerId: number,
     edition: number,
     sellAmount: number,
 };

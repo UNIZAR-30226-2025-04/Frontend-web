@@ -5,11 +5,13 @@
 		jokerEditionsDirectory,
 		overlayDirectory,
 		suitDirectory,
+        getValueFromRank,
+        getValueFromSuit,
 	} from "$lib/cardDirectory";
 	import VoucherCard from "$lib/components/VoucherCard.svelte";
 	import GameCard from "$lib/components/GameCard.svelte";
 	import JokerCard from "$lib/components/JokerCard.svelte";
-	import { HandTypesBase, type Card, type GameState } from "$lib/interfaces";
+	import { HandTypesBase, type Card, type CardItem, type GameState } from "$lib/interfaces";
 	import { getNextKey } from "$lib/keyGenerator";
 	import {
 		getDrawerStore,
@@ -17,12 +19,13 @@
 		type DrawerSettings,
 		type ModalSettings,
 	} from "@skeletonlabs/skeleton";
-    import { stat } from "fs";
+	import { stat } from "fs";
 	import { onDestroy, onMount } from "svelte";
 	import { flip } from "svelte/animate";
 	import { cubicOut } from "svelte/easing";
 	import { tweened } from "svelte/motion";
 	import { fade, fly } from "svelte/transition";
+	import { dndzone } from "svelte-dnd-action";
 
 	// Main state variable
 	let state: GameState = {
@@ -47,9 +50,6 @@
 		timeLeft: 30,
 	};
 
-	// To know what jocker has the user clicked
-	let pickedJoker: number = -1;
-
 	// If true it disables the button controls
 	let actionBlocked: boolean = false;
 
@@ -68,8 +68,9 @@
 	};
 
 	// Styles tag that repeat
-	const infoChip:string = "card text-center variant-filled-surface p-3 grid grid-rows-[25%_75%] gap-2";
-	const infoChipCard:string = "card text-5xl-r content-center";
+	const infoChip: string =
+		"card text-center variant-filled-surface p-3 grid grid-rows-[25%_75%] gap-2";
+	const infoChipCard: string = "card text-5xl-r content-center";
 
 	// Modal and drawer variables
 
@@ -136,18 +137,9 @@
 	function onClickJoker(index: number) {
 		if (actionBlocked) return;
 
-		if(state.phase === 0){
-			for (const card of state.handCards) card.picked = false;
-
-			if (index !== pickedJoker) {
-				const anyPicked = state.handCards.some((card) => card.picked);
-				if (!anyPicked) pickedJoker = index;
-			} else {
-				pickedJoker = -1;
-			}
-		}else if(state.phase === 1){
+		if (state.phase === 1) {
 			state.money += state.jokers[index].sellAmount;
-			state.jokers.splice(index,1);
+			state.jokers.splice(index, 1);
 		}
 	}
 
@@ -161,21 +153,18 @@
 	function onPlay() {
 		if (actionBlocked) return;
 
-		if (pickedJoker !== -1) return;
-
 		const pickedCards = state.handCards.filter((card) => card.picked);
 		const count = pickedCards.length;
 
 		if (count > 0 && count < 6) {
 			const played = pickedCards.map(({ card }) => ({
-				key: getNextKey(),
+				id: getNextKey(),
 				card,
 				picked: false,
 			}));
 
 			state.playedCards.push(...played);
 			state.handCards = state.handCards.filter((card) => !card.picked);
-			pickedJoker = -1;
 			state.playedCards = [...state.playedCards];
 			actionBlocked = true;
 
@@ -185,7 +174,7 @@
 				setTimeout(
 					() => {
 						indexToPlayAnim = i;
-						scorePlayAnim = Math.floor(Math.random() * 12);
+						scorePlayAnim = getValueFromRank(state.playedCards[i].card.rank);
 						state.blueScore += Math.floor(Math.random() * 1000);
 						state.redScore += Math.floor(Math.random() * 100);
 					},
@@ -199,80 +188,20 @@
 				state.playedCards = [];
 				state.minScore -= 10000;
 			}, playAnimSpeed * state.playedCards.length);
+
+			setTimeout(() => {
+				state.blueScore = 0;
+				state.redScore = 0;
+			}, playAnimSpeed * (state.playedCards.length + 1));
 		}
 	}
 
-	/**
-	 * Handles the action triggered by the left arrow key.
-	 * - If no action is blocked and no joker card is picked, it swaps the selected card with the one to its left.
-	 * - If a joker card is picked, it swaps the joker card with the one to its left in the `jokers` array.
-	 * This function ensures that the picked card can only be swapped with the card immediately to the left,
-	 * and updates the state of the hand cards or jokers accordingly.
-	 */
-	function onArrowLeft() {
-		if (actionBlocked) return;
-
-		if (pickedJoker === -1) {
-			let pickedIndex = state.handCards.findIndex((card) => card.picked);
-			if (
-				pickedIndex > 0 &&
-				state.handCards.filter((c) => c.picked).length === 1
-			) {
-				// Swap
-				[
-					state.handCards[pickedIndex - 1],
-					state.handCards[pickedIndex],
-				] = [
-					state.handCards[pickedIndex],
-					state.handCards[pickedIndex - 1],
-				];
-				state.handCards = [...state.handCards];
-			}
-		} else if (pickedJoker > 0) {
-			// Swap
-			[state.jokers[pickedJoker - 1], state.jokers[pickedJoker]] = [
-				state.jokers[pickedJoker],
-				state.jokers[pickedJoker - 1],
-			];
-			pickedJoker--;
-		}
+	function onSortR() {
+		state.handCards = state.handCards.sort((cardA, cardB:CardItem) => getValueFromRank(cardB.card.rank) - getValueFromRank(cardA.card.rank) )
 	}
 
-	/**
-	 * Handles the action triggered by the right arrow key.
-	 * - If no action is blocked and no joker card is picked, it swaps the selected card with the one to its right.
-	 * - If a joker card is picked, it swaps the joker card with the one to its right in the `jokers` array.
-	 * This function ensures that the picked card can only be swapped with the card immediately to the right,
-	 * and updates the state of the hand cards or jokers accordingly.
-	 */
-	function onArrowRight() {
-		if (actionBlocked) return;
-
-		if (pickedJoker === -1) {
-			let pickedIndex = state.handCards.findIndex((card) => card.picked);
-			if (
-				pickedIndex !== -1 &&
-				pickedIndex < state.handCards.length - 1 &&
-				state.handCards.filter((c) => c.picked).length === 1
-			) {
-				// Swap
-				[
-					state.handCards[pickedIndex + 1],
-					state.handCards[pickedIndex],
-				] = [
-					state.handCards[pickedIndex],
-					state.handCards[pickedIndex + 1],
-				];
-				state.handCards = [...state.handCards];
-			}
-		} else if (pickedJoker < state.jokers.length - 1) {
-			// Swap
-			[state.jokers[pickedJoker + 1], state.jokers[pickedJoker]] = [
-				state.jokers[pickedJoker],
-				state.jokers[pickedJoker + 1],
-			];
-			pickedJoker++;
-		}
+	function onSortS() {
+		state.handCards = state.handCards.sort((cardA, cardB:CardItem) => getValueFromSuit(cardA.card.suit) - getValueFromSuit(cardB.card.suit) )
 	}
 
 	/**
@@ -299,6 +228,20 @@
 		modalStore.trigger(leaveGameModal);
 	}
 
+	// Drag and drop functions
+	function handleDndConsiderCards(e: any) {
+		state.handCards = e.detail.items;
+	}
+	function handleDndFinalizeCards(e: any) {
+		state.handCards = e.detail.items;
+	}
+	function handleDndConsiderJokers(e: any) {
+		state.jokers = e.detail.items;
+	}
+	function handleDndFinalizeJokers(e: any) {
+		state.jokers = e.detail.items;
+	}
+
 	// Interval for timer, aux variable
 	let interval: any;
 
@@ -320,7 +263,7 @@
 	// Function just to get more cards and play around
 	function onDeck() {
 		state.handCards.push({
-			key: getNextKey(),
+			id: getNextKey(),
 			card: generateCard(true, true),
 			picked: false,
 		});
@@ -329,7 +272,7 @@
 
 	for (let i = 0; i < 0; i++) {
 		state.playedCards.push({
-			key: getNextKey(),
+			id: getNextKey(),
 			card: generateCard(true, true),
 			picked: false,
 		});
@@ -337,7 +280,7 @@
 
 	for (let i = 0; i < 8; i++) {
 		state.handCards.push({
-			key: getNextKey(),
+			id: getNextKey(),
 			card: generateCard(true, true),
 			picked: false,
 		});
@@ -385,10 +328,10 @@
 			Math.random() * jokerEditionsDirectory.length,
 		);
 		state.jokers.push({
-			key: getNextKey(),
-			id: newJoker,
+			id: getNextKey(),
+			jokerId: newJoker,
 			edition: newEdition,
-			sellAmount: Math.floor(Math.random() * 30) + 1
+			sellAmount: Math.floor(Math.random() * 30) + 1,
 		});
 		state.jokers = state.jokers;
 	}
@@ -400,21 +343,18 @@
 	}
 
 	function onClickHand(index: number) {
-		pickedJoker = -1;
 		const card = state.handCards[index];
 		card.picked = !card.picked;
 		state.handCards = [...state.handCards];
 	}
 
-	function onNextPhase(){
-		pickedJoker = -1;
-		if(state.phase === 1){
+	function onNextPhase() {
+		if (state.phase === 1) {
 			state.phase = 0;
-		}else{
+		} else {
 			state.phase++;
 		}
 	}
-
 </script>
 
 <!-- Main body -->
@@ -427,11 +367,17 @@
 		<!-- svelte-ignore a11y-click-events-have-key-events -->
 		<!-- svelte-ignore a11y-no-static-element-interactions -->
 		{#if state.phase === 0}
-			<div class="text-5xl-r h-[12%] card variant-filled-surface p-5" on:click={onNextPhase}>
+			<div
+				class="text-5xl-r h-[12%] card variant-filled-surface p-5"
+				on:click={onNextPhase}
+			>
 				Round {state.round}/10
 			</div>
 		{:else if state.phase === 1}
-			<div class="text-5xl-r h-[12%] card variant-filled-surface p-5" on:click={onNextPhase}>
+			<div
+				class="text-6xl-r h-[12%] card p-5 text-center content-center text-warning-500 border-8 border-warning-500 shadow-[5px_15px_10px_rgba(0,0,0,0.5)]"
+				on:click={onNextPhase}
+			>
 				SHOP
 			</div>
 		{/if}
@@ -531,42 +477,50 @@
 	</div>
 
 	<!-- Playing mat -->
-	 
+
 	<div class="h-[100vh] grid grid-rows-[20%_5%_20%_20%_8%] gap-[6%]">
 		<!--Jokers-->
 		<div
-			class="flex justify-between mt-[3%]"
-			style="width: calc(100% - 16vh);"
+			class="flex justify-between relative h-full mt-[3%]"
+			style="width: calc(100% - 9vh);"
+			use:dndzone={{
+				items: state.jokers,
+				flipDurationMs: 100,
+				type: "Joker",
+				dropTargetStyle: { outline: "solid 0px" },
+			}}
+			on:consider={handleDndConsiderJokers}
+			on:finalize={handleDndFinalizeJokers}
 		>
-			{#each state.jokers as joker, index (joker.key)}
+			{#each state.jokers as joker, index (joker.id)}
 				<!-- svelte-ignore a11y-click-events-have-key-events -->
 				<!-- svelte-ignore a11y-no-static-element-interactions -->
 				<div
 					animate:flip={{ duration: 100 }}
-					class={`w-1 transition-all duration-[100ms] ease-in-out ${index === pickedJoker && state.phase === 0 ? "mt-[5%]" : ""}`}
+					class={`w-[5vh] h-full transition-transform duration-200 ease-in-out
+								${index !== 0 ? "-ml-[10%]" : ""}`}
 					on:click={() => onClickJoker(index)}
 				>
-					<div class="absolute">
-						<JokerCard
-							width="w-[16vh]"
-							jokerId={joker.id}
-							editionId={joker.edition}
-							animateCard={true}
-							sellAmount={joker.sellAmount}
-							sellable={state.phase === 1}
-						/>
-					</div>
+					<JokerCard
+						width="w-[16vh]"
+						jokerId={joker.jokerId}
+						editionId={joker.edition}
+						animateCard={true}
+						sellAmount={joker.sellAmount}
+						sellable={state.phase === 1}
+					/>
 				</div>
 			{/each}
 		</div>
 		<div class="text-left text-2xl-r">{state.jokers.length}/5</div>
+
 		{#if state.phase === 0}
 			<!--Played cards-->
 			<div
 				class="flex justify-between ml-[10%] mr-[10%]"
 				style="width: calc(80% - 14vh);"
 			>
-				{#each state.playedCards as card, index (card.key)}
+				{#each state.playedCards as card, index (card.id)}
 					<div transition:fly={{ y: 100, duration: 500 }} class="w-1">
 						{#if index === indexToPlayAnim}
 							<div
@@ -589,22 +543,33 @@
 			</div>
 
 			<!--Hand-->
-			<div class="flex justify-between" style="width: calc(100% - 14vh);">
-				{#each state.handCards as card, index (card.key)}
+			<div
+				class="flex justify-between relative h-full"
+				style="width: calc(100% - 9vh);"
+				use:dndzone={{
+					items: state.handCards,
+					flipDurationMs: 100,
+					type: "hand",
+					dropTargetStyle: { outline: "solid 0px" },
+				}}
+				on:consider={handleDndConsiderCards}
+				on:finalize={handleDndFinalizeCards}
+			>
+				{#each state.handCards as card, index (card.id)}
 					<!-- svelte-ignore a11y-click-events-have-key-events -->
 					<!-- svelte-ignore a11y-no-static-element-interactions -->
 					<div
 						animate:flip={{ duration: 100 }}
-						class={`w-1 transition-all duration-[100ms] ease-in-out ${card.picked ? "mt-[-5%]" : ""}`}
+						class={`w-[5vh] h-full transition-transform duration-200 ease-in-out
+								${card.picked ? "mt-[-5%]" : ""}
+								${index !== 0 ? "-ml-[10%]" : ""}`}
 						on:click={() => onClickHand(index)}
 					>
-						<div class="absolute">
-							<GameCard
-								width="w-[14vh]"
-								card={card.card}
-								animateCard={true}
-							/>
-						</div>
+						<GameCard
+							card={card.card}
+							width="w-[14vh]"
+							animateCard={true}
+						/>
 					</div>
 				{/each}
 			</div>
@@ -619,13 +584,15 @@
 				<div class="flex w-[15%]">
 					<button
 						class="btn variant-filled-surface rounded-l-md rounded-r-none w-full text-5xl-r"
-						on:click={onArrowLeft}
-						>&lt;
+						on:click={onSortR}
+					>
+						R
 					</button>
 					<button
 						class="btn variant-filled-surface rounded-r-md rounded-l-none w-full text-5xl-r"
-						on:click={onArrowRight}
-						>&gt;
+						on:click={onSortS}
+					>
+						S
 					</button>
 				</div>
 				<button
@@ -635,9 +602,7 @@
 				</button>
 			</div>
 		{:else if state.phase === 1}
-			<div class="h-[63vh] border-white border-2">
-				HOLA
-			</div>
+			<div class="h-[63vh] border-white border-2">HOLA</div>
 		{/if}
 	</div>
 
@@ -699,6 +664,35 @@
 		background-repeat: no-repeat;
 	}
 
+	:global(.dnd-placeholder) {
+		display: none !important;
+	}
+
+	.text-6xl-r {
+		font-size: 5vh;
+		line-height: 1;
+	}
+
+	.text-5xl-r {
+		font-size: 4.5vh;
+		line-height: 1;
+	}
+
+	.text-4xl-r {
+		font-size: 3vh;
+		line-height: 1;
+	}
+
+	.text-3xl-r {
+		font-size: 2.5vh;
+		line-height: 1;
+	}
+
+	.text-2xl-r {
+		font-size: 2vh;
+		line-height: 1;
+	}
+
 	/*
 	Filter taken from https://github.com/D3nn7/crt-css
 	License says: "I love Open Source and decide that this small project don't need a license. 
@@ -721,26 +715,6 @@
 			text-shadow: none;
 			animation: none;
 		}
-	}
-
-	.text-5xl-r {
-		font-size: 4.5vh;
-		line-height: 1;
-	}
-
-	.text-4xl-r {
-		font-size: 3vh;
-		line-height: 1;
-	}
-
-	.text-3xl-r {
-		font-size: 2.5vh;
-		line-height: 1;
-	}
-
-	.text-2xl-r {
-		font-size: 2vh;
-		line-height: 1;
 	}
 
 	@keyframes textflicker {
