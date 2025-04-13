@@ -5,13 +5,15 @@
 		jokerEditionsDirectory,
 		overlayDirectory,
 		suitDirectory,
-        getValueFromRank,
-        getValueFromSuit,
+		getValueFromRank,
+		getValueFromSuit,
+		HandTypesBase,
+		packageDirectory,
 	} from "$lib/cardDirectory";
 	import VoucherCard from "$lib/components/VoucherCard.svelte";
 	import GameCard from "$lib/components/GameCard.svelte";
 	import JokerCard from "$lib/components/JokerCard.svelte";
-	import { HandTypesBase, type Card, type CardItem, type GameState } from "$lib/interfaces";
+	import { type Card, type CardItem, type GameState } from "$lib/interfaces";
 	import { getNextKey } from "$lib/keyGenerator";
 	import {
 		getDrawerStore,
@@ -22,10 +24,11 @@
 	import { stat } from "fs";
 	import { onDestroy, onMount } from "svelte";
 	import { flip } from "svelte/animate";
-	import { cubicOut } from "svelte/easing";
+	import { bounceOut, cubicOut } from "svelte/easing";
 	import { tweened } from "svelte/motion";
 	import { fade, fly } from "svelte/transition";
 	import { dndzone } from "svelte-dnd-action";
+    import PackageCard from "$lib/components/PackageCard.svelte";
 
 	// Main state variable
 	let state: GameState = {
@@ -35,6 +38,7 @@
 		activeVouchers: [],
 		vouchers: [],
 		handLevels: structuredClone(HandTypesBase),
+		shop: { jokerRow: [], voucherRow: [], packageRow: [] },
 		round: 1,
 		phase: 0,
 		minScore: 100000,
@@ -45,6 +49,7 @@
 		discards: 3,
 		pot: 5,
 		money: 10,
+		rerollAmount: 3,
 		deckSize: 52,
 		deckLeft: 44,
 		timeLeft: 30,
@@ -52,6 +57,9 @@
 
 	// If true it disables the button controls
 	let actionBlocked: boolean = false;
+
+	// Global speed of animations
+	const animationSpeed: number = 100; // ms
 
 	// For the play animation
 	const playAnimSpeed: number = 750; //ms
@@ -67,7 +75,8 @@
 		faceUp: false,
 	};
 
-	// Styles tag that repeat
+	// Styles tag that repeat or are too long
+	const shopTitle = "text-6xl-r h-[12%] card p-5 text-center content-center text-warning-500 border-8 border-warning-500 shadow-[5px_15px_10px_rgba(0,0,0,0.5)]";
 	const infoChip: string =
 		"card text-center variant-filled-surface p-3 grid grid-rows-[25%_75%] gap-2";
 	const infoChipCard: string = "card text-5xl-r content-center";
@@ -98,31 +107,31 @@
 	// Reactivity animations
 
 	const minScoreText = tweened(state.minScore, {
-		duration: 400,
+		duration: animationSpeed*4,
 		easing: cubicOut,
 	});
 	$: minScoreText.set(state.minScore);
 
 	const blueScoreText = tweened(state.blueScore, {
-		duration: 400,
+		duration: animationSpeed*4,
 		easing: cubicOut,
 	});
 	$: blueScoreText.set(state.blueScore);
 
 	const redScoreText = tweened(state.redScore, {
-		duration: 400,
+		duration: animationSpeed*4,
 		easing: cubicOut,
 	});
 	$: redScoreText.set(state.redScore);
 
 	const moneyText = tweened(state.money, {
-		duration: 400,
+		duration: animationSpeed*4,
 		easing: cubicOut,
 	});
 	$: moneyText.set(state.money);
 
 	const potText = tweened(state.pot, {
-		duration: 400,
+		duration: animationSpeed*4,
 		easing: cubicOut,
 	});
 	$: potText.set(state.pot);
@@ -174,7 +183,9 @@
 				setTimeout(
 					() => {
 						indexToPlayAnim = i;
-						scorePlayAnim = getValueFromRank(state.playedCards[i].card.rank);
+						scorePlayAnim = getValueFromRank(
+							state.playedCards[i].card.rank,
+						);
 						state.blueScore += Math.floor(Math.random() * 1000);
 						state.redScore += Math.floor(Math.random() * 100);
 					},
@@ -189,19 +200,36 @@
 				state.minScore -= 10000;
 			}, playAnimSpeed * state.playedCards.length);
 
-			setTimeout(() => {
-				state.blueScore = 0;
-				state.redScore = 0;
-			}, playAnimSpeed * (state.playedCards.length + 1));
+			setTimeout(
+				() => {
+					state.blueScore = 0;
+					state.redScore = 0;
+				},
+				playAnimSpeed * (state.playedCards.length + 1),
+			);
 		}
 	}
 
+	/**
+	 * Sort cards on hand by rank
+	 */
 	function onSortR() {
-		state.handCards = state.handCards.sort((cardA, cardB:CardItem) => getValueFromRank(cardB.card.rank) - getValueFromRank(cardA.card.rank) )
+		state.handCards = state.handCards.sort(
+			(cardA, cardB: CardItem) =>
+				getValueFromRank(cardB.card.rank) -
+				getValueFromRank(cardA.card.rank),
+		);
 	}
 
+	/**
+	 * Sorts cards on hand by suit
+	 */
 	function onSortS() {
-		state.handCards = state.handCards.sort((cardA, cardB:CardItem) => getValueFromSuit(cardA.card.suit) - getValueFromSuit(cardB.card.suit) )
+		state.handCards = state.handCards.sort(
+			(cardA, cardB: CardItem) =>
+				getValueFromSuit(cardA.card.suit) -
+				getValueFromSuit(cardB.card.suit),
+		);
 	}
 
 	/**
@@ -226,6 +254,73 @@
 
 	function onExit() {
 		modalStore.trigger(leaveGameModal);
+	}
+
+	/**
+	 * Buys the joker at 'index' from the shop if the user has the aviable money and space
+	 * @param index
+	 */
+	function onBuyJoker(index: number) {
+		if (
+			state.jokers.length < 5 &&
+			state.shop.jokerRow[index].sellAmount <= state.money
+		) {
+			state.money -= state.shop.jokerRow[index].sellAmount;
+			state.jokers.push(state.shop.jokerRow[index]);
+			state.shop.jokerRow.splice(index, 1);
+		}
+	}
+
+	/**
+	 * Buys the voucher at 'index' from the shop if the user has the aviable money
+	 * @param index
+	 */
+	 function onBuyVoucher(index: number) {
+		if (
+			state.shop.voucherRow[index].sellAmount <= state.money
+		) {
+			state.money -= state.shop.voucherRow[index].sellAmount;
+			state.vouchers.push(state.shop.voucherRow[index]);
+			state.shop.voucherRow.splice(index, 1);
+		}
+	}
+
+	/**
+	 * Buys the package at 'index' from the shop if the user has the aviable money
+	 * @param index
+	 */
+	 function onBuyPack(index: number) {
+		if (
+			state.shop.voucherRow[index].sellAmount <= state.money
+		) {
+			state.money -= state.shop.voucherRow[index].sellAmount;
+			state.shop.packageRow.splice(index, 1);
+		}
+	}
+
+	/**
+	 * If the user has enough money it rerolls the joker row from the shop
+	 */
+	function onReroll() {
+		if(state.money >= state.rerollAmount && state.shop.jokerRow.length > 0){
+			let aux:number = state.shop.jokerRow.length;
+			state.shop.jokerRow = [];
+			for (let i = 0; i < aux; i++) {
+				const newJoker = Math.floor(Math.random() * jokerDirectory.length);
+				const newEdition = Math.floor(
+					Math.random() * jokerEditionsDirectory.length,
+				);
+				state.shop.jokerRow.push({
+					id: getNextKey(),
+					jokerId: newJoker,
+					edition: newEdition,
+					sellAmount: Math.floor(Math.random() * 30) + 1,
+				});
+			}
+			state.shop.jokerRow = state.shop.jokerRow;
+			state.money -= state.rerollAmount;
+			state.rerollAmount += Math.floor(Math.random() * 5) + 1
+		}
 	}
 
 	// Drag and drop functions
@@ -268,6 +363,15 @@
 			picked: false,
 		});
 		state.handCards = state.handCards;
+	}
+
+	function onAddMoney(){
+		state.money += 10;
+	}
+
+	function onRemoveVoucher(){
+		state.vouchers.splice(0,1);
+		state.vouchers = state.vouchers;
 	}
 
 	for (let i = 0; i < 0; i++) {
@@ -338,8 +442,11 @@
 
 	function onAddVoucher() {
 		const newVoucher = Math.floor(Math.random() * voucherDirectory.length);
-		state.activeVouchers.push({ key: getNextKey(), id: newVoucher });
+		const newVoucherItem = { id: getNextKey(), voucherId: newVoucher, sellAmount:  Math.floor(Math.random() * 30) + 1};
+		state.activeVouchers.push(newVoucherItem);
+		state.vouchers.push(newVoucherItem);
 		state.activeVouchers = state.activeVouchers;
+		state.vouchers = state.vouchers;
 	}
 
 	function onClickHand(index: number) {
@@ -350,9 +457,48 @@
 
 	function onNextPhase() {
 		if (state.phase === 1) {
+			state.handCards = [];
 			state.phase = 0;
 		} else {
 			state.phase++;
+			state.shop = { jokerRow: [], voucherRow: [], packageRow: [] };
+			for (let i = 0; i < 3; i++) {
+				const newJoker = Math.floor(
+					Math.random() * jokerDirectory.length,
+				);
+				const newEdition = Math.floor(
+					Math.random() * jokerEditionsDirectory.length,
+				);
+				state.shop.jokerRow.push({
+					id: getNextKey(),
+					jokerId: newJoker,
+					edition: newEdition,
+					sellAmount: Math.floor(Math.random() * 30) + 1,
+				});
+			}
+			for (let i = 0; i < 2; i++) {
+				const newVoucher = Math.floor(
+					Math.random() * voucherDirectory.length,
+				);
+				state.shop.voucherRow.push({
+					id: getNextKey(),
+					voucherId: newVoucher,
+					sellAmount: Math.floor(Math.random() * 30) + 1
+				});
+			}
+			for (let i = 0; i < 2; i++) {
+				const newPack = Math.floor(
+					Math.random() * packageDirectory.length,
+				);
+				state.shop.packageRow.push({
+					id: getNextKey(),
+					packageId: newPack,
+					sellAmount: Math.floor(Math.random() * 30) + 1
+				});
+			}
+			state.shop.jokerRow = state.shop.jokerRow;
+			state.shop.voucherRow = state.shop.voucherRow;
+			state.shop.packageRow = state.shop.packageRow;
 		}
 	}
 </script>
@@ -364,39 +510,51 @@
 	<!-- Info column -->
 	<div class="h-[100vh] ml-[20%] card rounded-none text-left p-[5%]">
 		<!--Title-->
-		<!-- svelte-ignore a11y-click-events-have-key-events -->
-		<!-- svelte-ignore a11y-no-static-element-interactions -->
 		{#if state.phase === 0}
-			<div
-				class="text-5xl-r h-[12%] card variant-filled-surface p-5"
-				on:click={onNextPhase}
-			>
+			<div class="text-5xl-r h-[12%] card variant-filled-surface p-5">
 				Round {state.round}/10
 			</div>
 		{:else if state.phase === 1}
-			<div
-				class="text-6xl-r h-[12%] card p-5 text-center content-center text-warning-500 border-8 border-warning-500 shadow-[5px_15px_10px_rgba(0,0,0,0.5)]"
-				on:click={onNextPhase}
-			>
+			<div class={shopTitle}>
 				SHOP
 			</div>
 		{/if}
 
-		<!--Vouchers label-->
-		<div class="text-2xl-r mt-[3%]">Active consumables</div>
-		<!--Vouchers-->
-		<div
-			class="flex h-[20%] mt-[3%] justify-between"
-			style="width: calc(100% - 12vh);"
-		>
-			{#each state.activeVouchers as voucher (voucher.key)}
-				<div class="w-0">
-					<div class="absolute">
-						<VoucherCard width="w-[12vh]" voucherId={voucher.id} />
+		{#if state.phase === 0}
+			<!--Vouchers label-->
+			<div class="text-2xl-r mt-[3%]">Active consumables</div>
+			<!--Vouchers-->
+			<div
+				class="flex h-[20%] mt-[3%] justify-between"
+				style="width: calc(100% - 11vh);"
+			>
+				{#each state.activeVouchers as voucher (voucher.id)}
+					<div class="w-[1vh]" animate:flip={{ duration: animationSpeed }}>
+						<VoucherCard
+							width="w-[12vh]"
+							voucherId={voucher.voucherId}
+						/>
 					</div>
-				</div>
-			{/each}
-		</div>
+				{/each}
+			</div>
+		{:else if state.phase === 1}
+			<!--Vouchers label-->
+			<div class="text-2xl-r mt-[3%]">Your consumables</div>
+			<!--Vouchers-->
+			<div
+				class="flex h-[20%] mt-[3%] justify-between"
+				style="width: calc(100% - 11vh);"
+			>
+				{#each state.vouchers as voucher (voucher.id)}
+					<div class="w-[1vh]" animate:flip={{ duration: animationSpeed }}>
+						<VoucherCard
+							width="w-[12vh]"
+							voucherId={voucher.voucherId}
+						/>
+					</div>
+				{/each}
+			</div>
+		{/if}
 
 		<!--Score to beat-->
 		<div
@@ -478,14 +636,14 @@
 
 	<!-- Playing mat -->
 
-	<div class="h-[100vh] grid grid-rows-[20%_5%_20%_20%_8%] gap-[6%]">
+	<div class="h-[100vh] grid grid-rows-[20%_5%_75%] gap-[6%]">
 		<!--Jokers-->
 		<div
 			class="flex justify-between relative h-full mt-[3%]"
 			style="width: calc(100% - 9vh);"
 			use:dndzone={{
 				items: state.jokers,
-				flipDurationMs: 100,
+				flipDurationMs: animationSpeed,
 				type: "Joker",
 				dropTargetStyle: { outline: "solid 0px" },
 			}}
@@ -496,8 +654,8 @@
 				<!-- svelte-ignore a11y-click-events-have-key-events -->
 				<!-- svelte-ignore a11y-no-static-element-interactions -->
 				<div
-					animate:flip={{ duration: 100 }}
-					class={`w-[5vh] h-full transition-transform duration-200 ease-in-out
+					animate:flip={{ duration: animationSpeed }}
+					class={`w-[5vh] h-full transition-transform duration-[${animationSpeed*2}] ease-in-out
 								${index !== 0 ? "-ml-[10%]" : ""}`}
 					on:click={() => onClickJoker(index)}
 				>
@@ -515,94 +673,200 @@
 		<div class="text-left text-2xl-r">{state.jokers.length}/5</div>
 
 		{#if state.phase === 0}
-			<!--Played cards-->
-			<div
-				class="flex justify-between ml-[10%] mr-[10%]"
-				style="width: calc(80% - 14vh);"
-			>
-				{#each state.playedCards as card, index (card.id)}
-					<div transition:fly={{ y: 100, duration: 500 }} class="w-1">
-						{#if index === indexToPlayAnim}
-							<div
-								in:fly={{ y: 150, duration: 300 }}
-								out:fade={{ duration: 300 }}
-								class="w-[14vh] text-center absolute mt-[-4vh] text-warning-300 text-3xl-r"
-							>
-								+{scorePlayAnim}
-							</div>
-						{/if}
-						<div class="absolute">
+			<div class="grid grid-rows-[27%_27%_10%] gap-[8%]">
+				<!--Played cards-->
+				<div
+					class="flex justify-between ml-[10%] mr-[10%]"
+					style="width: calc(80% - 13vh);"
+				>
+					{#each state.playedCards as card, index (card.id)}
+						<div
+							transition:fly={{ y: 100, duration: animationSpeed*5 }}
+							class="w-[1vh]"
+						>
+							{#if index === indexToPlayAnim}
+								<div
+									in:fly={{ y: 150, duration: animationSpeed*3 }}
+									out:fade={{ duration: animationSpeed*3 }}
+									class="w-[14vh] text-center absolute mt-[-4vh] text-warning-300 text-3xl-r"
+								>
+									+{scorePlayAnim}
+								</div>
+							{/if}
 							<GameCard
 								width="w-[14vh]"
 								card={card.card}
 								animateCard={true}
 							/>
 						</div>
-					</div>
-				{/each}
-			</div>
+					{/each}
+				</div>
 
-			<!--Hand-->
-			<div
-				class="flex justify-between relative h-full"
-				style="width: calc(100% - 9vh);"
-				use:dndzone={{
-					items: state.handCards,
-					flipDurationMs: 100,
-					type: "hand",
-					dropTargetStyle: { outline: "solid 0px" },
-				}}
-				on:consider={handleDndConsiderCards}
-				on:finalize={handleDndFinalizeCards}
-			>
-				{#each state.handCards as card, index (card.id)}
-					<!-- svelte-ignore a11y-click-events-have-key-events -->
-					<!-- svelte-ignore a11y-no-static-element-interactions -->
-					<div
-						animate:flip={{ duration: 100 }}
-						class={`w-[5vh] h-full transition-transform duration-200 ease-in-out
-								${card.picked ? "mt-[-5%]" : ""}
-								${index !== 0 ? "-ml-[10%]" : ""}`}
-						on:click={() => onClickHand(index)}
-					>
-						<GameCard
-							card={card.card}
-							width="w-[14vh]"
-							animateCard={true}
-						/>
-					</div>
-				{/each}
-			</div>
+				<!--Hand-->
+				<div
+					class="flex justify-between relative h-full"
+					style="width: calc(100% - 9vh);"
+					use:dndzone={{
+						items: state.handCards,
+						flipDurationMs: animationSpeed,
+						type: "hand",
+						dropTargetStyle: { outline: "solid 0px" },
+					}}
+					on:consider={handleDndConsiderCards}
+					on:finalize={handleDndFinalizeCards}
+				>
+					{#each state.handCards as card, index (card.id)}
+						<!-- svelte-ignore a11y-click-events-have-key-events -->
+						<!-- svelte-ignore a11y-no-static-element-interactions -->
+						<div
+							animate:flip={{ duration: animationSpeed }}
+							class={`w-[5vh] h-full transition-transform duration-[${animationSpeed*2}] ease-in-out
+									${card.picked ? "mt-[-5%]" : ""}
+									${index !== 0 ? "-ml-[10%]" : ""}`}
+							on:click={() => onClickHand(index)}
+						>
+							<GameCard
+								card={card.card}
+								width="w-[14vh]"
+								animateCard={true}
+							/>
+						</div>
+					{/each}
+				</div>
 
-			<!--Action buttons-->
-			<div class="flex justify-center gap-[4%]">
-				<button
-					class="btn variant-filled-tertiary w-[35%] text-5xl-r"
-					on:click={onPlay}
-					>Play
-				</button>
-				<div class="flex w-[15%]">
+				<!--Action buttons-->
+				<div class="flex justify-center gap-[4%]">
 					<button
-						class="btn variant-filled-surface rounded-l-md rounded-r-none w-full text-5xl-r"
-						on:click={onSortR}
-					>
-						R
+						class="btn variant-filled-tertiary w-[35%] text-5xl-r"
+						on:click={onPlay}
+						>Play
 					</button>
+					<div class="flex w-[15%]">
+						<button
+							class="btn variant-filled-surface rounded-l-md rounded-r-none w-full text-5xl-r"
+							on:click={onSortR}
+						>
+							R
+						</button>
+						<button
+							class="btn variant-filled-surface rounded-r-md rounded-l-none w-full text-5xl-r"
+							on:click={onSortS}
+						>
+							S
+						</button>
+					</div>
 					<button
-						class="btn variant-filled-surface rounded-r-md rounded-l-none w-full text-5xl-r"
-						on:click={onSortS}
-					>
-						S
+						class="btn variant-filled-error w-[35%] text-5xl-r"
+						on:click={onDiscard}
+						>Discard
 					</button>
 				</div>
-				<button
-					class="btn variant-filled-error w-[35%] text-5xl-r"
-					on:click={onDiscard}
-					>Discard
-				</button>
 			</div>
 		{:else if state.phase === 1}
-			<div class="h-[63vh] border-white border-2">HOLA</div>
+			<!--Shop container-->
+			<div
+				class="h-[63vh] card p-3 flex flex-col gap-3"
+				transition:fly={{ y: 500, duration: animationSpeed*3, easing: bounceOut }}
+			>
+				<!--Joker row-->
+				<div class="h-[50%] w-full flex gap-2">
+					<div
+						class="w-[25%] h-full flex flex-col gap-3 p-3 content-center text-4xl-r"
+					>
+						<button
+							class="w-full h-[50%] card variant-filled-error tv-filter"
+							on:click={onNextPhase}
+						>
+							<p>Next</p>
+							<p>Round</p>
+						</button>
+						<button
+							class="w-full h-[50%] card variant-filled-primary tv-filter"
+							on:click={onReroll}
+						>
+							<p>Reroll</p>
+							<p class="text-5xl-r">{state.rerollAmount}$</p>
+						</button>
+					</div>
+					<div
+						class="w-[75%] card variant-filled-surface p-3 flex justify-around"
+					>
+						{#each state.shop.jokerRow as joker, index (joker.id)}
+							<!-- svelte-ignore a11y-click-events-have-key-events -->
+							<!-- svelte-ignore a11y-no-static-element-interactions -->
+							<div
+								animate:flip={{ duration: animationSpeed }}
+								in:fly={{ y: -300, duration: animationSpeed*3, easing: cubicOut }}
+								class="flex flex-col justify-between gap-3"
+								on:click={() => onBuyJoker(index)}
+							>
+								<JokerCard
+									width="w-[16vh]"
+									jokerId={joker.jokerId}
+									editionId={joker.edition}
+									animateCard={true}
+								/>
+								<div
+									class="h-full card border-2 border-warning-500 text-3xl-r text-warning-500 content-center"
+								>
+									{joker.sellAmount}$
+								</div>
+							</div>
+						{/each}
+					</div>
+				</div>
+				<!--Bottom rows-->
+				<div class="h-[50%] w-full flex gap-3">
+					<!--Voucher row-->
+					<div class="w-[50%] h-full card variant-filled-surface p-4">
+						<div class="w-full h-full card flex justify-around">
+							{#each state.shop.voucherRow as voucher, index (voucher.id)}
+								<!-- svelte-ignore a11y-click-events-have-key-events -->
+								<!-- svelte-ignore a11y-no-static-element-interactions -->
+								<div
+									animate:flip={{ duration: animationSpeed }}
+									class="flex flex-col justify-between gap-3 p-2"
+									on:click={() => onBuyVoucher(index)}
+								>
+									<VoucherCard
+										width="w-[14vh]"
+										voucherId={voucher.voucherId}
+										animateCard={true}
+									/>
+									<div
+									class="h-full card border-2 border-warning-500 text-3xl-r text-warning-500 content-center"
+									>
+										{voucher.sellAmount}$
+									</div>
+								</div>
+							{/each}
+						</div>
+					</div>
+					<!--Package row-->
+					<div class="w-[50%] h-full card variant-filled-surface flex justify-around p-3">
+						{#each state.shop.packageRow as pack, index (pack.id)}
+							<!-- svelte-ignore a11y-click-events-have-key-events -->
+							<!-- svelte-ignore a11y-no-static-element-interactions -->
+							<div
+								animate:flip={{ duration: animationSpeed }}
+								class="flex flex-col justify-between gap-3"
+								on:click={() => onBuyPack(index)}
+							>
+								<PackageCard
+									width="w-[16vh]"
+									packageId={pack.packageId}
+									animateCard={true}
+								/>
+								<div
+									class="h-full card border-2 border-warning-500 text-3xl-r text-warning-500 content-center"
+								>
+									{pack.sellAmount}$
+								</div>
+							</div>
+						{/each}
+					</div>
+				</div>
+			</div>
 		{/if}
 	</div>
 
@@ -629,9 +893,25 @@
 					X
 				</button>
 			</div>
-			<div class="w-full card text-5xl-r text-right p-4 mt-[5%]">
+			<div class={`w-full card text-5xl-r text-right p-4 mt-[5%] ${state.timeLeft <= 0 ? "variant-filled-error" : ""}`}>
 				{state.timeLeft}s
 			</div>
+		</div>
+
+		<!--Debug buttons-->
+		<div class="flex flex-col gap-2">
+			<button class="btn variant-filled-surface" on:click={onNextPhase}>
+				Next phase
+			</button>
+			<button class="btn variant-filled-surface" on:click={onDeck}>
+				Add card
+			</button>
+			<button class="btn variant-filled-surface" on:click={onAddMoney}>
+				Add money
+			</button>
+			<button class="btn variant-filled-surface" on:click={onRemoveVoucher}>
+				Remove voucher
+			</button>
 		</div>
 
 		<!--Deck-->
@@ -643,9 +923,7 @@
 				<div class="absolute top-[5%] left-[5%]">
 					<GameCard width="w-[14vh]" card={dummyCard} />
 				</div>
-				<!-- svelte-ignore a11y-click-events-have-key-events -->
-				<!-- svelte-ignore a11y-no-static-element-interactions -->
-				<div class="absolute" on:click={onDeck}>
+				<div class="absolute">
 					<GameCard width="w-[14vh]" card={dummyCard} />
 				</div>
 			</div>
@@ -662,10 +940,6 @@
 		background-size: cover;
 		background-position: center;
 		background-repeat: no-repeat;
-	}
-
-	:global(.dnd-placeholder) {
-		display: none !important;
 	}
 
 	.text-6xl-r {

@@ -1,4 +1,4 @@
-import type { Voucher, Joker, JokerEdition, Overlay, Suit } from "./interfaces";
+import type { Voucher, Joker, JokerEdition, Overlay, Suit, HandType, Package } from "./interfaces";
 
 // Regular cards
 
@@ -41,6 +41,23 @@ export const overlayDirectory:Overlay[] = [
     {name:"Glass",image:"cards/overlays/glassDemo3.png",tooltip:"This is a tooltip for the glass overlay!"}
 ]
 
+// Base scores for diferent hands
+export const HandTypesBase:HandType[] = [
+    {name:"Flush five",lvl:1,baseBlue:160,baseRed:16},
+    {name:"Flush house",lvl:1,baseBlue:140,baseRed:14},
+    {name:"Five of a kind",lvl:1,baseBlue:120,baseRed:12},
+    {name:"Royal flush",lvl:1,baseBlue:100,baseRed:8},
+    {name:"Straight flush",lvl:1,baseBlue:100,baseRed:8},
+    {name:"Four of a kind",lvl:1,baseBlue:60,baseRed:7},
+    {name:"Full house",lvl:1,baseBlue:40,baseRed:4},
+    {name:"Flush",lvl:1,baseBlue:35,baseRed:4},
+    {name:"Straight",lvl:1,baseBlue:30,baseRed:4},
+    {name:"Three of a kind",lvl:1,baseBlue:30,baseRed:3},
+    {name:"Two pair",lvl:1,baseBlue:20,baseRed:2},
+    {name:"One pair",lvl:1,baseBlue:10,baseRed:2},
+    {name:"High card",lvl:1,baseBlue:5,baseRed:1},
+]
+
 // Jokers
 
 export const errorJoker:Joker = {
@@ -49,9 +66,7 @@ export const errorJoker:Joker = {
 
 export const jokerDirectory:Joker[] = [
     {name:"Average size Michael",image:"cards/jokers/AVERAGE_SIZE_MICHAEL.png",tooltip:"+15 mult, 1/15 chance of being sold each round"},
-    {name:"Wheel of fortune", image:"cards/bouchers/wheel_of_fortune.png",tooltip:"It's just wheel of fortune, it looses money"},
     {name:"Glass",image:"cards/overlays/glassDemo3.png",tooltip:"This is a tooltip for the glass overlay!"}
-
 ]
 
 export const jokerEditionsDirectory:JokerEdition[] = [
@@ -66,6 +81,16 @@ export const errorVoucher:Voucher = {
 }
 
 export const voucherDirectory:Voucher[] = [
-    {name:"Wheel of fortune", image:"cards/bouchers/wheel_of_fortune.png",tooltip:"It's just wheel of fortune, it looses money"},
-    {name:"Average size Michael",image:"cards/jokers/AVERAGE_SIZE_MICHAEL.png",tooltip:"+15 mult, 1/15 chance of being sold each round"},
+    {name:"Clearence sell", image:"cards/vouchers/Clearance_Sale.png",tooltip:"Next shop its 50% off!"},
+    {name:"Crystal_Ball",image:"cards/vouchers/Crystal_Ball.png",tooltip:"1 in 4 chance of getting a normal card replaced by an ace in next round"},
+]
+
+// Packs
+
+export const errorPack:Package = {
+    name:"Error boucher", image:"icons/missing.png"
+}
+
+export const packageDirectory:Package[] = [
+    {name:"Standar pack", image:"cards/packs/Standard_Normal_1.png"}
 ]

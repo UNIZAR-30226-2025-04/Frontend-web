@@ -159,6 +159,7 @@ export type GameState = {
 	activeVouchers: VoucherItem[],
 	vouchers: VoucherItem[],
     handLevels: HandType[],
+    shop: Shop,
     round: number,
     phase: number, // 0 Play - 1 Shop - 2 Boucher
     minScore: number,
@@ -169,6 +170,7 @@ export type GameState = {
     discards:number,
     pot:number,
     money:number,
+    rerollAmount:number,
     deckSize:number,
     deckLeft:number,
     timeLeft:number,
@@ -188,8 +190,9 @@ export type JokerItem = {
 };
 
 export type VoucherItem = {
-    key: number,
-    id: number
+    id: number,
+    voucherId: number,
+    sellAmount: number
 };
 
 export type HandType = {
@@ -199,18 +202,19 @@ export type HandType = {
     baseRed:number
 }
 
-export const HandTypesBase:HandType[] = [
-    {name:"Flush five",lvl:1,baseBlue:160,baseRed:16},
-    {name:"Flush house",lvl:1,baseBlue:140,baseRed:14},
-    {name:"Five of a kind",lvl:1,baseBlue:120,baseRed:12},
-    {name:"Royal flush",lvl:1,baseBlue:100,baseRed:8},
-    {name:"Straight flush",lvl:1,baseBlue:100,baseRed:8},
-    {name:"Four of a kind",lvl:1,baseBlue:60,baseRed:7},
-    {name:"Full house",lvl:1,baseBlue:40,baseRed:4},
-    {name:"Flush",lvl:1,baseBlue:35,baseRed:4},
-    {name:"Straight",lvl:1,baseBlue:30,baseRed:4},
-    {name:"Three of a kind",lvl:1,baseBlue:30,baseRed:3},
-    {name:"Two pair",lvl:1,baseBlue:20,baseRed:2},
-    {name:"One pair",lvl:1,baseBlue:10,baseRed:2},
-    {name:"High card",lvl:1,baseBlue:5,baseRed:1},
-]
+export type Shop = {
+    jokerRow: JokerItem[],
+    voucherRow: VoucherItem[],
+    packageRow: PackageItem[]
+}
+
+export type Package = {
+    name:string,
+    image:string
+}
+
+export type PackageItem = {
+    id: number,
+    packageId: number,
+    sellAmount: number
+} 

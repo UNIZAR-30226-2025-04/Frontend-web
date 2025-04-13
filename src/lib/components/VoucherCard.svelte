@@ -4,6 +4,7 @@
     import type { Voucher } from "$lib/interfaces";
     import { popup, type PopupSettings } from "@skeletonlabs/skeleton";
     import { onDestroy, onMount } from "svelte";
+    import tilt from "svelte-tilt";
 
     export let voucherId: number; // Main data to show
     export let width: string = "w-full"; // Width of the card
@@ -13,9 +14,6 @@
     let voucher: Voucher;
     // Necesary for avoiding animation errors
     let salt:number = Math.floor(Math.random() * (100000));
-    // Animation variables
-    let stopAnimation: () => void;
-    let voucherImage: HTMLImageElement;
 
     // If boucher exists we extract the data
     if (voucherId < 0 || voucherId >= voucherDirectory.length) {
@@ -32,18 +30,6 @@
         placement: "bottom",
     };
 
-    onMount(() => {
-        if(animateCard){
-            stopAnimation = cardAnimation({elements:[voucherImage]});
-        }
-	});
-
-    onDestroy(() => {
-		if (animateCard && stopAnimation) {
-			stopAnimation();
-		}
-	});
-
 </script>
 
 <div class="{width} min-w-[70px] relative">
@@ -54,12 +40,22 @@
     </div>
 
     <!--Voucher image-->
-    <img
-        bind:this={voucherImage}
-        src={voucher.image}
-        alt={voucher.name}
-        class="{width} min-w-[70px] rounded-[5.46875%] shadow-[5px_15px_10px_rgba(0,0,0,0.5)]"
-        style="aspect-ratio: {ratio}; transform-style: preserve-3d;"
-        use:popup={popupHover}
-    />
+    {#if animateCard}
+        <img
+            use:tilt={{ reverse: true }}
+            src={voucher.image}
+            alt={voucher.name}
+            class="{width} min-w-[70px]"
+            style="aspect-ratio: {ratio}; transform-style: preserve-3d;"
+            use:popup={popupHover}
+        />
+    {:else}
+        <img
+            src={voucher.image}
+            alt={voucher.name}
+            class="{width} min-w-[70px]"
+            style="aspect-ratio: {ratio}; transform-style: preserve-3d;"
+            use:popup={popupHover}
+        />
+    {/if}
 </div>
