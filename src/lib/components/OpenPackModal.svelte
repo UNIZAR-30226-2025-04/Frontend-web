@@ -91,12 +91,14 @@
     class="w-[45vh] card p-4 grid grid-rows-[1fr_3fr_4fr_1fr] items-center"
 >
     {#if $modalStore[0] && pack && packItem}
+        <!--Title card-->
         <div
             class="w-full card variant-filled-surface text-[2.5vh] leading-none p-2"
         >
             <p>{pack.name}</p>
         </div>
 
+        <!--Pack image-->
         <div class="relative w-full flex justify-center items-center">
             <img
                 alt="star backdrop"
@@ -111,6 +113,7 @@
             />
         </div>
 
+        <!--Pack contents-->
         {#if packItem.contents}
             <!-- svelte-ignore a11y-click-events-have-key-events -->
             <!-- svelte-ignore a11y-no-static-element-interactions -->
@@ -186,6 +189,7 @@
             </div>
         {/if}
 
+        <!--Action buttons-->
         <div class="w-full flex justify-between gap-3 p-2">
             <button
                 class="w-full btn text-[2.5vh] leading-none variant-filled-tertiary"
