@@ -29,6 +29,7 @@
     import HandInfoModal from '$lib/components/HandInfoModal.svelte';
     import { loadingStore } from '$lib/stores/loadingStore';
     import LoadingScreen from '$lib/components/LoadingScreen.svelte';
+    import OpenPackModal from '$lib/components/OpenPackModal.svelte';
 
 	// For all singletons
 	initializeStores();
@@ -45,6 +46,7 @@
 		shareModal: {ref: ShareModal},
 		leaveGameModal: {ref :LeaveGameModal},
 		handInfoModal: {ref: HandInfoModal},
+		openPackModal: {ref: OpenPackModal},
 	};
   
 </script>

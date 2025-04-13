@@ -187,12 +187,14 @@ export type JokerItem = {
     jokerId: number,
     edition: number,
     sellAmount: number,
+    picked: boolean
 };
 
 export type VoucherItem = {
     id: number,
     voucherId: number,
     sellAmount: number
+    picked: boolean
 };
 
 export type HandType = {
@@ -210,11 +212,15 @@ export type Shop = {
 
 export type Package = {
     name:string,
-    image:string
+    image:string,
+    chooseAmount: number,
+    contentType: number,
+    contentSize: number
 }
 
 export type PackageItem = {
     id: number,
     packageId: number,
-    sellAmount: number
+    sellAmount: number,
+    contents: CardItem[] | JokerItem[] | VoucherItem[],
 } 

@@ -82,15 +82,17 @@ export const errorVoucher:Voucher = {
 
 export const voucherDirectory:Voucher[] = [
     {name:"Clearence sell", image:"cards/vouchers/Clearance_Sale.png",tooltip:"Next shop its 50% off!"},
-    {name:"Crystal_Ball",image:"cards/vouchers/Crystal_Ball.png",tooltip:"1 in 4 chance of getting a normal card replaced by an ace in next round"},
+    {name:"Crystal Ball",image:"cards/vouchers/Crystal_Ball.png",tooltip:"1 in 4 chance of getting a normal card replaced by an ace in next round"},
 ]
 
 // Packs
 
 export const errorPack:Package = {
-    name:"Error boucher", image:"icons/missing.png"
+    name:"Error boucher", image:"icons/missing.png", chooseAmount: 1, contentType: 0, contentSize: 1
 }
 
 export const packageDirectory:Package[] = [
-    {name:"Standar pack", image:"cards/packs/Standard_Normal_1.png"}
+    {name:"Standar pack", image:"cards/packs/Standard_Normal_1.png", chooseAmount:3, contentType:0, contentSize:3},
+    {name:"Buffon pack", image:"cards/packs/Buffoon_Normal_2.png", chooseAmount:1, contentType:1, contentSize:3},
+    {name:"Voucher pack", image:"cards/packs/Spectral_Jumbo_1.png", chooseAmount:1, contentType:2, contentSize:2},
 ]
