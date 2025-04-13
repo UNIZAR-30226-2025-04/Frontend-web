@@ -62,8 +62,10 @@
 	const animationSpeed: number = 100; // ms
 
 	// For the play animation
-	const playAnimSpeed: number = 750; //ms
-	const playAnimDelay: number = 200; //ms
+	const playAnimSpeed: number = animationSpeed*7.5; //ms
+	const playAnimDelay: number = animationSpeed*2; //ms
+	const drawCardAnimSpeed: number = animationSpeed; //ms
+	const drawCardDelay: number = animationSpeed*2; //ms
 	let indexToPlayAnim: number = -1;
 	let scorePlayAnim: number = 0;
 
@@ -80,6 +82,7 @@
 	const infoChip: string =
 		"card text-center variant-filled-surface p-3 grid grid-rows-[25%_75%] gap-2";
 	const infoChipCard: string = "card text-5xl-r content-center";
+	const priceChip: string = "h-full card border-2 border-warning-500 text-3xl-r text-warning-500 content-center";
 
 	// Modal and drawer variables
 
@@ -458,6 +461,14 @@
 	function onNextPhase() {
 		if (state.phase === 1) {
 			state.handCards = [];
+			for(let i = 0; i< 8; i++){
+				setTimeout(
+					() => {
+						onDeck();
+					},
+					drawCardAnimSpeed * i + drawCardDelay,
+				);
+			}
 			state.phase = 0;
 		} else {
 			state.phase++;
@@ -806,9 +817,7 @@
 									editionId={joker.edition}
 									animateCard={true}
 								/>
-								<div
-									class="h-full card border-2 border-warning-500 text-3xl-r text-warning-500 content-center"
-								>
+								<div class={priceChip}>
 									{joker.sellAmount}$
 								</div>
 							</div>
@@ -833,9 +842,7 @@
 										voucherId={voucher.voucherId}
 										animateCard={true}
 									/>
-									<div
-									class="h-full card border-2 border-warning-500 text-3xl-r text-warning-500 content-center"
-									>
+									<div class={priceChip}>
 										{voucher.sellAmount}$
 									</div>
 								</div>
@@ -857,9 +864,7 @@
 									packageId={pack.packageId}
 									animateCard={true}
 								/>
-								<div
-									class="h-full card border-2 border-warning-500 text-3xl-r text-warning-500 content-center"
-								>
+								<div class={priceChip}>
 									{pack.sellAmount}$
 								</div>
 							</div>
