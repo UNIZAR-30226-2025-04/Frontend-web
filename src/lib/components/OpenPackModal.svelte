@@ -88,7 +88,7 @@
 </script>
 
 <div
-    class="h-[72vh] w-[45vh] card p-4 grid grid-rows-[1fr_3fr_4fr_1fr] gap-[7%] items-center"
+    class="w-[45vh] card p-4 grid grid-rows-[1fr_3fr_4fr_1fr] items-center"
 >
     {#if $modalStore[0] && pack && packItem}
         <div
@@ -114,8 +114,8 @@
         {#if packItem.contents}
             <!-- svelte-ignore a11y-click-events-have-key-events -->
             <!-- svelte-ignore a11y-no-static-element-interactions -->
-            <div class="h-full w-full card variant-filled-surface p-3">
-                <div class="h-[80%] flex gap-3 justify-around">
+            <div class=" w-full card variant-filled-surface p-3 flex flex-col justify-between">
+                <div class="flex gap-3 justify-around">
                     {#if pack.contentType === 0}
                         <!--Normal card type-->
                         {#each toCardItems(packItem.contents) as card, index (card.id)}
@@ -124,7 +124,7 @@
                                     duration:
                                         $modalStore[0].meta.animationSpeed,
                                 }}
-                                class={`w-full h-full transition-transform duration-[${$modalStore[0].meta.animationSpeed * 2}] ease-in-out
+                                class={`transition-transform duration-[${$modalStore[0].meta.animationSpeed * 2}] ease-in-out
                                     ${card.picked ? "translate-y-[-10%]" : ""}`}
                                 on:click={() => onClickCard(index)}
                             >
@@ -143,7 +143,7 @@
                                     duration:
                                         $modalStore[0].meta.animationSpeed,
                                 }}
-                                class={`h-full transition-transform duration-[${$modalStore[0].meta.animationSpeed * 2}] ease-in-out
+                                class={`transition-transform duration-[${$modalStore[0].meta.animationSpeed * 2}] ease-in-out
                                     ${joker.picked ? "translate-y-[-10%]" : ""}`}
                                 on:click={() => onClickCard(index)}
                             >
@@ -163,7 +163,7 @@
                                     duration:
                                         $modalStore[0].meta.animationSpeed,
                                 }}
-                                class={`h-full transition-transform duration-[${$modalStore[0].meta.animationSpeed * 2}] ease-in-out
+                                class={`transition-transform duration-[${$modalStore[0].meta.animationSpeed * 2}] ease-in-out
                                     ${voucher.picked ? "translate-y-[-10%]" : ""}`}
                                 on:click={() => onClickCard(index)}
                             >
@@ -186,7 +186,7 @@
             </div>
         {/if}
 
-        <div class="w-full h-full flex justify-between gap-3 p-2">
+        <div class="w-full flex justify-between gap-3 p-2">
             <button
                 class="w-full btn text-[2.5vh] leading-none variant-filled-tertiary"
                 on:click={onChoose}
