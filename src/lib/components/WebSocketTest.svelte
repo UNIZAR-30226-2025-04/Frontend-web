@@ -8,7 +8,7 @@
   import { joinLobbyFetch, createLobbyFetch } from "$lib/fetch/lobbyFetch";
 
   let socket: Socket | null = null;
-  let messages: {type: string, direction: string, content: any}[] = [];
+  let messages: { type: string, direction: string, content: any }[] = [];
   let lobbyCodeInput = "";
   let messageInput = "";
   let username = get(userDataStore).username;
@@ -20,12 +20,13 @@
     messages = [{
       type,
       direction,
-      content: typeof content === 'object' ? JSON.stringify(content, null, 2) : content
+      content: typeof content === "object" ? JSON.stringify(content, null, 2) : content
     }, ...messages];
   }
 
+  // Connect to the WebSocket server
   function connect() {
-    loadingStore.startLoading('Conectando al servidor WebSocket...');
+    loadingStore.startLoading("Connecting to WebSocket server...");
     
     socket = io(wsBase, {
       auth: {
@@ -53,12 +54,12 @@
     });
 
     socket.on("connection_error", (args) => {
-      addMessage("connection_error", "recibido", args);
+      addMessage("connection_error", "received", args);
       loadingStore.stopLoading();
     });
 
     socket.on("error", (error) => {
-      addMessage("error", "recibido", error);
+      addMessage("error", "received", error);
       loadingStore.stopLoading();
     });
 
@@ -76,11 +77,11 @@
     });
 
     socket.on("new_user_in_lobby", (args) => {
-      addMessage("new_user_in_lobby", "recibido", args);
+      addMessage("new_user_in_lobby", "received", args);
     });
 
     socket.on("lobby_info", (args) => {
-      addMessage("lobby_info", "recibido", args);
+      addMessage("lobby_info", "received", args);
     });
 
     socket.on("exited_lobby", (args) => {
@@ -100,59 +101,61 @@
     });
 
     socket.on("new_lobby_message", (args) => {
-      addMessage("new_lobby_message", "recibido", args);
+      addMessage("new_lobby_message", "received", args);
     });
 
     // Capture all events for the log
     socket.onAny((event, ...args) => {
       if (!["connect", "disconnect", "connection_success", "connection_error", 
-            "error", "joined_lobby", "new_user_in_lobby", "lobby_info", 
+        "error", "joined_lobby", "new_user_in_lobby", "lobby_info", 
             "exited_lobby", "player_left", "new_lobby_message"].includes(event)) {
-        addMessage(event, "recibido", args);
+        addMessage(event, "received", args);
       }
     });
   }
 
+  // Disconnect from the WebSocket server
   function disconnect() {
     if (socket) {
       socket.disconnect();
       socket = null;
-      addMessage("disconnect", "enviado", "Desconexión manual");
+      addMessage("disconnect", "sent", "Manual disconnect");
       socketStore.set(null);
     }
   }
 
+  // Join a lobby using the provided lobby code
   async function joinLobby() {
     if (!isConnected) {
-      addMessage("error", "local", "No conectado");
+      addMessage("error", "local", "Not connected");
       return;
     }
     
     if (!lobbyCodeInput) {
-      addMessage("error", "local", "Código de lobby vacío");
+      addMessage("error", "local", "Lobby code is empty");
       return;
     }
     
     try {
-      // 1. First use the HTTP endpoint to join the lobby
+      // 1. Call the HTTP endpoint to join the lobby
       loadingStore.startLoading('Joining lobby via API...');
       const joinSuccess = await joinLobbyFetch(lobbyCodeInput);
       loadingStore.stopLoading();
       
       if (!joinSuccess) {
-        addMessage("error", "local", "Error al unirse al lobby via API");
+        addMessage("error", "local", "Error joining lobby via API");
         return;
       }
       
-      addMessage("join_api", "enviado", "Joined lobby via API successfully");
+      addMessage("join_api", "sent", "Joined lobby via API successfully");
       
-      // 2. Then use Socket.IO to join the room
+      // 2. Use Socket.IO to join the room
       socket.emit("join_lobby", lobbyCodeInput);
-      addMessage("join_lobby", "enviado", lobbyCodeInput);
+      addMessage("join_lobby", "sent", lobbyCodeInput);
       
       // 3. Request lobby information
       socket.emit("get_lobby_info", lobbyCodeInput);
-      addMessage("get_lobby_info", "enviado", lobbyCodeInput);
+      addMessage("get_lobby_info", "sent", lobbyCodeInput);
       
       currentLobbyId = lobbyCodeInput;
     } catch (error) {
@@ -161,39 +164,41 @@
     }
   }
 
+  // Leave the current lobby
   function exitLobby() {
     if (!isConnected) {
-      addMessage("error", "local", "No conectado");
+      addMessage("error", "local", "Not connected");
       return;
     }
     
     if (!currentLobbyId) {
-      addMessage("error", "local", "No estás en ningún lobby");
+      addMessage("error", "local", "Not in any lobby");
       return;
     }
     
     socket.emit("exit_lobby", currentLobbyId);
-    addMessage("exit_lobby", "enviado", currentLobbyId);
+    addMessage("exit_lobby", "sent", currentLobbyId);
   }
 
+  // Send a message to the lobby
   function sendMessage() {
     if (!isConnected) {
-      addMessage("error", "local", "No conectado");
+      addMessage("error", "local", "Not connected");
       return;
     }
     
     if (!currentLobbyId) {
-      addMessage("error", "local", "No estás en ningún lobby");
+      addMessage("error", "local", "Not in any lobby");
       return;
     }
     
     if (!messageInput.trim()) {
-      addMessage("error", "local", "Mensaje vacío");
+      addMessage("error", "local", "Message is empty");
       return;
     }
     
     socket.emit("broadcast_to_lobby", currentLobbyId, messageInput);
-    addMessage("broadcast_to_lobby", "enviado", {
+    addMessage("broadcast_to_lobby", "sent", {
       lobby_id: currentLobbyId,
       message: messageInput
     });
@@ -201,27 +206,30 @@
     messageInput = "";
   }
 
+  // Clear the message log
   function clearMessages() {
     messages = [];
   }
 
+  // Test starting the game
   function startGameTest() {
     if (!socket || !currentLobbyId) {
-      addMessage("error", "local", "No conectado o no estás en un lobby");
+      addMessage("error", "local", "Not connected or not in a lobby");
       return;
     }
     
     socket.emit("start_game", currentLobbyId);
-    addMessage("start_game", "enviado", currentLobbyId);
+    addMessage("start_game", "sent", currentLobbyId);
   }
   
+  // Test playing a hand
   function playHandTest() {
     if (!socket || !currentLobbyId) {
-      addMessage("error", "local", "No conectado o no estás en un lobby");
+      addMessage("error", "local", "Not connected or not in a lobby");
       return;
     }
     
-    // Formato corregido según lo que espera el backend
+    // Corrected format as expected by the backend
     const testHand = {
       Cards: [
         { Suit: "h", Rank: "10" },
@@ -233,16 +241,17 @@
     };
     
     socket.emit("play_hand", testHand);
-    addMessage("play_hand", "enviado", JSON.stringify(testHand, null, 2));
+    addMessage("play_hand", "sent", JSON.stringify(testHand, null, 2));
   }
   
+  // Test drawing cards
   function drawCardsTest() {
     if (!socket || !currentLobbyId) {
-      addMessage("error", "local", "No conectado o no estás en un lobby");
+      addMessage("error", "local", "Not connected or not in a lobby");
       return;
     }
     
-    // Formato corregido según lo que espera el backend
+    // Corrected format as expected by the backend
     const currentHand = {
       Cards: [
         { Suit: "h", Rank: "10" },
@@ -253,41 +262,37 @@
     };
     
     socket.emit("draw_cards", currentHand);
-    addMessage("draw_cards", "enviado", JSON.stringify(currentHand, null, 2));
+    addMessage("draw_cards", "sent", JSON.stringify(currentHand, null, 2));
   }
   
+  // Test getting the full deck
   function getFullDeckTest() {
     if (!socket || !currentLobbyId) {
-      addMessage("error", "local", "No conectado o no estás en un lobby");
+      addMessage("error", "local", "Not connected or not in a lobby");
       return;
     }
     
     socket.emit("get_full_deck");
-    addMessage("get_full_deck", "enviado", "Requesting full deck");
+    addMessage("get_full_deck", "sent", "Requesting full deck");
   }
 
-  // New function for testing room creation and joining the lobby
+  // Test room creation and joining the lobby
   async function createLobbyTest() {
-      // Start the loading indicator
-      loadingStore.startLoading('Creating lobby via test...');
-      try {
-          // Call createLobbyFetch setting true for a public lobby (adjust as needed)
-          const result = await createLobbyFetch(true);
-          if (result) {
-              // Update the local currentLobbyId from the lobbyStore so that subsequent actions work properly
-              currentLobbyId = get(lobbyStore).code;
-              // Optionally, emit a socket event to join the lobby if not done already by the HTTP call
-              socket.emit("join_lobby", currentLobbyId);
-              addMessage("create_lobby", "sent", "Room created and joined successfully.");
-          } else {
-              addMessage("error", "local", "Error creating room.");
-          }
-      } catch (error: any) {
-          addMessage("error", "local", "Exception: " + error.message);
-      } finally {
-          // Stop the loading indicator regardless of the outcome
-          loadingStore.stopLoading();
+    loadingStore.startLoading('Creating lobby via test...');
+    try {
+      const result = await createLobbyFetch(true);
+      if (result) {
+        currentLobbyId = get(lobbyStore).code;
+        socket.emit("join_lobby", currentLobbyId);
+        addMessage("create_lobby", "sent", "Room created and joined successfully.");
+      } else {
+        addMessage("error", "local", "Error creating room.");
       }
+    } catch (error: any) {
+      addMessage("error", "local", "Exception: " + error.message);
+    } finally {
+      loadingStore.stopLoading();
+    }
   }
 
   onDestroy(() => {
@@ -306,52 +311,52 @@
           
           <div class="space-y-4">
             {#if !isConnected}
-              <button class="btn variant-filled-primary" on:click={connect}>Conectar</button>
+              <button class="btn variant-filled-primary" on:click={connect}>Connect</button>
             {:else}
-              <button class="btn variant-filled-error" on:click={disconnect}>Desconectar</button>
+              <button class="btn variant-filled-error" on:click={disconnect}>Disconnect</button>
             {/if}
           </div>
 
           <div class="card p-2 mt-4">
-            <h4 class="h4 mb-2">Pruebas de Lobby</h4>
+            <h4 class="h4 mb-2">Lobby Testing</h4>
             <div class="space-y-2">
               <div class="input-group input-group-divider">
                 <input 
                   bind:value={lobbyCodeInput} 
                   type="text" 
-                  placeholder="Código de Lobby" 
+                  placeholder="Lobby Code" 
                   class="input"
                 />
               </div>
               <div class="flex flex-wrap gap-2">
-                <button class="btn btn-sm variant-filled-secondary" on:click={joinLobby}>Unirse al Lobby</button>
-                <button class="btn btn-sm variant-filled-secondary" on:click={exitLobby}>Salir del Lobby</button>
-                <button class="btn btn-sm variant-filled-success" on:click={createLobbyTest}>Crear Sala</button>
+                <button class="btn btn-sm variant-filled-secondary" on:click={joinLobby}>Join Lobby</button>
+                <button class="btn btn-sm variant-filled-secondary" on:click={exitLobby}>Exit Lobby</button>
+                <button class="btn btn-sm variant-filled-success" on:click={createLobbyTest}>Create Lobby</button>
               </div>
             </div>
           </div>
 
           <div class="card p-2 mt-4">
-            <h4 class="h4 mb-2">Enviar mensaje</h4>
+            <h4 class="h4 mb-2">Send Message</h4>
             <div class="space-y-2">
               <div class="input-group input-group-divider">
                 <input 
                   bind:value={messageInput} 
                   type="text" 
-                  placeholder="Mensaje" 
+                  placeholder="Message" 
                   class="input"
                 />
-                <button class="variant-filled-secondary" on:click={sendMessage}>Enviar</button>
+                <button class="variant-filled-secondary" on:click={sendMessage}>Send</button>
               </div>
             </div>
           </div>
 
           <div class="mt-4">
-            <p>Estado actual:</p>
+            <p>Current status:</p>
             <ul class="list">
-              <li>Conectado: {isConnected ? 'Sí' : 'No'}</li>
-              <li>Usuario: {username}</li>
-              <li>Lobby actual: {currentLobbyId || 'Ninguno'}</li>
+              <li>Connected: {isConnected ? 'Yes' : 'No'}</li>
+              <li>User: {username}</li>
+              <li>Current Lobby: {currentLobbyId || 'None'}</li>
             </ul>
           </div>
         </div>
@@ -359,15 +364,15 @@
 
       <div class="card p-4 variant-filled-surface">
         <div class="flex justify-between items-center mb-4">
-          <h3 class="h3">Registro de Mensajes</h3>
-          <button class="btn btn-sm variant-filled" on:click={clearMessages}>Limpiar</button>
+          <h3 class="h3">Message Log</h3>
+          <button class="btn btn-sm variant-filled" on:click={clearMessages}>Clear</button>
         </div>
         
         <div class="h-[60vh] overflow-auto space-y-2 p-2 bg-surface-700/50 rounded-container-token">
           {#each messages as msg, i}
-            <div class="card p-2 {msg.direction === 'enviado' ? 'variant-soft-primary' : msg.direction === 'recibido' ? 'variant-soft-secondary' : 'variant-soft-tertiary'}">
+            <div class="card p-2 {msg.direction === 'sent' ? 'variant-soft-primary' : msg.direction === 'received' ? 'variant-soft-secondary' : 'variant-soft-tertiary'}">
               <div class="flex justify-between items-center">
-                <span class="badge {msg.direction === 'enviado' ? 'variant-filled-primary' : msg.direction === 'recibido' ? 'variant-filled-secondary' : 'variant-filled-tertiary'}">{msg.type}</span>
+                <span class="badge {msg.direction === 'sent' ? 'variant-filled-primary' : msg.direction === 'received' ? 'variant-filled-secondary' : 'variant-filled-tertiary'}">{msg.type}</span>
                 <span class="badge variant-filled">{msg.direction}</span>
               </div>
               <pre class="whitespace-pre-wrap text-xs mt-2 p-2 bg-surface-900/30 rounded">{msg.content}</pre>
@@ -375,29 +380,29 @@
           {/each}
           
           {#if messages.length === 0}
-            <p class="text-center p-4 opacity-50">No hay mensajes</p>
+            <p class="text-center p-4 opacity-50">No messages</p>
           {/if}
         </div>
       </div>
 
       <div class="card p-4 variant-filled-surface">
-        <h3 class="h3 mb-4">Acciones de Juego</h3>
+        <h3 class="h3 mb-4">Game Actions</h3>
         
         <div class="grid grid-cols-2 gap-2">
           <button class="btn variant-filled-primary" on:click={startGameTest} disabled={!isConnected || !currentLobbyId}>
-            Iniciar Juego
+            Start Game
           </button>
           
           <button class="btn variant-filled-secondary" on:click={playHandTest} disabled={!isConnected || !currentLobbyId}>
-            Jugar Mano de Prueba
+            Play Test Hand
           </button>
           
           <button class="btn variant-filled-tertiary" on:click={drawCardsTest} disabled={!isConnected || !currentLobbyId}>
-            Pedir Cartas
+            Draw Cards
           </button>
           
           <button class="btn variant-filled-secondary" on:click={getFullDeckTest} disabled={!isConnected || !currentLobbyId}>
-            Ver Mazo Completo
+            View Full Deck
           </button>
         </div>
       </div>
