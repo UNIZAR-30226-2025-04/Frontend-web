@@ -58,5 +58,5 @@ export const allLobbiesPath:string = apiBase + 'auth/getAllLobbies';
 
 // GAMELOBBY
 // Get all game lobby invitations for the authenticated user
-export const recievedGameInvitations:string = apiBase + 'auth/received_lobby_invitations';
+export const receivedGameInvitations:string = apiBase + 'auth/received_lobby_invitations';
 

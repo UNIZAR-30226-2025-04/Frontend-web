@@ -155,7 +155,32 @@ export function initializeSocket() {
 		goto(base + "/home");
 	});
 
+	// Game events
+	socket.on("game_starting", (args: any) => {
+		console.log("-> game_starting", args);
+		// Redirect to the game screen when the server confirms that the game has started
+		goto(base + "/game");
+	});
 
+	socket.on("played_hand", (args: any) => {
+		console.log("-> played_hand", args);
+		// TODO: Once we have a response we will be able to operate
+		// Update the score and the game state
+		// For example: updatePoints(args.points, args.gold);
+	});
+
+	socket.on("drawed_cards", (args: any) => {
+		console.log("-> drawed_cards", args);
+		// TODO: Once we have a response we will be able to operate
+		// Add the new cards to the player's hand
+		// For example: addCardsToHand(JSON.parse(args.new_cards));
+	});
+
+	socket.on("full_deck", (args: any) => {
+		console.log("-> full_deck", args);
+		// Update the deck information in the store
+		// For example: deckStore.set({ totalCards: args.total_cards, playedCards: args.played_cards });
+	});
 }
 
 /**

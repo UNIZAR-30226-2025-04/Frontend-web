@@ -1,43 +1,42 @@
 <script lang="ts">
 	import {
-		voucherDirectory,
-		jokerDirectory,
-		jokerEditionsDirectory,
-		overlayDirectory,
-		suitDirectory,
-		getValueFromRank,
-		getValueFromSuit,
-		HandTypesBase,
-		packageDirectory,
+	    getValueFromRank,
+	    getValueFromSuit,
+	    HandTypesBase,
+	    jokerDirectory,
+	    jokerEditionsDirectory,
+	    overlayDirectory,
+	    packageDirectory,
+	    suitDirectory,
+	    voucherDirectory,
 	} from "$lib/cardDirectory";
-	import VoucherCard from "$lib/components/VoucherCard.svelte";
 	import GameCard from "$lib/components/GameCard.svelte";
 	import JokerCard from "$lib/components/JokerCard.svelte";
+	import PackageCard from "$lib/components/PackageCard.svelte";
+	import VoucherCard from "$lib/components/VoucherCard.svelte";
 	import {
-		type Card,
-		type CardItem,
-		type GameState,
-		type Joker,
-		type JokerItem,
-		type Package,
-		type PackageItem,
-		type VoucherItem,
+	    type Card,
+	    type CardItem,
+	    type GameState,
+	    type JokerItem,
+	    type Package,
+	    type PackageItem,
+	    type VoucherItem
 	} from "$lib/interfaces";
 	import { getNextKey } from "$lib/keyGenerator";
+	import { initializeSocket } from "$lib/sockets-utils/lobbySocket";
 	import {
-		getDrawerStore,
-		getModalStore,
-		type DrawerSettings,
-		type ModalSettings,
+	    getDrawerStore,
+	    getModalStore,
+	    type DrawerSettings,
+	    type ModalSettings,
 	} from "@skeletonlabs/skeleton";
-	import { stat } from "fs";
 	import { onDestroy, onMount } from "svelte";
+	import { dndzone } from "svelte-dnd-action";
 	import { flip } from "svelte/animate";
 	import { bounceOut, cubicOut } from "svelte/easing";
 	import { tweened } from "svelte/motion";
 	import { fade, fly } from "svelte/transition";
-	import { dndzone } from "svelte-dnd-action";
-	import PackageCard from "$lib/components/PackageCard.svelte";
 
 	// Main state variable
 	let state: GameState = {
@@ -309,8 +308,8 @@
 				packItem.packageId >= 0 &&
 				packItem.packageId < packageDirectory.length
 			) {
-				let pack:Package = packageDirectory[packItem.packageId];
-				if(pack.contentType !== 1 || state.jokers.length < 5){
+				let pack: Package = packageDirectory[packItem.packageId];
+				if (pack.contentType !== 1 || state.jokers.length < 5) {
 					const openPackModal: ModalSettings = {
 						type: "component",
 						meta: {
@@ -379,6 +378,9 @@
 	let interval: any;
 
 	onMount(() => {
+		// We initialize the socket
+		initializeSocket();
+
 		// Interval for the Time left clock
 		interval = setInterval(() => {
 			if (state.timeLeft > 0) {

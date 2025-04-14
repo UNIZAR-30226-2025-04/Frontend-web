@@ -1,5 +1,5 @@
 <script lang="ts">
-    export let message: string = "Cargando...";
+    export let message: string = "Loading...";
     export let fullScreen: boolean = true;
 </script>
 

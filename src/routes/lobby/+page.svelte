@@ -14,6 +14,7 @@
 	import { flip } from "svelte/animate";
 	import { cubicOut } from "svelte/easing";
 	import { get } from "svelte/store";
+	import { startGame } from "$lib/sockets-utils/gameSocket";
 
 	const modalStore = getModalStore();
 	const drawerStore = getDrawerStore();
@@ -48,6 +49,8 @@
 
 	// Function to start the game
 	function onStart() {
+		// We now make the ws call
+		startGame();
 		goto(base + "/game");
 	}
 	

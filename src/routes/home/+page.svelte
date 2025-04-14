@@ -3,8 +3,11 @@
   import { lobbyStore, userDataStore } from '$lib/stores';
   import { base } from '$app/paths';
   import { goto } from '$app/navigation';
-    import { onMount } from 'svelte';
-    import type { Lobby } from '$lib/interfaces';
+  import { onMount } from 'svelte';
+  import type { Lobby } from '$lib/interfaces';
+  import AvatarDisplay from "$lib/components/AvatarDisplay.svelte";
+  import { initializeSocket } from "$lib/sockets-utils/lobbySocket";
+  import WebSocketTest from "$lib/components/WebSocketTest.svelte";
 
   const modalStore = getModalStore();
   
@@ -28,6 +31,9 @@
     component: 'friendsModal'
   }
 
+  // TO TEST
+  let showWsTest = false;
+  let hideTestButton = false;
 
   function clickOnJoin(){
     goto(base+"/lobbies");
@@ -59,12 +65,37 @@
       isPublic: false
     }
     lobbyStore.set(defaultLobby);
+    
+    if (!$userDataStore.token) {
+      goto(base + '/');
+    }
   });
 
+  function toggleWsTest() {
+    showWsTest = !showWsTest;
+  }
 </script>
 
+<div class="container h-full mx-auto flex justify-center items-center">
+  <div class="flex flex-col space-y-10 p-4 w-full max-w-md">
+    <div class="text-center">
+      <div class="flex justify-center mb-6">
+      </div>
+    </div>
+    
+    <div class="grid grid-cols-1 gap-4">
+      {#if !hideTestButton}
+        <button class="btn variant-filled-tertiary" on:click={toggleWsTest}>
+          Prueba WebSocket
+        </button>
+      {/if}
+    </div>
+  </div>
+</div>
 
-
+{#if showWsTest}
+  <WebSocketTest />
+{/if}
 
 <!-- Game logo -->
 <img class='mt-[2vh] h-[50vmin] w-auto' src='nogler2.png' alt="Nogler" />

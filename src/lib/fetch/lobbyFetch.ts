@@ -1,5 +1,5 @@
 import type { inviteItem, LobbyInfo, LobbyDisplay } from "$lib/interfaces";
-import { allLobbiesPath, createLobbyPath, deleteSentLobbyInvitationsPath, exitLobbyPath, joinLobbyPath, sendLobbyInvitationsPath, sentLobbyInvitationsPath, recievedGameInvitations, deleteReceivedInvitationPath } from "$lib/paths";
+import { allLobbiesPath, createLobbyPath, deleteSentLobbyInvitationsPath, exitLobbyPath, joinLobbyPath, sendLobbyInvitationsPath, sentLobbyInvitationsPath, receivedGameInvitations, deleteReceivedInvitationPath } from "$lib/paths";
 import { lobbyStore, userDataStore } from "$lib/stores";
 import { get } from "svelte/store";
 import { fetchDeleteGameInvitation } from "$lib/fetch/inboxFetch";
@@ -85,7 +85,7 @@ export async function joinLobbyFetch(lobbyCode: string): Promise<boolean> {
             loadingStore.startLoading('Limpiando invitaciones pendientes...');
             
             // Get all received invitations
-            const invitationsResponse = await fetch(recievedGameInvitations, {
+            const invitationsResponse = await fetch(receivedGameInvitations, {
                 method: 'GET',
                 headers: {
                     'accept': 'application/json',
