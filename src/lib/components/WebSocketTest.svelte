@@ -5,7 +5,7 @@
   import { io, Socket } from "socket.io-client";
   import { get } from "svelte/store";
   import { loadingStore } from "$lib/stores/loadingStore";
-  import { joinLobbyFetch } from "$lib/fetch/lobbyFetch";
+  import { joinLobbyFetch, createLobbyFetch } from "$lib/fetch/lobbyFetch";
 
   let socket: Socket | null = null;
   let messages: {type: string, direction: string, content: any}[] = [];
@@ -266,6 +266,30 @@
     addMessage("get_full_deck", "enviado", "Requesting full deck");
   }
 
+  // New function for testing room creation and joining the lobby
+  async function createLobbyTest() {
+      // Start the loading indicator
+      loadingStore.startLoading('Creating lobby via test...');
+      try {
+          // Call createLobbyFetch setting true for a public lobby (adjust as needed)
+          const result = await createLobbyFetch(true);
+          if (result) {
+              // Update the local currentLobbyId from the lobbyStore so that subsequent actions work properly
+              currentLobbyId = get(lobbyStore).code;
+              // Optionally, emit a socket event to join the lobby if not done already by the HTTP call
+              socket.emit("join_lobby", currentLobbyId);
+              addMessage("create_lobby", "sent", "Room created and joined successfully.");
+          } else {
+              addMessage("error", "local", "Error creating room.");
+          }
+      } catch (error: any) {
+          addMessage("error", "local", "Exception: " + error.message);
+      } finally {
+          // Stop the loading indicator regardless of the outcome
+          loadingStore.stopLoading();
+      }
+  }
+
   onDestroy(() => {
     if (socket && socket.connected) {
       socket.disconnect();
@@ -302,6 +326,7 @@
               <div class="flex flex-wrap gap-2">
                 <button class="btn btn-sm variant-filled-secondary" on:click={joinLobby}>Unirse al Lobby</button>
                 <button class="btn btn-sm variant-filled-secondary" on:click={exitLobby}>Salir del Lobby</button>
+                <button class="btn btn-sm variant-filled-success" on:click={createLobbyTest}>Crear Sala</button>
               </div>
             </div>
           </div>
