@@ -36,8 +36,10 @@
       transports: ["websocket"],
     });
 
+
     // Connection events
     socket.on("connect", () => {
+      if(!socket) return;
       addMessage("connect", "received", `Connected with ID: ${socket.id}`);
       isConnected = true;
       socketStore.set(socket);
@@ -120,13 +122,14 @@
       socket.disconnect();
       socket = null;
       addMessage("disconnect", "sent", "Manual disconnect");
-      socketStore.set(null);
+      // Can't set to null
+      //socketStore.set(null);
     }
   }
 
   // Join a lobby using the provided lobby code
   async function joinLobby() {
-    if (!isConnected) {
+    if (!isConnected || !socket) {
       addMessage("error", "local", "Not connected");
       return;
     }
@@ -158,7 +161,7 @@
       addMessage("get_lobby_info", "sent", lobbyCodeInput);
       
       currentLobbyId = lobbyCodeInput;
-    } catch (error) {
+    } catch (error:any) {
       addMessage("error", "local", "Error: " + error.message);
       loadingStore.stopLoading();
     }
@@ -166,6 +169,8 @@
 
   // Leave the current lobby
   function exitLobby() {
+    if(!socket) return;
+
     if (!isConnected) {
       addMessage("error", "local", "Not connected");
       return;
@@ -182,6 +187,8 @@
 
   // Send a message to the lobby
   function sendMessage() {
+    if(!socket) return;
+    
     if (!isConnected) {
       addMessage("error", "local", "Not connected");
       return;
@@ -283,8 +290,12 @@
       const result = await createLobbyFetch(true);
       if (result) {
         currentLobbyId = get(lobbyStore).code;
-        socket.emit("join_lobby", currentLobbyId);
-        addMessage("create_lobby", "sent", "Room created and joined successfully.");
+        if(socket){
+          socket.emit("join_lobby", currentLobbyId);
+          addMessage("create_lobby", "sent", "Room created and joined successfully.");
+        }else{
+          addMessage("error", "local", "Must be connected before creating a lobby.");
+        }
       } else {
         addMessage("error", "local", "Error creating room.");
       }
