@@ -1,4 +1,4 @@
-import { addFriendPath, deleteReceivedInvitationPath, deleteReceivedRequestsPath, receivedFriendshipRequestsPath, recievedGameInvitations } from "$lib/paths";
+import { addFriendPath, deleteReceivedInvitationPath, deleteReceivedRequestsPath, receivedFriendshipRequestsPath, receivedGameInvitations } from "$lib/paths";
 import { userDataStore } from "$lib/stores";
 import { get } from "svelte/store";
 import type { invitation, request } from '$lib/interfaces'
@@ -116,7 +116,7 @@ export async function fetchAcceptFriendshipRequest(posibleFriend:string): Promis
 export async function fetchReceivedGameInvitations(invitations:invitation[]) {
     try {
         loadingStore.startLoading('Cargando invitaciones...');
-        const response = await fetch(recievedGameInvitations, {
+        const response = await fetch(receivedGameInvitations, {
             method: 'GET',
             headers: {
                 'accept': 'application/json',
