@@ -436,21 +436,19 @@
 			if (state.timeLeft > 0) {
 				state.timeLeft--;
 			} else if (state.timeLeft === 0) {
-				if (!voucherPhase && state.phase === 0) {
-					// When time reaches 0, activate voucher phase
-					voucherPhase = true;
-					state.timeLeft = 30; // Reset timer for voucher phase
-					
-					// Move player's vouchers to hand
-					moveVouchersToHand();
-				} else if (voucherPhase && state.phase === 0) {
-					// When voucher phase timer ends, go to shop
-					voucherPhase = false;
+				if (state.phase === 0 && !voucherPhase) {
+					// Normal phase → Shop phase
 					state.phase = 1;
 					setupShop();
-					state.timeLeft = 30; // Reset timer for shop phase
+					state.timeLeft = 30;
 				} else if (state.phase === 1) {
-					// When shop phase timer ends, go to next round
+					// Shop phase → Voucher phase
+					state.phase = 0;
+					voucherPhase = true;
+					moveVouchersToHand();
+					state.timeLeft = 30;
+				} else if (state.phase === 0 && voucherPhase) {
+					// Voucher phase → Normal phase (next round)
 					handleNextRound();
 				}
 			}
@@ -600,23 +598,23 @@
 	}
 
 	/**
-	 * Modified onNextPhase function to handle transition between phases
+	 * Modified onNextPhase function to handle transition between phases correctly
 	 */
 	function onNextPhase() {
-		if (state.phase === 1) {
-			// If we're in shop phase, go to next round
+		if (state.phase === 0 && !voucherPhase) {
+			// Normal phase → Shop phase
+			state.phase = 1;
+			setupShop();
+			state.timeLeft = 30;
+		} else if (state.phase === 1) {
+			// Shop phase → Voucher phase
+			state.phase = 0;
+			voucherPhase = true;
+			moveVouchersToHand();
+			state.timeLeft = 30;
+		} else if (state.phase === 0 && voucherPhase) {
+			// Voucher phase → Normal phase (next round)
 			handleNextRound();
-		} else if (voucherPhase) {
-			// If we're in voucher phase, go to shop
-			voucherPhase = false;
-			state.phase = 1;
-			setupShop(); // Configure shop
-			state.timeLeft = 30; // Reset timer
-		} else {
-			// If we're in normal phase, go to shop
-			state.phase = 1;
-			setupShop(); // Configure shop
-			state.timeLeft = 30; // Reset timer
 		}
 	}
 
@@ -870,35 +868,33 @@
 
 	/**
 	 * Handles the transition to the next round
-	 * This function is called when the timer reaches 0 in shop phase
-	 * or when the Next Round button is clicked
 	 */
 	function handleNextRound() {
-	// Reset hand cards
-	state.handCards = [];
-	
-	// Deal new cards for the next round
-	for (let i = 0; i < 8; i++) {
-		setTimeout(
-		() => {
-			onDeck();
-		},
-		drawCardAnimSpeed * i + drawCardDelay,
-		);
-	}
-	
-	// Increment round counter
-	state.round++;
-	
-	// Reset phase and timer
-	state.phase = 0;
-	voucherPhase = false;
-	state.timeLeft = 30;
-	
-	// Update minimum score for the new round
-	state.minScore = 100000 - (state.round * 10000);
-	
-	console.log("Starting round " + state.round);
+		// Reset hand cards
+		state.handCards = [];
+		
+		// Deal new cards for the next round
+		for (let i = 0; i < 8; i++) {
+			setTimeout(
+				() => {
+					onDeck();
+				},
+				drawCardAnimSpeed * i + drawCardDelay,
+			);
+		}
+		
+		// Increment round counter
+		state.round++;
+		
+		// Reset phase and timer
+		state.phase = 0;
+		voucherPhase = false;
+		state.timeLeft = 30;
+		
+		// Update minimum score for the new round
+		state.minScore = 100000 - (state.round * 10000);
+		
+		console.log("Starting round " + state.round);
 	}
 </script>
 
@@ -910,9 +906,13 @@
 	<div class="h-[100vh] ml-[20%] card rounded-none text-left p-[5%]">
 		<!--Title-->
 		{#if state.phase === 0}
-			<div class="text-5xl-r h-[12%] card variant-filled-surface p-5">
-				Round {state.round}/10
-			</div>
+			{#if voucherPhase}
+				<div class={shopTitle}>VOUCHERS</div>
+			{:else}
+				<div class="text-5xl-r h-[12%] card variant-filled-surface p-5">
+					Round {state.round}/10
+				</div>
+			{/if}
 		{:else if state.phase === 1}
 			<div class={shopTitle}>SHOP</div>
 		{/if}
@@ -1125,7 +1125,7 @@
 						<button
 							class="btn variant-filled-error w-[35%] text-5xl-r"
 							on:click={onNextPhase}
-							>Go to Shop
+							>Next Round
 						</button>
 					</div>
 				</div>
