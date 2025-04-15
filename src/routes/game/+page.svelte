@@ -194,65 +194,78 @@
 	 * @param voucherId ID of the voucher to add
 	 */
 	function addVoucherToHand(voucherId: number) {
-	// Create a voucher with properties specific for testing
-	const targetType = voucherId % 2 !== 0; // IDs odd require selection
-	const targetCount = targetType ? Math.floor(Math.random() * 3) + 1 : 0;
-	
-	state.handCards.push({
-		id: getNextKey(),
-		voucherId: voucherId,
-		isVoucher: true,
-		picked: false,
-		targetType: targetType,
-		targetCount: targetCount,
-		card: { rank: "", suit: "", overlay: 0, faceUp: true }
-	});
-	
-	state.handCards = [...state.handCards]; // Trigger reactivity
-	console.log(`Añadido voucher ID ${voucherId}, targetType: ${targetType}, targetCount: ${targetCount}`);
+		// Get the voucher info from directory
+		const voucherInfo = voucherDirectory[voucherId];
+		
+		// Create a voucher CardItem that includes isVoucher flag
+		const newVoucherCard: CardItem = {
+			id: getNextKey(),
+			voucherId: voucherId,
+			isVoucher: true,
+			picked: false,
+			// Use the base card structure required by CardItem
+			card: { 
+				rank: "", 
+				suit: "", 
+				overlay: 0, 
+				faceUp: true 
+			}
+		};
+		
+		state.handCards.push(newVoucherCard);
+		state.handCards = [...state.handCards]; // Trigger reactivity
+		console.log(`Added voucher ID ${voucherId}, targetType: ${voucherInfo.targetType}, targetCount: ${voucherInfo.targetCount}`);
 	}
 	
 	/**
 	 * Handles the play action, processing both normal cards and vouchers
 	 */
 	function onPlay() {
-	if (actionBlocked) return;
+		if (actionBlocked) return;
 
-	const pickedCards = state.handCards.filter((card) => card.picked);
-	const count = pickedCards.length;
+		const pickedCards = state.handCards.filter((card) => card.picked);
+		const count = pickedCards.length;
 
-	if (count > 0 && count < 6) {
-		// Separate vouchers and normal cards
-		const vouchers = pickedCards.filter(card => card.isVoucher);
-		const normalCards = pickedCards.filter(card => !card.isVoucher);
-		
-		// Check if there are vouchers that require player selection
-		const targetVouchers = vouchers.filter(voucher => voucher.targetType === true);
-		
-		// If there are vouchers requiring selection, show the dialog
-		if (targetVouchers.length > 0) {
-		actionCards = targetVouchers;
-		showPlayerSelection = true;
-		return;
+		if (count > 0 && count < 6) {
+			// Separate vouchers and normal cards
+			const vouchers = pickedCards.filter(card => card.isVoucher && card.voucherId !== undefined);
+			const normalCards = pickedCards.filter(card => !card.isVoucher);
+			
+			// Check if there are vouchers that require player selection
+			const targetVouchers = vouchers.filter(voucher => {
+				// Safely check if this voucher requires target selection
+				if (voucher.voucherId !== undefined) {
+					return requiresPlayerSelection(voucher.voucherId);
+				}
+				return false;
+			});
+			
+			// If there are vouchers requiring selection, show the dialog
+			if (targetVouchers.length > 0) {
+				actionCards = targetVouchers;
+				showPlayerSelection = true;
+				return;
+			}
+			
+			// Process vouchers that don't require selection
+			for (const voucher of vouchers) {
+				if (voucher.voucherId !== undefined) {
+					applyVoucherEffect(voucher.voucherId);
+				}
+			}
+			
+			// Remove processed vouchers from hand
+			if (vouchers.length > 0) {
+				state.handCards = state.handCards.filter(card => 
+					!(card.picked && card.isVoucher)
+				);
+			}
+			
+			// Play normal cards directly
+			if (normalCards.length > 0) {
+				playCards(normalCards);
+			}
 		}
-		
-		// Process vouchers that don't require selection
-		for (const voucher of vouchers.filter(v => v.targetType === false)) {
-		applyVoucherEffect(voucher.voucherId);
-		}
-		
-		// Remove processed vouchers from hand
-		if (vouchers.length > 0) {
-		state.handCards = state.handCards.filter(card => 
-			!(card.picked && card.isVoucher)
-		);
-		}
-		
-		// Play normal cards directly
-		if (normalCards.length > 0) {
-		playCards(normalCards);
-		}
-	}
 	}
 
 	/**
@@ -547,18 +560,27 @@
 		state.jokers = state.jokers;
 	}
 
+	/**
+	 * Creates a new voucher for the active vouchers and vouchers collections
+	 */
 	function onAddVoucher() {
 		const newVoucher = Math.floor(Math.random() * voucherDirectory.length);
-		const newVoucherItem = {
+		// Get voucher details from directory to determine targetType
+		const voucherInfo = voucherDirectory[newVoucher];
+		
+		const newVoucherItem: VoucherItem = {
 			id: getNextKey(),
 			voucherId: newVoucher,
 			sellAmount: Math.floor(Math.random() * 30) + 1,
 			picked: false,
+			targetType: voucherInfo.targetType,  // Add the required property
+			targetCount: voucherInfo.targetCount // Add optional property if available
 		};
+		
 		state.activeVouchers.push(newVoucherItem);
 		state.vouchers.push(newVoucherItem);
-		state.activeVouchers = state.activeVouchers;
-		state.vouchers = state.vouchers;
+		state.activeVouchers = [...state.activeVouchers];
+		state.vouchers = [...state.vouchers];
 	}
 
 	function onClickHand(index: number) {
@@ -571,30 +593,31 @@
 	 * Moves player's vouchers to their hand when time reaches 0
 	 */
 	function moveVouchersToHand() {
-	// Clear normal cards from hand
-	state.handCards = [];
-	
-	// Add vouchers to hand
-	for (const voucher of state.vouchers) {
-		const voucherInfo = voucherDirectory[voucher.voucherId];
-		state.handCards.push({
-		id: getNextKey(),
-		voucherId: voucher.voucherId,
-		isVoucher: true,
-		picked: false,
-		targetType: voucherInfo.targetType,
-		targetCount: voucherInfo.targetCount,
-		card: { rank: "", suit: "", overlay: 0, faceUp: true }
-		});
-	}
-	
-	// If there are no vouchers, add at least one that requires selection
-	if (state.handCards.length === 0) {
-		addVoucherToHand(1); // Add a voucher that requires selection
-	}
-	
-	// Update hand to reflect in UI
-	state.handCards = [...state.handCards];
+		// Clear normal cards from hand
+		state.handCards = [];
+		
+		// Add vouchers to hand
+		for (const voucher of state.vouchers) {
+			if (voucher.voucherId !== undefined) {
+				const voucherInfo = voucherDirectory[voucher.voucherId];
+				
+				state.handCards.push({
+					id: getNextKey(),
+					voucherId: voucher.voucherId,
+					isVoucher: true,
+					picked: false,
+					card: { rank: "", suit: "", overlay: 0, faceUp: true }
+				});
+			}
+		}
+		
+		// If there are no vouchers, add at least one that requires selection
+		if (state.handCards.length === 0) {
+			addVoucherToHand(1); // Add a voucher that requires selection
+		}
+		
+		// Update hand to reflect in UI
+		state.handCards = [...state.handCards];
 	}
 
 	/**
@@ -640,11 +663,16 @@
 		// Añadir vouchers a la tienda
 		for (let i = 0; i < 2; i++) {
 			const newVoucher = Math.floor(Math.random() * voucherDirectory.length);
+			// Obtener información del voucher del directorio
+			const voucherInfo = voucherDirectory[newVoucher];
+			
 			state.shop.voucherRow.push({
 				id: getNextKey(),
 				voucherId: newVoucher,
 				sellAmount: Math.floor(Math.random() * 30) + 1,
 				picked: false,
+				targetType: voucherInfo.targetType, // Añadir propiedad requerida
+				targetCount: voucherInfo.targetCount // Añadir propiedad opcional
 			});
 		}
 		
@@ -684,11 +712,14 @@
 				content = <VoucherItem[]>[];
 				for (let j = 0; j < pack.contentSize; j++) {
 					const newVoucher = Math.floor(Math.random() * voucherDirectory.length);
+					const voucherInfo = voucherDirectory[newVoucher];
 					content.push({
 						id: getNextKey(),
 						voucherId: newVoucher,
 						sellAmount: Math.floor(Math.random() * 30) + 1,
 						picked: false,
+						targetType: voucherInfo.targetType,
+						targetCount: voucherInfo.targetCount
 					});
 				}
 			}
@@ -713,7 +744,7 @@
 	 */
 	function selectPlayer(player: any) {
 		// Get the maximum number of selectable players
-		const maxSelectable = Math.max(...actionCards.map(v => v.targetCount || 1));
+		const maxSelectable = Math.max(...actionCards.map(v => v.targetCount ?? 1));
 		
 		// Verify if the player is already selected
 		const playerIndex = selectedPlayers.findIndex(p => p.id === player.id);
@@ -907,7 +938,7 @@
 					>
 						<VoucherCard
 							width="w-[12vh]"
-							voucherId={voucher.voucherId}
+							voucherId={voucher.voucherId ?? 0}
 							animateCard={true}
 						/>
 					</div>
@@ -928,7 +959,7 @@
 					>
 						<VoucherCard
 							width="w-[12vh]"
-							voucherId={voucher.voucherId}
+							voucherId={voucher.voucherId ?? 0}
 							animateCard={true}
 						/>
 					</div>
@@ -1082,7 +1113,7 @@
 							>
 								<VoucherCard
 									width="w-[14vh]"
-									voucherId={card.voucherId}
+									voucherId={card.voucherId ?? 0}
 									animateCard={true}
 								/>
 							</div>
@@ -1165,7 +1196,7 @@
 								{#if card.isVoucher}
 									<VoucherCard
 										width="w-[14vh]"
-										voucherId={card.voucherId}
+										voucherId={card.voucherId ?? 0}
 										animateCard={true}
 									/>
 								{:else}
