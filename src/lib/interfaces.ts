@@ -144,11 +144,12 @@ export type JokerEdition = {
 
 // Voucher data
 export type Voucher = {
-    name:string,
-    image:string,
-    tooltip:string,
+  name: string,
+  image: string,
+  tooltip: string,
+  targetType: boolean,
+  targetCount?: number
 }
-
 
 // /game interfaces
 
@@ -179,6 +180,8 @@ export type GameState = {
 export type CardItem = {
     id: number,
     card: Card,
+    voucherId?: number,
+    isVoucher?: boolean,
     picked: boolean,
 };
 
@@ -193,7 +196,9 @@ export type JokerItem = {
 export type VoucherItem = {
     id: number,
     voucherId: number,
-    sellAmount: number
+    targetType: boolean,
+    targetCount?: number,
+    sellAmount: number,
     picked: boolean
 };
 
