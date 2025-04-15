@@ -813,31 +813,6 @@
 	}
 
 	/**
-	 * Debug function to add a specific voucher that requires player selection
-	 */
-	function onAddTargetVoucherToHand() {
-	// Create a voucher that always requires player selection
-	const voucherId = 1; // Odd ID
-	
-	state.handCards.push({
-		id: getNextKey(),
-		voucherId: voucherId,
-		isVoucher: true,
-		picked: true, // Mark it as automatically selected
-		targetType: true, // Always requires selection
-		targetCount: 3, // Can select up to 3 players
-		card: { rank: "", suit: "", overlay: 0, faceUp: true }
-	});
-	
-	state.handCards = [...state.handCards];
-	console.log("Added voucher that requires player selection");
-	
-	// Activate directly the selection dialog
-	actionCards = [state.handCards[state.handCards.length - 1]];
-	showPlayerSelection = true;
-	}
-
-	/**
 	 * Modified onAddVoucherToHand to add random vouchers with higher chance of target vouchers
 	 */
 	function onAddVoucherToHand() {
@@ -1080,8 +1055,7 @@
 			{#if voucherPhase}
 				<!-- Voucher phase -->
 				<div class="h-[63vh] grid grid-rows-[33%_33%_12%] gap-[8%]">
-					<div class="text-5xl-r h-[12%] card variant-filled-surface p-5 text-center">
-						VOUCHERS PHASE
+					<div class="">
 					</div>
 					
 					<!-- Hand (vouchers only) -->
@@ -1395,9 +1369,6 @@
 			</button>
 			<button class="btn variant-filled-surface" on:click={onAddVoucherToHand}>
 				Add Voucher to Hand
-			</button>
-			<button class="btn variant-filled-surface" on:click={onAddTargetVoucherToHand}>
-				Add Target Voucher
 			</button>
 		</div>
 
