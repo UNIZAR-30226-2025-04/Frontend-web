@@ -166,7 +166,7 @@
 	// Flag to show the player selection dialog
 	let showPlayerSelection = false;
 	// Store the selected player
-	let selectedPlayer: any = null;
+	let selectedPlayers: any[] = [];
 	// Store the cards that triggered the player selection
 	let actionCards: any[] = [];
 
@@ -194,62 +194,65 @@
 	 * @param voucherId ID of the voucher to add
 	 */
 	function addVoucherToHand(voucherId: number) {
-		// Get voucher info from directory
-		const voucherInfo = voucherDirectory[voucherId];
-		
-		state.handCards.push({
-			id: getNextKey(),
-			voucherId: voucherId,
-			isVoucher: true,
-			picked: false,
-			targetType: voucherInfo.targetType,
-			targetCount: voucherInfo.targetCount,
-			card: { rank: "", suit: "", overlay: 0, faceUp: true } // Empty card object to satisfy type
-		});
-		state.handCards = [...state.handCards]; // Trigger reactivity
+	// Create a voucher with properties specific for testing
+	const targetType = voucherId % 2 !== 0; // IDs odd require selection
+	const targetCount = targetType ? Math.floor(Math.random() * 3) + 1 : 0;
+	
+	state.handCards.push({
+		id: getNextKey(),
+		voucherId: voucherId,
+		isVoucher: true,
+		picked: false,
+		targetType: targetType,
+		targetCount: targetCount,
+		card: { rank: "", suit: "", overlay: 0, faceUp: true }
+	});
+	
+	state.handCards = [...state.handCards]; // Trigger reactivity
+	console.log(`Añadido voucher ID ${voucherId}, targetType: ${targetType}, targetCount: ${targetCount}`);
 	}
 	
 	/**
 	 * Handles the play action, processing both normal cards and vouchers
 	 */
 	function onPlay() {
-		if (actionBlocked) return;
+	if (actionBlocked) return;
 
-		const pickedCards = state.handCards.filter((card) => card.picked);
-		const count = pickedCards.length;
+	const pickedCards = state.handCards.filter((card) => card.picked);
+	const count = pickedCards.length;
 
-		if (count > 0 && count < 6) {
-			// Separate vouchers and normal cards
-			const vouchers = pickedCards.filter(card => card.isVoucher);
-			const normalCards = pickedCards.filter(card => !card.isVoucher);
-			
-			// Check if there are vouchers that require player selection
-			const targetVouchers = vouchers.filter(voucher => voucher.targetType === true);
-			
-			// If there are vouchers requiring selection, show the dialog
-			if (targetVouchers.length > 0) {
-				actionCards = targetVouchers;
-				showPlayerSelection = true;
-				return;
-			}
-			
-			// Process vouchers that don't require selection (targetType = false)
-			for (const voucher of vouchers.filter(v => v.targetType === false)) {
-				applyVoucherEffect(voucher.voucherId);
-			}
-			
-			// Remove processed vouchers from hand
-			if (vouchers.length > 0) {
-				state.handCards = state.handCards.filter(card => 
-					!(card.picked && card.isVoucher)
-				);
-			}
-			
-			// Play normal cards directly
-			if (normalCards.length > 0) {
-				playCards(normalCards);
-			}
+	if (count > 0 && count < 6) {
+		// Separate vouchers and normal cards
+		const vouchers = pickedCards.filter(card => card.isVoucher);
+		const normalCards = pickedCards.filter(card => !card.isVoucher);
+		
+		// Check if there are vouchers that require player selection
+		const targetVouchers = vouchers.filter(voucher => voucher.targetType === true);
+		
+		// If there are vouchers requiring selection, show the dialog
+		if (targetVouchers.length > 0) {
+		actionCards = targetVouchers;
+		showPlayerSelection = true;
+		return;
 		}
+		
+		// Process vouchers that don't require selection
+		for (const voucher of vouchers.filter(v => v.targetType === false)) {
+		applyVoucherEffect(voucher.voucherId);
+		}
+		
+		// Remove processed vouchers from hand
+		if (vouchers.length > 0) {
+		state.handCards = state.handCards.filter(card => 
+			!(card.picked && card.isVoucher)
+		);
+		}
+		
+		// Play normal cards directly
+		if (normalCards.length > 0) {
+		playCards(normalCards);
+		}
+	}
 	}
 
 	/**
@@ -432,12 +435,24 @@
 		interval = setInterval(() => {
 			if (state.timeLeft > 0) {
 				state.timeLeft--;
-			} else if (state.timeLeft === 0 && !voucherPhase && state.phase === 0) {
-				// Cuando el tiempo llega a 0, activamos la fase de vouchers
-				voucherPhase = true;
-				
-				// Movemos los vouchers del jugador a la mano
-				moveVouchersToHand();
+			} else if (state.timeLeft === 0) {
+				if (!voucherPhase && state.phase === 0) {
+					// When time reaches 0, activate voucher phase
+					voucherPhase = true;
+					state.timeLeft = 30; // Reset timer for voucher phase
+					
+					// Move player's vouchers to hand
+					moveVouchersToHand();
+				} else if (voucherPhase && state.phase === 0) {
+					// When voucher phase timer ends, go to shop
+					voucherPhase = false;
+					state.phase = 1;
+					setupShop();
+					state.timeLeft = 30; // Reset timer for shop phase
+				} else if (state.phase === 1) {
+					// When shop phase timer ends, go to next round
+					handleNextRound();
+				}
 			}
 		}, 1000);
 	});
@@ -555,57 +570,53 @@
 	}
 
 	/**
-	 * Mueve los vouchers del jugador a su mano cuando el tiempo llega a 0
+	 * Moves player's vouchers to their hand when time reaches 0
 	 */
 	function moveVouchersToHand() {
-		// Limpiamos las cartas normales de la mano
-		state.handCards = [];
-		
-		// Añadimos los vouchers a la mano
-		for (const voucher of state.vouchers) {
-			const voucherInfo = voucherDirectory[voucher.voucherId];
-			state.handCards.push({
-				id: getNextKey(),
-				voucherId: voucher.voucherId,
-				isVoucher: true,
-				picked: false,
-				targetType: voucherInfo.targetType,
-				targetCount: voucherInfo.targetCount,
-				card: { rank: "", suit: "", overlay: 0, faceUp: true }
-			});
-		}
-		
-		// Actualizamos la mano para que se refleje en la UI
-		state.handCards = [...state.handCards];
+	// Clear normal cards from hand
+	state.handCards = [];
+	
+	// Add vouchers to hand
+	for (const voucher of state.vouchers) {
+		const voucherInfo = voucherDirectory[voucher.voucherId];
+		state.handCards.push({
+		id: getNextKey(),
+		voucherId: voucher.voucherId,
+		isVoucher: true,
+		picked: false,
+		targetType: voucherInfo.targetType,
+		targetCount: voucherInfo.targetCount,
+		card: { rank: "", suit: "", overlay: 0, faceUp: true }
+		});
+	}
+	
+	// If there are no vouchers, add at least one that requires selection
+	if (state.handCards.length === 0) {
+		addVoucherToHand(1); // Add a voucher that requires selection
+	}
+	
+	// Update hand to reflect in UI
+	state.handCards = [...state.handCards];
 	}
 
 	/**
-	 * Modificar la función onNextPhase para manejar la transición entre fases
+	 * Modified onNextPhase function to handle transition between phases
 	 */
 	function onNextPhase() {
 		if (state.phase === 1) {
-			// Si estamos en la fase de tienda, volvemos a la fase normal
-			state.handCards = [];
-			for (let i = 0; i < 8; i++) {
-				setTimeout(
-					() => {
-						onDeck();
-					},
-					drawCardAnimSpeed * i + drawCardDelay,
-				);
-			}
-			state.phase = 0;
-			voucherPhase = false; // Reseteamos la fase de vouchers
-			state.timeLeft = 30; // Reiniciamos el temporizador
+			// If we're in shop phase, go to next round
+			handleNextRound();
 		} else if (voucherPhase) {
-			// Si estamos en la fase de vouchers, pasamos a la tienda
+			// If we're in voucher phase, go to shop
 			voucherPhase = false;
 			state.phase = 1;
-			setupShop(); // Configuramos la tienda
+			setupShop(); // Configure shop
+			state.timeLeft = 30; // Reset timer
 		} else {
-			// Si estamos en la fase normal, pasamos a la tienda
+			// If we're in normal phase, go to shop
 			state.phase = 1;
-			setupShop(); // Configuramos la tienda
+			setupShop(); // Configure shop
+			state.timeLeft = 30; // Reset timer
 		}
 	}
 
@@ -699,33 +710,51 @@
 	}
 
 	/**
-	 * Selects a player from the dialog
-	 * @param player The player to select
+	 * Selects or deselects a player from the dialog
+	 * @param player The player to select/deselect
 	 */
 	function selectPlayer(player: any) {
-		selectedPlayer = player;
+		// Get the maximum number of selectable players
+		const maxSelectable = Math.max(...actionCards.map(v => v.targetCount || 1));
+		
+		// Verify if the player is already selected
+		const playerIndex = selectedPlayers.findIndex(p => p.id === player.id);
+		
+		if (playerIndex >= 0) {
+			// If already selected, remove it
+			selectedPlayers = selectedPlayers.filter(p => p.id !== player.id);
+		} else {
+			// If not selected and not reached the limit, add it
+			if (selectedPlayers.length < maxSelectable) {
+				selectedPlayers = [...selectedPlayers, player];
+			}
+		}
 	}
 
 	/**
-	 * Sends the action to the selected player and closes the dialog
+	 * Sends the action to the selected players and closes the dialog
 	 */
 	function sendActionToPlayer() {
-		if (!selectedPlayer) return;
+		if (selectedPlayers.length === 0) return;
+
+		console.log(`Enviando vouchers a ${selectedPlayers.length} jugadores`);
+
+		// Apply effects of vouchers sent to each selected player
+		for (const voucher of actionCards) {
+			for (const player of selectedPlayers) {
+				console.log(`Applying voucher ${voucher.voucherId} to player ${player.id}`);
+				// TODO: Apply voucher effect to player
+			}
+		}
 		
-		// We're only sending vouchers now
-		console.log(`Sending voucher(s) to player ${selectedPlayer.username}`);
-		
-		// Here we would implement the actual logic to send the voucher to the player
-		// through a socket connection
-		
-		// Remove the sent vouchers from the player's hand
+		// Eliminate used vouchers from player's hand
 		state.handCards = state.handCards.filter(card => 
 			!(card.picked && card.isVoucher)
 		);
 		
-		// Close the dialog and reset selection
+		// Close the dialog and reset the selection
 		showPlayerSelection = false;
-		selectedPlayer = null;
+		selectedPlayers = [];
 		actionCards = [];
 	}
 
@@ -734,7 +763,7 @@
 	 */
 	function cancelAction() {
 		showPlayerSelection = false;
-		selectedPlayer = null;
+		selectedPlayers = [];
 		actionCards = [];
 	}
 
@@ -786,22 +815,90 @@
 	}
 
 	/**
-	 * Debug function to add a voucher card to the player's hand
+	 * Debug function to add a specific voucher that requires player selection
 	 */
-	function onAddVoucherToHand() {
-		const randomVoucherId = Math.floor(Math.random() * voucherDirectory.length);
-		addVoucherToHand(randomVoucherId);
+	function onAddTargetVoucherToHand() {
+	// Create a voucher that always requires player selection
+	const voucherId = 1; // Odd ID
+	
+	state.handCards.push({
+		id: getNextKey(),
+		voucherId: voucherId,
+		isVoucher: true,
+		picked: true, // Mark it as automatically selected
+		targetType: true, // Always requires selection
+		targetCount: 3, // Can select up to 3 players
+		card: { rank: "", suit: "", overlay: 0, faceUp: true }
+	});
+	
+	state.handCards = [...state.handCards];
+	console.log("Added voucher that requires player selection");
+	
+	// Activate directly the selection dialog
+	actionCards = [state.handCards[state.handCards.length - 1]];
+	showPlayerSelection = true;
 	}
 
 	/**
-	 * Determines if a voucher can be sent to another player
-	 * @param voucherId The ID of the voucher to check
-	 * @returns True if the voucher can be sent to another player
+	 * Modified onAddVoucherToHand to add random vouchers with higher chance of target vouchers
 	 */
-	function isVoucherSendable(voucherId: number): boolean {
-		// Define which voucher IDs can be sent to other players
-		// Vouchers with even IDs (2, 4) can be sent to other players
-		return voucherId % 2 === 0;
+	function onAddVoucherToHand() {
+		// Increase chance of getting a voucher that requires player selection
+		const randomValue = Math.random();
+		let voucherId;
+		
+		if (randomValue < 0.7) {
+			// 70% chance to get a voucher that requires player selection
+			voucherId = randomValue < 0.35 ? 1 : 3; // IDs that require player selection
+		} else {
+			// 30% chance to get a random voucher
+			voucherId = Math.floor(Math.random() * voucherDirectory.length);
+		}
+		
+		addVoucherToHand(voucherId);
+	}
+
+	/**
+	 * Determines if a voucher requires player selection
+	 * @param voucherId The ID of the voucher to check
+	 * @returns True if the voucher requires player selection
+	 */
+	function requiresPlayerSelection(voucherId: number): boolean {
+		// The vouchers with odd ID (1, 3, 5...) require player selection (TODO: Do this according to the received data)
+		return voucherId % 2 !== 0;
+	}
+
+	/**
+	 * Handles the transition to the next round
+	 * This function is called when the timer reaches 0 in shop phase
+	 * or when the Next Round button is clicked
+	 */
+	function handleNextRound() {
+	// Reset hand cards
+	state.handCards = [];
+	
+	// Deal new cards for the next round
+	for (let i = 0; i < 8; i++) {
+		setTimeout(
+		() => {
+			onDeck();
+		},
+		drawCardAnimSpeed * i + drawCardDelay,
+		);
+	}
+	
+	// Increment round counter
+	state.round++;
+	
+	// Reset phase and timer
+	state.phase = 0;
+	voucherPhase = false;
+	state.timeLeft = 30;
+	
+	// Update minimum score for the new round
+	state.minScore = 100000 - (state.round * 10000);
+	
+	console.log("Starting round " + state.round);
 	}
 </script>
 
@@ -981,13 +1078,13 @@
 
 		{#if state.phase === 0}
 			{#if voucherPhase}
-				<!-- Fase de vouchers -->
+				<!-- Voucher phase -->
 				<div class="h-[63vh] grid grid-rows-[33%_33%_12%] gap-[8%]">
 					<div class="text-5xl-r h-[12%] card variant-filled-surface p-5 text-center">
 						VOUCHERS PHASE
 					</div>
 					
-					<!-- Hand (solo vouchers) -->
+					<!-- Hand (vouchers only) -->
 					<div
 						class="flex justify-between relative"
 						style="width: calc(100% - 9vh);"
@@ -1299,6 +1396,9 @@
 			<button class="btn variant-filled-surface" on:click={onAddVoucherToHand}>
 				Add Voucher to Hand
 			</button>
+			<button class="btn variant-filled-surface" on:click={onAddTargetVoucherToHand}>
+				Add Target Voucher
+			</button>
 		</div>
 
 		<!--Deck-->
@@ -1403,8 +1503,12 @@
 		in:fly={{ y: 50, duration: animationSpeed * 3 }}
 	>
 		<h2 class="text-6xl-r mb-8">
-			{actionCards.some(card => card.isVoucher) ? 'SEND VOUCHER TO' : 'USE CARD AGAINST'}
+			SEND VOUCHER TO PLAYER{#if Math.max(...actionCards.map(v => v.targetCount || 1)) > 1}S{/if}
 		</h2>
+		
+		<p class="text-3xl-r mb-4">
+			Select up to {Math.max(...actionCards.map(v => v.targetCount || 1))} player{Math.max(...actionCards.map(v => v.targetCount || 1)) > 1 ? 's' : ''}
+		</p>
 		
 		<div class="grid grid-cols-5 gap-4 mb-8">
 			{#each mockPlayers as player}
@@ -1412,9 +1516,9 @@
 				<!-- svelte-ignore a11y-no-static-element-interactions -->
 				<div 
 					class="flex flex-col items-center cursor-pointer p-2"
-					class:border-4={selectedPlayer && selectedPlayer.id === player.id}
-					class:border-warning-500={selectedPlayer && selectedPlayer.id === player.id}
-					class:rounded-lg={selectedPlayer && selectedPlayer.id === player.id}
+					class:border-4={selectedPlayers.some(p => p.id === player.id)}
+					class:border-warning-500={selectedPlayers.some(p => p.id === player.id)}
+					class:rounded-lg={selectedPlayers.some(p => p.id === player.id)}
 					on:click={() => selectPlayer(player)}
 				>
 					<img src={player.avatar} alt="Player avatar" class="w-16 h-16 rounded-full mb-2" />
@@ -1427,7 +1531,7 @@
 			<button 
 				class="btn variant-filled-tertiary w-[40%] text-4xl-r"
 				on:click={sendActionToPlayer}
-				disabled={!selectedPlayer}
+				disabled={selectedPlayers.length === 0}
 			>
 				SEND
 			</button>
