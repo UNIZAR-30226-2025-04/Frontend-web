@@ -190,7 +190,7 @@
 	}
 
 	/**
-	 * Adds a voucher card to the player's hand
+	 * Adds a voucher to the player's hand
 	 * @param voucherId ID of the voucher to add
 	 */
 	function addVoucherToHand(voucherId: number) {
@@ -364,23 +364,23 @@
 		if (state.shop.voucherRow[index].sellAmount <= state.money) {
 			state.money -= state.shop.voucherRow[index].sellAmount;
 			
-			// Crear una copia del voucher para añadirlo a la colección
+			// Create a copy of the voucher to add to the collection
 			const boughtVoucher = {
 				...state.shop.voucherRow[index],
-				id: getNextKey() // Asignar un nuevo ID único
+				id: getNextKey() // Assign a new unique ID
 			};
 			
-			// Añadir al inventario de vouchers del jugador
+			// Add to player's voucher inventory
 			state.vouchers.push(boughtVoucher);
 			
-			// Asegurar reactividad
+			// Ensure reactivity
 			state.vouchers = [...state.vouchers]; 
 			
-			// Eliminar el voucher de la tienda
+			// Remove the voucher from the shop
 			state.shop.voucherRow.splice(index, 1);
 			state.shop.voucherRow = [...state.shop.voucherRow]; 
 			
-			console.log(`Comprado voucher ID ${boughtVoucher.voucherId}, total en inventario: ${state.vouchers.length}`);
+			console.log(`Bought voucher ID ${boughtVoucher.voucherId}, total in inventory: ${state.vouchers.length}`);
 		}
 	}
 
@@ -663,13 +663,13 @@
 				}
 			}
 			
-			console.log(`Fase de vouchers: ${state.vouchers.length} vouchers disponibles`);
+			console.log(`Voucher phase: ${state.vouchers.length} vouchers available`);
 		} 
-		// Solo añadir un voucher por defecto en la primera ronda si no hay ninguno
+		// Only add a default voucher in the first round if there are none
 		else if (state.round === 1) {
 			addVoucherToHand(1);
 			
-			// También añadirlo al inventario de vouchers
+			// Also add it to the voucher inventory
 			const voucherInfo = voucherDirectory[1];
 			state.vouchers.push({
 				id: getNextKey(),
@@ -680,7 +680,7 @@
 				targetCount: voucherInfo.targetCount
 			});
 			
-			console.log("Añadido voucher inicial en primera ronda");
+			console.log("Added initial voucher in first round");
 		}
 		
 		// Update hand to reflect in UI
@@ -921,7 +921,7 @@
 	 * Handles the transition to the next round
 	 */
 	function handleNextRound() {
-		// Limpiar solo las cartas normales, no los vouchers del inventario
+		// Clear only normal cards, not vouchers from inventory
 		state.handCards = [];
 		
 		// Deal new cards for the next round
@@ -949,7 +949,7 @@
 	}
 
 	/**
-	 * Removes a voucher from the player's inventory (Your consumables)
+	 * Removes a voucher from the player's inventory (Your vouchers)
 	 * @param voucherId The ID of the voucher to remove
 	 */
 	function removeVoucherFromInventory(voucherId: number) {
@@ -962,7 +962,7 @@
 			state.vouchers = [...state.vouchers]; // Trigger reactivity
 			console.log(`Removed voucher ID ${voucherId} from inventory, remaining: ${state.vouchers.length}`);
 		} else {
-			console.warn(`No se encontró el voucher ID ${voucherId} en el inventario`);
+			console.warn(`Voucher ID ${voucherId} not found in inventory`);
 		}
 	}
 
@@ -1023,10 +1023,10 @@
 			<div class={shopTitle}>SHOP</div>
 		{/if}
 
-		<!-- Mostrar "Your consumables" solo en la fase de tienda -->
+		<!-- Show "Your vouchers" only in shop phase -->
 		{#if state.phase === 1}
 			<!--Vouchers label-->
-			<div class="text-2xl-r mt-[3%]">Your consumables</div>
+			<div class="text-2xl-r mt-[3%]">Your vouchers</div>
 			<!--Vouchers-->
 			<div
 				class="flex h-[20%] mt-[3%] justify-between"
@@ -1047,7 +1047,7 @@
 			</div>
 		{/if}
 
-		<!-- Active Vouchers Display - mostrar en todas las fases excepto tienda -->
+		<!-- Active Vouchers Display - show in all phases except shop -->
 		{#if state.activeVouchers.length > 0 && state.phase !== 1}
 			<div class="text-2xl-r mt-[3%]">Active Effects</div>
 			<div
