@@ -1398,9 +1398,6 @@
 			>
 				Remove voucher
 			</button>
-			<button class="btn variant-filled-surface" on:click={onAddVoucherToHand}>
-				Add Voucher to Hand
-			</button>
 		</div>
 
 		<!--Deck-->
