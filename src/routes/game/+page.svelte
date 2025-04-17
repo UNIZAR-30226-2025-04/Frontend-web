@@ -233,7 +233,6 @@
 			
 			// Check if there are vouchers that require player selection
 			const targetVouchers = vouchers.filter(voucher => {
-				// Safely check if this voucher requires target selection
 				if (voucher.voucherId !== undefined) {
 					return requiresPlayerSelection(voucher.voucherId);
 				}
@@ -251,6 +250,9 @@
 			for (const voucher of vouchers) {
 				if (voucher.voucherId !== undefined) {
 					applyVoucherEffect(voucher.voucherId);
+					
+					// Eliminar el voucher del inventario después de usarlo
+					removeVoucherFromInventory(voucher.voucherId);
 				}
 			}
 			
@@ -273,6 +275,9 @@
 	 * @param voucherId The ID of the voucher to apply
 	 */
 	function applyVoucherEffect(voucherId: number) {
+		// Get voucher info from directory
+		const voucherInfo = voucherDirectory[voucherId];
+		
 		// Implement different effects based on voucher ID
 		if (voucherId === 0) {
 			// Example: Increase blue score
@@ -283,9 +288,16 @@
 				setTimeout(() => onDeck(), drawCardAnimSpeed * i + drawCardDelay);
 			}
 		}
-		// Add more voucher effects as needed
+		
+		// If the voucher is non-offensive (persistent), add it to active vouchers
+		if (!isOffensiveVoucher(voucherId)) {
+			addToActiveVouchers(voucherId);
+		}
+		
+		// Remove from vouchers list (Your consumables)
+		removeVoucherFromInventory(voucherId);
 	}
-
+	
 	/**
 	 * Sort cards on hand by rank
 	 */
@@ -354,8 +366,24 @@
 	function onBuyVoucher(index: number) {
 		if (state.shop.voucherRow[index].sellAmount <= state.money) {
 			state.money -= state.shop.voucherRow[index].sellAmount;
-			state.vouchers.push(state.shop.voucherRow[index]);
+			
+			// Crear una copia del voucher para añadirlo a la colección
+			const boughtVoucher = {
+				...state.shop.voucherRow[index],
+				id: getNextKey() // Asignar un nuevo ID único
+			};
+			
+			// Añadir al inventario de vouchers del jugador
+			state.vouchers.push(boughtVoucher);
+			
+			// Asegurar reactividad
+			state.vouchers = [...state.vouchers]; 
+			
+			// Eliminar el voucher de la tienda
 			state.shop.voucherRow.splice(index, 1);
+			state.shop.voucherRow = [...state.shop.voucherRow]; 
+			
+			console.log(`Comprado voucher ID ${boughtVoucher.voucherId}, total en inventario: ${state.vouchers.length}`);
 		}
 	}
 
@@ -561,7 +589,7 @@
 	}
 
 	/**
-	 * Creates a new voucher for the active vouchers and vouchers collections
+	 * Creates a new voucher for the vouchers collection only
 	 */
 	function onAddVoucher() {
 		const newVoucher = Math.floor(Math.random() * voucherDirectory.length);
@@ -573,14 +601,15 @@
 			voucherId: newVoucher,
 			sellAmount: Math.floor(Math.random() * 30) + 1,
 			picked: false,
-			targetType: voucherInfo.targetType,  // Add the required property
-			targetCount: voucherInfo.targetCount // Add optional property if available
+			targetType: voucherInfo.targetType,
+			targetCount: voucherInfo.targetCount
 		};
 		
-		state.activeVouchers.push(newVoucherItem);
+		// Solo añadir a state.vouchers, no a activeVouchers
 		state.vouchers.push(newVoucherItem);
-		state.activeVouchers = [...state.activeVouchers];
 		state.vouchers = [...state.vouchers];
+		
+		console.log(`Added voucher ID ${newVoucher} to inventory, total: ${state.vouchers.length}`);
 	}
 
 	/**
@@ -623,24 +652,38 @@
 		// Clear normal cards from hand
 		state.handCards = [];
 		
-		// Add vouchers to hand
-		for (const voucher of state.vouchers) {
-			if (voucher.voucherId !== undefined) {
-				const voucherInfo = voucherDirectory[voucher.voucherId];
-				
-				state.handCards.push({
-					id: getNextKey(),
-					voucherId: voucher.voucherId,
-					isVoucher: true,
-					picked: false,
-					card: { rank: "", suit: "", overlay: 0, faceUp: true }
-				});
+		// Add vouchers to hand from player's inventory (state.vouchers)
+		if (state.vouchers && state.vouchers.length > 0) {
+			for (const voucher of state.vouchers) {
+				if (voucher.voucherId !== undefined) {
+					state.handCards.push({
+						id: getNextKey(),
+						voucherId: voucher.voucherId,
+						isVoucher: true,
+						picked: false,
+						card: { rank: "", suit: "", overlay: 0, faceUp: true }
+					});
+				}
 			}
-		}
-		
-		// If there are no vouchers, add at least one that requires selection
-		if (state.handCards.length === 0) {
-			addVoucherToHand(1); // Add a voucher that requires selection
+			
+			console.log(`Fase de vouchers: ${state.vouchers.length} vouchers disponibles`);
+		} 
+		// Solo añadir un voucher por defecto en la primera ronda si no hay ninguno
+		else if (state.round === 1) {
+			addVoucherToHand(1);
+			
+			// También añadirlo al inventario de vouchers
+			const voucherInfo = voucherDirectory[1];
+			state.vouchers.push({
+				id: getNextKey(),
+				voucherId: 1,
+				sellAmount: 0,
+				picked: false,
+				targetType: voucherInfo.targetType,
+				targetCount: voucherInfo.targetCount
+			});
+			
+			console.log("Añadido voucher inicial en primera ronda");
 		}
 		
 		// Update hand to reflect in UI
@@ -797,9 +840,14 @@
 
 		// Apply effects of vouchers sent to each selected player
 		for (const voucher of actionCards) {
-			for (const player of selectedPlayers) {
-				console.log(`Applying voucher ${voucher.voucherId} to player ${player.id}`);
-				// TODO: Apply voucher effect to player
+			if (voucher.voucherId !== undefined) {
+				// Eliminar el voucher del inventario después de usarlo
+				removeVoucherFromInventory(voucher.voucherId);
+				
+				for (const player of selectedPlayers) {
+					console.log(`Applying voucher ${voucher.voucherId} to player ${player.id}`);
+					// TODO: Apply voucher effect to player
+				}
 			}
 		}
 		
@@ -809,15 +857,6 @@
 		);
 		
 		// Close the dialog and reset the selection
-		showPlayerSelection = false;
-		selectedPlayers = [];
-		actionCards = [];
-	}
-
-	/**
-	 * Function to cancel the action and close the dialog
-	 */
-	function cancelAction() {
 		showPlayerSelection = false;
 		selectedPlayers = [];
 		actionCards = [];
@@ -871,25 +910,6 @@
 	}
 
 	/**
-	 * Modified onAddVoucherToHand to add random vouchers with higher chance of target vouchers
-	 */
-	function onAddVoucherToHand() {
-		// Increase chance of getting a voucher that requires player selection
-		const randomValue = Math.random();
-		let voucherId;
-		
-		if (randomValue < 0.7) {
-			// 70% chance to get a voucher that requires player selection
-			voucherId = randomValue < 0.35 ? 1 : 3; // IDs that require player selection
-		} else {
-			// 30% chance to get a random voucher
-			voucherId = Math.floor(Math.random() * voucherDirectory.length);
-		}
-		
-		addVoucherToHand(voucherId);
-	}
-
-	/**
 	 * Determines if a voucher requires player selection
 	 * @param voucherId The ID of the voucher to check
 	 * @returns True if the voucher requires player selection
@@ -903,7 +923,7 @@
 	 * Handles the transition to the next round
 	 */
 	function handleNextRound() {
-		// Reset hand cards
+		// Limpiar solo las cartas normales, no los vouchers del inventario
 		state.handCards = [];
 		
 		// Deal new cards for the next round
@@ -927,7 +947,62 @@
 		// Update minimum score for the new round
 		state.minScore = 100000 - (state.round * 10000);
 		
-		console.log("Starting round " + state.round);
+		console.log("Starting round " + state.round + " with " + state.vouchers.length + " vouchers");
+	}
+
+	/**
+	 * Removes a voucher from the player's inventory (Your consumables)
+	 * @param voucherId The ID of the voucher to remove
+	 */
+	function removeVoucherFromInventory(voucherId: number) {
+		// Find the index of the first voucher with matching ID
+		const index = state.vouchers.findIndex(v => v.voucherId === voucherId);
+		
+		// If found, remove it
+		if (index !== -1) {
+			state.vouchers.splice(index, 1);
+			state.vouchers = [...state.vouchers]; // Trigger reactivity
+			console.log(`Removed voucher ID ${voucherId} from inventory, remaining: ${state.vouchers.length}`);
+		} else {
+			console.warn(`No se encontró el voucher ID ${voucherId} en el inventario`);
+		}
+	}
+
+	/**
+	 * Adds a voucher to the active vouchers list
+	 * @param voucherId The ID of the voucher to add
+	 */
+	function addToActiveVouchers(voucherId: number) {
+		// Get voucher info from directory
+		const voucherInfo = voucherDirectory[voucherId];
+		
+		// Create a new active voucher item
+		const newActiveVoucher: VoucherItem = {
+			id: getNextKey(),
+			voucherId: voucherId,
+			sellAmount: 0, // Not sellable when active
+			picked: false,
+			targetType: voucherInfo.targetType,
+			targetCount: voucherInfo.targetCount
+		};
+		
+		// Add to active vouchers
+		state.activeVouchers.push(newActiveVoucher);
+		state.activeVouchers = [...state.activeVouchers]; // Trigger reactivity
+		console.log(`Added voucher ID ${voucherId} to active vouchers`);
+	}
+
+	/**
+	 * Determines if a voucher is offensive (one-time use) or non-offensive (persistent)
+	 * @param voucherId The ID of the voucher to check
+	 * @returns True if the voucher is offensive
+	 */
+	function isOffensiveVoucher(voucherId: number): boolean {
+		// Get voucher info from directory
+		const voucherInfo = voucherDirectory[voucherId];
+		
+		// Check if it's offensive based on targetType
+		return voucherInfo.targetType === 'offensive';
 	}
 </script>
 
@@ -952,13 +1027,13 @@
 
 		{#if state.phase === 0}
 			<!--Vouchers label-->
-			<div class="text-2xl-r mt-[3%]">Active consumables</div>
+			<div class="text-2xl-r mt-[3%]">Your consumables</div>
 			<!--Vouchers-->
 			<div
 				class="flex h-[20%] mt-[3%] justify-between"
 				style="width: calc(100% - 11vh);"
 			>
-				{#each state.activeVouchers as voucher (voucher.id)}
+				{#each state.vouchers as voucher (voucher.id)}
 					<div
 						class="w-[1vh]"
 						animate:flip={{ duration: animationSpeed }}
@@ -1563,7 +1638,11 @@
 			</button>
 			<button 
 				class="btn variant-filled-error w-[40%] text-4xl-r"
-				on:click={cancelAction}
+				on:click={() => {
+					showPlayerSelection = false;
+					selectedPlayers = [];
+					actionCards = [];
+				}}
 			>
 				CANCEL
 			</button>
