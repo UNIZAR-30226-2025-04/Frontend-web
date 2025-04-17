@@ -170,7 +170,7 @@
 	// Store the cards that triggered the player selection
 	let actionCards: any[] = [];
 
-	// Añadir esta variable para controlar la fase de vouchers
+	// Add this variable to control the voucher phase
 	let voucherPhase = false;
 
 	/**
@@ -250,9 +250,6 @@
 			for (const voucher of vouchers) {
 				if (voucher.voucherId !== undefined) {
 					applyVoucherEffect(voucher.voucherId);
-					
-					// Eliminar el voucher del inventario después de usarlo
-					removeVoucherFromInventory(voucher.voucherId);
 				}
 			}
 			
@@ -294,7 +291,7 @@
 			addToActiveVouchers(voucherId);
 		}
 		
-		// Remove from vouchers list (Your consumables)
+		// Always remove from vouchers list (Your consumables) after using
 		removeVoucherFromInventory(voucherId);
 	}
 	
@@ -605,7 +602,7 @@
 			targetCount: voucherInfo.targetCount
 		};
 		
-		// Solo añadir a state.vouchers, no a activeVouchers
+		// Only add to state.vouchers, not to activeVouchers
 		state.vouchers.push(newVoucherItem);
 		state.vouchers = [...state.vouchers];
 		
@@ -712,12 +709,12 @@
 	}
 
 	/**
-	 * Configura la tienda con nuevos items
+	 * Configures the shop with new items
 	 */
 	function setupShop() {
 		state.shop = { jokerRow: [], voucherRow: [], packageRow: [] };
 		
-		// Añadir jokers a la tienda
+		// Add jokers to the shop
 		for (let i = 0; i < 3; i++) {
 			const newJoker = Math.floor(Math.random() * jokerDirectory.length);
 			const newEdition = Math.floor(Math.random() * jokerEditionsDirectory.length);
@@ -730,10 +727,10 @@
 			});
 		}
 		
-		// Añadir vouchers a la tienda
+		// Add vouchers to the shop
 		for (let i = 0; i < 2; i++) {
 			const newVoucher = Math.floor(Math.random() * voucherDirectory.length);
-			// Obtener información del voucher del directorio
+			// Get voucher info from directory
 			const voucherInfo = voucherDirectory[newVoucher];
 			
 			state.shop.voucherRow.push({
@@ -741,20 +738,20 @@
 				voucherId: newVoucher,
 				sellAmount: Math.floor(Math.random() * 30) + 1,
 				picked: false,
-				targetType: voucherInfo.targetType, // Añadir propiedad requerida
-				targetCount: voucherInfo.targetCount // Añadir propiedad opcional
+				targetType: voucherInfo.targetType, // Add required property
+				targetCount: voucherInfo.targetCount // Add optional property
 			});
 		}
 		
-		// Añadir paquetes a la tienda
+		// Add packages to the shop
 		for (let i = 0; i < 2; i++) {
 			const newPack = Math.floor(Math.random() * packageDirectory.length);
 			const pack = packageDirectory[newPack];
 			let content: CardItem[] | JokerItem[] | VoucherItem[] = [];
 			
-			// Configurar el contenido según el tipo de paquete
+			// Configure content based on package type
 			if (pack.contentType === 0) {
-				// Contenido de cartas
+				// Card content
 				content = <CardItem[]>[];
 				for (let j = 0; j < pack.contentSize; j++) {
 					content.push({
@@ -764,7 +761,7 @@
 					});
 				}
 			} else if (pack.contentType === 1) {
-				// Contenido de jokers
+				// Joker content
 				content = <JokerItem[]>[];
 				for (let j = 0; j < pack.contentSize; j++) {
 					const newJoker = Math.floor(Math.random() * jokerDirectory.length);
@@ -778,7 +775,7 @@
 					});
 				}
 			} else {
-				// Contenido de vouchers
+				// Voucher content
 				content = <VoucherItem[]>[];
 				for (let j = 0; j < pack.contentSize; j++) {
 					const newVoucher = Math.floor(Math.random() * voucherDirectory.length);
@@ -802,7 +799,7 @@
 			});
 		}
 		
-		// Actualizar la tienda para que se refleje en la UI
+		// Update shop to reflect in UI
 		state.shop.jokerRow = [...state.shop.jokerRow];
 		state.shop.voucherRow = [...state.shop.voucherRow];
 		state.shop.packageRow = [...state.shop.packageRow];
@@ -836,18 +833,19 @@
 	function sendActionToPlayer() {
 		if (selectedPlayers.length === 0) return;
 
-		console.log(`Enviando vouchers a ${selectedPlayers.length} jugadores`);
+		console.log(`Sending vouchers to ${selectedPlayers.length} players`);
 
 		// Apply effects of vouchers sent to each selected player
 		for (const voucher of actionCards) {
 			if (voucher.voucherId !== undefined) {
-				// Eliminar el voucher del inventario después de usarlo
-				removeVoucherFromInventory(voucher.voucherId);
-				
+				// Apply voucher effect to selected players
 				for (const player of selectedPlayers) {
 					console.log(`Applying voucher ${voucher.voucherId} to player ${player.id}`);
 					// TODO: Apply voucher effect to player
 				}
+				
+				// Remove the voucher from inventory after using it
+				removeVoucherFromInventory(voucher.voucherId);
 			}
 		}
 		
@@ -1025,7 +1023,8 @@
 			<div class={shopTitle}>SHOP</div>
 		{/if}
 
-		{#if state.phase === 0}
+		<!-- Mostrar "Your consumables" solo en la fase de tienda -->
+		{#if state.phase === 1}
 			<!--Vouchers label-->
 			<div class="text-2xl-r mt-[3%]">Your consumables</div>
 			<!--Vouchers-->
@@ -1046,15 +1045,16 @@
 					</div>
 				{/each}
 			</div>
-		{:else if state.phase === 1}
-			<!--Vouchers label-->
-			<div class="text-2xl-r mt-[3%]">Your consumables</div>
-			<!--Vouchers-->
+		{/if}
+
+		<!-- Active Vouchers Display - mostrar en todas las fases excepto tienda -->
+		{#if state.activeVouchers.length > 0 && state.phase !== 1}
+			<div class="text-2xl-r mt-[3%]">Active Effects</div>
 			<div
 				class="flex h-[20%] mt-[3%] justify-between"
 				style="width: calc(100% - 11vh);"
 			>
-				{#each state.vouchers as voucher (voucher.id)}
+				{#each state.activeVouchers as voucher (voucher.id)}
 					<div
 						class="w-[1vh]"
 						animate:flip={{ duration: animationSpeed }}
@@ -1063,6 +1063,7 @@
 							width="w-[12vh]"
 							voucherId={voucher.voucherId ?? 0}
 							animateCard={true}
+							isActive={true}
 						/>
 					</div>
 				{/each}
