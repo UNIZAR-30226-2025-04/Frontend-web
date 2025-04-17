@@ -583,9 +583,36 @@
 		state.vouchers = [...state.vouchers];
 	}
 
+	/**
+	 * Handles click on a hand card, with different behavior for vouchers and normal cards
+	 * @param index Index of the clicked card
+	 */
 	function onClickHand(index: number) {
+		if (actionBlocked) return;
+		
 		const card = state.handCards[index];
-		card.picked = !card.picked;
+		
+		// Check if the card is a voucher
+		if (card.isVoucher) {
+			// For vouchers: only one can be selected at a time
+			if (card.picked) {
+				// If already selected, just deselect it
+				card.picked = false;
+			} else {
+				// Deselect all other vouchers first
+				state.handCards.forEach(c => {
+					if (c.isVoucher) c.picked = false;
+				});
+				
+				// Select only the current voucher
+				card.picked = true;
+			}
+		} else {
+			// For normal cards: multiple selection is allowed
+			card.picked = !card.picked;
+		}
+		
+		// Update state to reflect changes in UI
 		state.handCards = [...state.handCards];
 	}
 
