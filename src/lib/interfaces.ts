@@ -180,8 +180,6 @@ export type GameState = {
 export type CardItem = {
     id: number,
     card: Card,
-    voucherId?: number,
-    isVoucher?: boolean,
     picked: boolean,
 };
 
@@ -196,8 +194,6 @@ export type JokerItem = {
 export type VoucherItem = {
     id: number,
     voucherId: number,
-    targetType: boolean,
-    targetCount?: number,
     sellAmount: number,
     picked: boolean
 };

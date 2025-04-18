@@ -77,12 +77,12 @@ export const jokerEditionsDirectory:JokerEdition[] = [
 // Vouchers
 
 export const errorVoucher:Voucher = {
-    name:"Error boucher", image:"icons/missing.png",tooltip:"Error boucher"
+    name:"Error boucher", image:"icons/missing.png",tooltip:"Error boucher",targetType:true,targetCount:1
 }
 
 export const voucherDirectory:Voucher[] = [
-    {name:"Clearence sell", image:"cards/vouchers/Clearance_Sale.png",tooltip:"Next shop its 50% off!"},
-    {name:"Crystal Ball",image:"cards/vouchers/Crystal_Ball.png",tooltip:"1 in 4 chance of getting a normal card replaced by an ace in next round"},
+    {name:"Clearence sell", image:"cards/vouchers/Clearance_Sale.png",tooltip:"Next shop its 50% off!", targetType:false},
+    {name:"Crystal Ball",image:"cards/vouchers/Crystal_Ball.png",tooltip:"1 in 4 chance of getting a normal card replaced by an ace in next round", targetType:true, targetCount:3},
 ]
 
 // Packs

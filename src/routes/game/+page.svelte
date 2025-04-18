@@ -1,35 +1,35 @@
 <script lang="ts">
 	import {
-	    getValueFromRank,
-	    getValueFromSuit,
-	    HandTypesBase,
-	    jokerDirectory,
-	    jokerEditionsDirectory,
-	    overlayDirectory,
-	    packageDirectory,
-	    suitDirectory,
-	    voucherDirectory,
+		getValueFromRank,
+		getValueFromSuit,
+		HandTypesBase,
+		jokerDirectory,
+		jokerEditionsDirectory,
+		overlayDirectory,
+		packageDirectory,
+		suitDirectory,
+		voucherDirectory,
 	} from "$lib/cardDirectory";
 	import GameCard from "$lib/components/GameCard.svelte";
 	import JokerCard from "$lib/components/JokerCard.svelte";
 	import PackageCard from "$lib/components/PackageCard.svelte";
 	import VoucherCard from "$lib/components/VoucherCard.svelte";
 	import {
-	    type Card,
-	    type CardItem,
-	    type GameState,
-	    type JokerItem,
-	    type Package,
-	    type PackageItem,
-	    type VoucherItem
+		type Card,
+		type CardItem,
+		type GameState,
+		type JokerItem,
+		type Package,
+		type PackageItem,
+		type VoucherItem,
 	} from "$lib/interfaces";
 	import { getNextKey } from "$lib/keyGenerator";
 	import { initializeSocket } from "$lib/sockets-utils/lobbySocket";
 	import {
-	    getDrawerStore,
-	    getModalStore,
-	    type DrawerSettings,
-	    type ModalSettings,
+		getDrawerStore,
+		getModalStore,
+		type DrawerSettings,
+		type ModalSettings,
 	} from "@skeletonlabs/skeleton";
 	import { onDestroy, onMount } from "svelte";
 	import { dndzone } from "svelte-dnd-action";
@@ -48,7 +48,7 @@
 		handLevels: structuredClone(HandTypesBase),
 		shop: { jokerRow: [], voucherRow: [], packageRow: [] },
 		round: 1,
-		phase: 0,
+		phase: 2,
 		minScore: 100000,
 		handType: 1,
 		blueScore: 0,
@@ -60,7 +60,7 @@
 		rerollAmount: 3,
 		deckSize: 52,
 		deckLeft: 44,
-		timeLeft: 30,
+		timeLeft: 300,
 	};
 
 	// If true it disables the button controls
@@ -149,29 +149,6 @@
 	});
 	$: potText.set(state.pot);
 
-	// Mock players for the player selection dialog
-	let mockPlayers = [
-		{ id: 1, username: "Username1", avatar: "icons/pxArt(4).png" },
-		{ id: 2, username: "Username2", avatar: "icons/pxArt(4).png" },
-		{ id: 3, username: "Username3", avatar: "icons/pxArt(4).png" },
-		{ id: 4, username: "Username4", avatar: "icons/pxArt(4).png" },
-		{ id: 5, username: "Username5", avatar: "icons/pxArt(4).png" },
-		{ id: 6, username: "Username6", avatar: "icons/pxArt(4).png" },
-		{ id: 7, username: "Username7", avatar: "icons/pxArt(4).png" },
-		{ id: 8, username: "Username8", avatar: "icons/pxArt(4).png" },
-		{ id: 9, username: "Username9", avatar: "icons/pxArt(4).png" },
-		{ id: 10, username: "Username10", avatar: "icons/pxArt(4).png" }
-	];
-
-	// Flag to show the player selection dialog
-	let showPlayerSelection = false;
-	// Store the selected player
-	let selectedPlayers: any[] = [];
-	// Store the cards that triggered the player selection
-	let actionCards: any[] = [];
-
-	// Add this variable to control the voucher phase
-	let voucherPhase = false;
 
 	/**
 	 * Handles the click event on the joker card, updating the state of the hand cards.
@@ -190,111 +167,46 @@
 	}
 
 	/**
-	 * Adds a voucher to the player's hand
-	 * @param voucherId ID of the voucher to add
+	 * Handles the play action on vouchers phase
 	 */
-	function addVoucherToHand(voucherId: number) {
-		// Get the voucher info from directory
-		const voucherInfo = voucherDirectory[voucherId];
-		
-		// Create a voucher CardItem that includes isVoucher flag
-		const newVoucherCard: CardItem = {
-			id: getNextKey(),
-			voucherId: voucherId,
-			isVoucher: true,
-			picked: false,
-			// Use the base card structure required by CardItem
-			card: { 
-				rank: "", 
-				suit: "", 
-				overlay: 0, 
-				faceUp: true 
-			}
-		};
-		
-		state.handCards.push(newVoucherCard);
-		state.handCards = [...state.handCards]; // Trigger reactivity
-		console.log(`Added voucher ID ${voucherId}, targetType: ${voucherInfo.targetType}, targetCount: ${voucherInfo.targetCount}`);
-	}
-	
-	/**
-	 * Handles the play action, processing both normal cards and vouchers
-	 */
-	function onPlay() {
+	function onPlayVoucher() {
 		if (actionBlocked) return;
 
-		const pickedCards = state.handCards.filter((card) => card.picked);
-		const count = pickedCards.length;
+		let pickedVouchers:VoucherItem[] = state.vouchers.filter((vouch:VoucherItem) => vouch.picked);
 
-		if (count > 0 && count < 6) {
-			// Separate vouchers and normal cards
-			const vouchers = pickedCards.filter(card => card.isVoucher && card.voucherId !== undefined);
-			const normalCards = pickedCards.filter(card => !card.isVoucher);
-			
-			// Check if there are vouchers that require player selection
-			const targetVouchers = vouchers.filter(voucher => {
-				if (voucher.voucherId !== undefined) {
-					return requiresPlayerSelection(voucher.voucherId);
+		if(pickedVouchers.length === 1){
+
+			let pickedVoucher:VoucherItem = pickedVouchers[0];
+			const index:number = state.vouchers.findIndex((vouch:VoucherItem) => vouch.picked);
+
+			if(isOffensiveVoucher(pickedVoucher.voucherId)){
+				const useVoucherModal: ModalSettings = {
+					type: "component",
+					meta: { voucherId: pickedVoucher.voucherId },
+					component: "useVoucherModal",
+					response: (r: boolean | undefined) => removeVoucherModal(r,index)
 				}
-				return false;
-			});
-			
-			// If there are vouchers requiring selection, show the dialog
-			if (targetVouchers.length > 0) {
-				actionCards = targetVouchers;
-				showPlayerSelection = true;
-				return;
+
+				modalStore.trigger(useVoucherModal);
+			}else{
+				state.activeVouchers.push(pickedVoucher);
+				state.vouchers.splice(index,1);
 			}
-			
-			// Process vouchers that don't require selection
-			for (const voucher of vouchers) {
-				if (voucher.voucherId !== undefined) {
-					applyVoucherEffect(voucher.voucherId);
-				}
-			}
-			
-			// Remove processed vouchers from hand
-			if (vouchers.length > 0) {
-				state.handCards = state.handCards.filter(card => 
-					!(card.picked && card.isVoucher)
-				);
-			}
-			
-			// Play normal cards directly
-			if (normalCards.length > 0) {
-				playCards(normalCards);
-			}
+
+			// Reset the picked voucher
+			state.vouchers.map((vouch:VoucherItem) => vouch.picked = false);
+			state.vouchers = [...state.vouchers];
+		}
+
+	}
+
+	function removeVoucherModal(response:boolean|undefined ,index:number){
+		if(response && response === true && index > 0 && index < state.vouchers.length){
+			state.vouchers.splice(index,1);
+			state.vouchers = [...state.vouchers];
 		}
 	}
 
-	/**
-	 * Applies the effect of a voucher based on its ID
-	 * @param voucherId The ID of the voucher to apply
-	 */
-	function applyVoucherEffect(voucherId: number) {
-		// Get voucher info from directory
-		const voucherInfo = voucherDirectory[voucherId];
-		
-		// Implement different effects based on voucher ID
-		if (voucherId === 0) {
-			// Example: Increase blue score
-			state.blueScore += 500;
-		} else if (voucherId === 1) {
-			// Example: Draw additional cards
-			for (let i = 0; i < 2; i++) {
-				setTimeout(() => onDeck(), drawCardAnimSpeed * i + drawCardDelay);
-			}
-		}
-		
-		// If the voucher is non-offensive (persistent), add it to active vouchers
-		if (!isOffensiveVoucher(voucherId)) {
-			addToActiveVouchers(voucherId);
-		}
-		
-		// Always remove from vouchers list (Your consumables) after using
-		removeVoucherFromInventory(voucherId);
-	}
-	
 	/**
 	 * Sort cards on hand by rank
 	 */
@@ -363,24 +275,26 @@
 	function onBuyVoucher(index: number) {
 		if (state.shop.voucherRow[index].sellAmount <= state.money) {
 			state.money -= state.shop.voucherRow[index].sellAmount;
-			
+
 			// Create a copy of the voucher to add to the collection
 			const boughtVoucher = {
 				...state.shop.voucherRow[index],
-				id: getNextKey() // Assign a new unique ID
+				id: getNextKey(), // Assign a new unique ID
 			};
-			
+
 			// Add to player's voucher inventory
 			state.vouchers.push(boughtVoucher);
-			
+
 			// Ensure reactivity
-			state.vouchers = [...state.vouchers]; 
-			
+			state.vouchers = [...state.vouchers];
+
 			// Remove the voucher from the shop
 			state.shop.voucherRow.splice(index, 1);
-			state.shop.voucherRow = [...state.shop.voucherRow]; 
-			
-			console.log(`Bought voucher ID ${boughtVoucher.voucherId}, total in inventory: ${state.vouchers.length}`);
+			state.shop.voucherRow = [...state.shop.voucherRow];
+
+			console.log(
+				`Bought voucher ID ${boughtVoucher.voucherId}, total in inventory: ${state.vouchers.length}`,
+			);
 		}
 	}
 
@@ -461,46 +375,19 @@
 	function handleDndFinalizeJokers(e: any) {
 		state.jokers = e.detail.items;
 	}
+	function handleDndConsiderVouchers(e: any) {
+		state.vouchers = e.detail.items;
+	}
+	function handleDndFinalizeVouchers(e: any) {
+		state.vouchers = e.detail.items;
+	}
 
-	// Interval for timer, aux variable
-	let interval: any;
-
-	onMount(() => {
-		// We initialize the socket
-		initializeSocket();
-
-		// Interval for the Time left clock
-		interval = setInterval(() => {
-			if (state.timeLeft > 0) {
-				state.timeLeft--;
-			} else if (state.timeLeft === 0) {
-				if (state.phase === 0 && !voucherPhase) {
-					// Normal phase → Shop phase
-					state.phase = 1;
-					setupShop();
-					state.timeLeft = 30;
-				} else if (state.phase === 1) {
-					// Shop phase → Voucher phase
-					state.phase = 0;
-					voucherPhase = true;
-					moveVouchersToHand();
-					state.timeLeft = 30;
-				} else if (state.phase === 0 && voucherPhase) {
-					// Voucher phase → Normal phase (next round)
-					handleNextRound();
-				}
-			}
-		}, 1000);
-	});
-
-	onDestroy(() => {
-		clearInterval(interval);
-	});
+	
 
 	// ==== MOCKUP FUNCTIONS ====
 
 	// Function just to get more cards and play around
-	function onDeck() {
+	function onAddCard() {
 		state.handCards.push({
 			id: getNextKey(),
 			card: generateCard(true, true),
@@ -518,29 +405,7 @@
 		state.vouchers = state.vouchers;
 	}
 
-	for (let i = 0; i < 0; i++) {
-		state.playedCards.push({
-			id: getNextKey(),
-			card: generateCard(true, true),
-			picked: false,
-		});
-	}
-
-	for (let i = 0; i < 8; i++) {
-		state.handCards.push({
-			id: getNextKey(),
-			card: generateCard(true, true),
-			picked: false,
-		});
-	}
-
-	for (let j = 0; j < 5; j++) {
-		onAddJoker();
-	}
-
-	for (let j = 0; j < 6; j++) {
-		onAddVoucher();
-	}
+	
 
 	function generateCard(withOverlay: boolean, faceUp: boolean): Card {
 		const ranks: string[] = [
@@ -592,132 +457,95 @@
 		const newVoucher = Math.floor(Math.random() * voucherDirectory.length);
 		// Get voucher details from directory to determine targetType
 		const voucherInfo = voucherDirectory[newVoucher];
-		
+
 		const newVoucherItem: VoucherItem = {
 			id: getNextKey(),
 			voucherId: newVoucher,
 			sellAmount: Math.floor(Math.random() * 30) + 1,
 			picked: false,
-			targetType: voucherInfo.targetType,
-			targetCount: voucherInfo.targetCount
 		};
-		
+
 		// Only add to state.vouchers, not to activeVouchers
 		state.vouchers.push(newVoucherItem);
 		state.vouchers = [...state.vouchers];
-		
-		console.log(`Added voucher ID ${newVoucher} to inventory, total: ${state.vouchers.length}`);
+
+		console.log(
+			`Added voucher ID ${newVoucher} to inventory, total: ${state.vouchers.length}`,
+		);
 	}
 
 	/**
-	 * Handles click on a hand card, with different behavior for vouchers and normal cards
+	 * Handles click on a hand card
 	 * @param index Index of the clicked card
 	 */
 	function onClickHand(index: number) {
 		if (actionBlocked) return;
-		
-		const card = state.handCards[index];
-		
-		// Check if the card is a voucher
-		if (card.isVoucher) {
-			// For vouchers: only one can be selected at a time
-			if (card.picked) {
-				// If already selected, just deselect it
-				card.picked = false;
-			} else {
-				// Deselect all other vouchers first
-				state.handCards.forEach(c => {
-					if (c.isVoucher) c.picked = false;
-				});
-				
-				// Select only the current voucher
-				card.picked = true;
-			}
-		} else {
-			// For normal cards: multiple selection is allowed
-			card.picked = !card.picked;
-		}
-		
+
+		const card:CardItem = state.handCards[index];
+
+		// Switch state
+		card.picked = !card.picked;
+
 		// Update state to reflect changes in UI
 		state.handCards = [...state.handCards];
 	}
 
 	/**
-	 * Moves player's vouchers to their hand when time reaches 0
+	 * Handles click on a voucher in hand
+	 * @param index Index of the clicked voucher
 	 */
-	function moveVouchersToHand() {
-		// Clear normal cards from hand
-		state.handCards = [];
-		
-		// Add vouchers to hand from player's inventory (state.vouchers)
-		if (state.vouchers && state.vouchers.length > 0) {
-			for (const voucher of state.vouchers) {
-				if (voucher.voucherId !== undefined) {
-					state.handCards.push({
-						id: getNextKey(),
-						voucherId: voucher.voucherId,
-						isVoucher: true,
-						picked: false,
-						card: { rank: "", suit: "", overlay: 0, faceUp: true }
-					});
-				}
-			}
-			
-			console.log(`Voucher phase: ${state.vouchers.length} vouchers available`);
-		} 
-		// Only add a default voucher in the first round if there are none
-		else if (state.round === 1) {
-			addVoucherToHand(1);
-			
-			// Also add it to the voucher inventory
-			const voucherInfo = voucherDirectory[1];
-			state.vouchers.push({
-				id: getNextKey(),
-				voucherId: 1,
-				sellAmount: 0,
-				picked: false,
-				targetType: voucherInfo.targetType,
-				targetCount: voucherInfo.targetCount
-			});
-			
-			console.log("Added initial voucher in first round");
-		}
-		
-		// Update hand to reflect in UI
-		state.handCards = [...state.handCards];
+	function onClickHandVoucher(index:number){
+		if (actionBlocked) return;
+
+		const voucher:VoucherItem = state.vouchers[index];
+		const prevState = voucher.picked;
+
+		// Deselect all vouchers
+		state.vouchers.map((voucherItem) => (voucherItem.picked = false));
+
+		// Switch state
+		voucher.picked = !prevState;
+
+		// Update state to reflect changes in UI
+		state.vouchers = [...state.vouchers];
 	}
 
 	/**
 	 * Modified onNextPhase function to handle transition between phases correctly
 	 */
 	function onNextPhase() {
-		if (state.phase === 0 && !voucherPhase) {
+
+		// Closes all active modals
+		modalStore.close();
+
+		if (state.phase === 0) {
 			// Normal phase → Shop phase
 			state.phase = 1;
 			setupShop();
 			state.timeLeft = 30;
 		} else if (state.phase === 1) {
 			// Shop phase → Voucher phase
-			state.phase = 0;
-			voucherPhase = true;
-			moveVouchersToHand();
+			state.activeVouchers = [];
+			state.phase = 2;
 			state.timeLeft = 30;
-		} else if (state.phase === 0 && voucherPhase) {
+		} else if (state.phase === 2) {
 			// Voucher phase → Normal phase (next round)
 			handleNextRound();
 		}
 	}
 
 	/**
-	 * Configures the shop with new items
+	 * Configures the shop with new items, MOCKUP change later
 	 */
 	function setupShop() {
 		state.shop = { jokerRow: [], voucherRow: [], packageRow: [] };
-		
+
 		// Add jokers to the shop
 		for (let i = 0; i < 3; i++) {
 			const newJoker = Math.floor(Math.random() * jokerDirectory.length);
-			const newEdition = Math.floor(Math.random() * jokerEditionsDirectory.length);
+			const newEdition = Math.floor(
+				Math.random() * jokerEditionsDirectory.length,
+			);
 			state.shop.jokerRow.push({
 				id: getNextKey(),
 				jokerId: newJoker,
@@ -726,29 +554,29 @@
 				picked: false,
 			});
 		}
-		
+
 		// Add vouchers to the shop
 		for (let i = 0; i < 2; i++) {
-			const newVoucher = Math.floor(Math.random() * voucherDirectory.length);
+			const newVoucher = Math.floor(
+				Math.random() * voucherDirectory.length,
+			);
 			// Get voucher info from directory
 			const voucherInfo = voucherDirectory[newVoucher];
-			
+
 			state.shop.voucherRow.push({
 				id: getNextKey(),
 				voucherId: newVoucher,
 				sellAmount: Math.floor(Math.random() * 30) + 1,
 				picked: false,
-				targetType: voucherInfo.targetType, // Add required property
-				targetCount: voucherInfo.targetCount // Add optional property
 			});
 		}
-		
+
 		// Add packages to the shop
 		for (let i = 0; i < 2; i++) {
 			const newPack = Math.floor(Math.random() * packageDirectory.length);
 			const pack = packageDirectory[newPack];
 			let content: CardItem[] | JokerItem[] | VoucherItem[] = [];
-			
+
 			// Configure content based on package type
 			if (pack.contentType === 0) {
 				// Card content
@@ -764,8 +592,12 @@
 				// Joker content
 				content = <JokerItem[]>[];
 				for (let j = 0; j < pack.contentSize; j++) {
-					const newJoker = Math.floor(Math.random() * jokerDirectory.length);
-					const newEdition = Math.floor(Math.random() * jokerEditionsDirectory.length);
+					const newJoker = Math.floor(
+						Math.random() * jokerDirectory.length,
+					);
+					const newEdition = Math.floor(
+						Math.random() * jokerEditionsDirectory.length,
+					);
 					content.push({
 						id: getNextKey(),
 						jokerId: newJoker,
@@ -778,19 +610,19 @@
 				// Voucher content
 				content = <VoucherItem[]>[];
 				for (let j = 0; j < pack.contentSize; j++) {
-					const newVoucher = Math.floor(Math.random() * voucherDirectory.length);
+					const newVoucher = Math.floor(
+						Math.random() * voucherDirectory.length,
+					);
 					const voucherInfo = voucherDirectory[newVoucher];
 					content.push({
 						id: getNextKey(),
 						voucherId: newVoucher,
 						sellAmount: Math.floor(Math.random() * 30) + 1,
 						picked: false,
-						targetType: voucherInfo.targetType,
-						targetCount: voucherInfo.targetCount
 					});
 				}
 			}
-			
+
 			state.shop.packageRow.push({
 				id: getNextKey(),
 				packageId: newPack,
@@ -798,7 +630,7 @@
 				contents: content,
 			});
 		}
-		
+
 		// Update shop to reflect in UI
 		state.shop.jokerRow = [...state.shop.jokerRow];
 		state.shop.voucherRow = [...state.shop.voucherRow];
@@ -806,65 +638,13 @@
 	}
 
 	/**
-	 * Selects or deselects a player from the dialog
-	 * @param player The player to select/deselect
+	 * Plays the selected cards on game phase
 	 */
-	function selectPlayer(player: any) {
-		// Get the maximum number of selectable players
-		const maxSelectable = Math.max(...actionCards.map(v => v.targetCount ?? 1));
-		
-		// Verify if the player is already selected
-		const playerIndex = selectedPlayers.findIndex(p => p.id === player.id);
-		
-		if (playerIndex >= 0) {
-			// If already selected, remove it
-			selectedPlayers = selectedPlayers.filter(p => p.id !== player.id);
-		} else {
-			// If not selected and not reached the limit, add it
-			if (selectedPlayers.length < maxSelectable) {
-				selectedPlayers = [...selectedPlayers, player];
-			}
-		}
-	}
+	 function onPlayHand() {
+		if (actionBlocked) return;
 
-	/**
-	 * Sends the action to the selected players and closes the dialog
-	 */
-	function sendActionToPlayer() {
-		if (selectedPlayers.length === 0) return;
-
-		console.log(`Sending vouchers to ${selectedPlayers.length} players`);
-
-		// Apply effects of vouchers sent to each selected player
-		for (const voucher of actionCards) {
-			if (voucher.voucherId !== undefined) {
-				// Apply voucher effect to selected players
-				for (const player of selectedPlayers) {
-					console.log(`Applying voucher ${voucher.voucherId} to player ${player.id}`);
-					// TODO: Apply voucher effect to player
-				}
-				
-				// Remove the voucher from inventory after using it
-				removeVoucherFromInventory(voucher.voucherId);
-			}
-		}
+		let pickedCards:CardItem[] = state.handCards.filter((cardItem:CardItem) => cardItem.picked);
 		
-		// Eliminate used vouchers from player's hand
-		state.handCards = state.handCards.filter(card => 
-			!(card.picked && card.isVoucher)
-		);
-		
-		// Close the dialog and reset the selection
-		showPlayerSelection = false;
-		selectedPlayers = [];
-		actionCards = [];
-	}
-
-	/**
-	 * Plays the selected cards
-	 * @param pickedCards The cards to play
-	 */
-	function playCards(pickedCards: any[]) {
 		const played = pickedCards.map(({ card }: any) => ({
 			id: getNextKey(),
 			card,
@@ -907,15 +687,6 @@
 		);
 	}
 
-	/**
-	 * Determines if a voucher requires player selection
-	 * @param voucherId The ID of the voucher to check
-	 * @returns True if the voucher requires player selection
-	 */
-	function requiresPlayerSelection(voucherId: number): boolean {
-		// The vouchers with odd ID (1, 3, 5...) require player selection (TODO: Do this according to the received data)
-		return voucherId % 2 !== 0;
-	}
 
 	/**
 	 * Handles the transition to the next round
@@ -923,85 +694,89 @@
 	function handleNextRound() {
 		// Clear only normal cards, not vouchers from inventory
 		state.handCards = [];
-		
+
 		// Deal new cards for the next round
 		for (let i = 0; i < 8; i++) {
 			setTimeout(
 				() => {
-					onDeck();
+					onAddCard();
 				},
 				drawCardAnimSpeed * i + drawCardDelay,
 			);
 		}
-		
+
 		// Increment round counter
 		state.round++;
-		
+
 		// Reset phase and timer
 		state.phase = 0;
-		voucherPhase = false;
 		state.timeLeft = 30;
-		
+
 		// Update minimum score for the new round
-		state.minScore = 100000 - (state.round * 10000);
-		
-		console.log("Starting round " + state.round + " with " + state.vouchers.length + " vouchers");
+		state.minScore = 100000 - state.round * 10000;
 	}
 
-	/**
-	 * Removes a voucher from the player's inventory (Your vouchers)
-	 * @param voucherId The ID of the voucher to remove
-	 */
-	function removeVoucherFromInventory(voucherId: number) {
-		// Find the index of the first voucher with matching ID
-		const index = state.vouchers.findIndex(v => v.voucherId === voucherId);
-		
-		// If found, remove it
-		if (index !== -1) {
-			state.vouchers.splice(index, 1);
-			state.vouchers = [...state.vouchers]; // Trigger reactivity
-			console.log(`Removed voucher ID ${voucherId} from inventory, remaining: ${state.vouchers.length}`);
-		} else {
-			console.warn(`Voucher ID ${voucherId} not found in inventory`);
-		}
-	}
 
 	/**
-	 * Adds a voucher to the active vouchers list
-	 * @param voucherId The ID of the voucher to add
-	 */
-	function addToActiveVouchers(voucherId: number) {
-		// Get voucher info from directory
-		const voucherInfo = voucherDirectory[voucherId];
-		
-		// Create a new active voucher item
-		const newActiveVoucher: VoucherItem = {
-			id: getNextKey(),
-			voucherId: voucherId,
-			sellAmount: 0, // Not sellable when active
-			picked: false,
-			targetType: voucherInfo.targetType,
-			targetCount: voucherInfo.targetCount
-		};
-		
-		// Add to active vouchers
-		state.activeVouchers.push(newActiveVoucher);
-		state.activeVouchers = [...state.activeVouchers]; // Trigger reactivity
-		console.log(`Added voucher ID ${voucherId} to active vouchers`);
-	}
-
-	/**
-	 * Determines if a voucher is offensive (one-time use) or non-offensive (persistent)
+	 * Auxiliary function: Determines if a voucher is offensive (must choose players) or non-offensive (only own user affected)
 	 * @param voucherId The ID of the voucher to check
 	 * @returns True if the voucher is offensive
 	 */
 	function isOffensiveVoucher(voucherId: number): boolean {
-		// Get voucher info from directory
-		const voucherInfo = voucherDirectory[voucherId];
-		
-		// Check if it's offensive based on targetType
-		return voucherInfo.targetType === 'offensive';
+		if (voucherId > 0 && voucherId < voucherDirectory.length) {
+			// Get voucher info from directory
+			const voucherInfo = voucherDirectory[voucherId];
+
+			// Check if it's offensive based on targetType
+			return voucherInfo.targetType;
+		} else {
+			return false;
+		}
 	}
+
+	// Interval for timer, aux variable
+	let interval: any;
+
+	onMount(() => {
+		// State mockup initialization
+		for (let i = 0; i < 0; i++) {
+			state.playedCards.push({
+				id: getNextKey(),
+				card: generateCard(true, true),
+				picked: false,
+			});
+		}
+
+		for (let i = 0; i < 8; i++) {
+			state.handCards.push({
+				id: getNextKey(),
+				card: generateCard(true, true),
+				picked: false,
+			});
+		}
+
+		for (let j = 0; j < 5; j++) {
+			onAddJoker();
+		}
+
+		for (let j = 0; j < 6; j++) {
+			onAddVoucher();
+		}
+
+		// Interval for the Time left clock
+		interval = setInterval(() => {
+			if (state.timeLeft > 0) {
+				state.timeLeft--;
+			} else if (state.timeLeft === 0) {
+				onNextPhase();
+			}
+		}, 1000);
+	});
+
+	onDestroy(() => {
+		clearInterval(interval);
+	});
+
 </script>
 
 <!-- Main body -->
@@ -1012,15 +787,13 @@
 	<div class="h-[100vh] ml-[20%] card rounded-none text-left p-[5%]">
 		<!--Title-->
 		{#if state.phase === 0}
-			{#if voucherPhase}
-				<div class={shopTitle}>VOUCHERS</div>
-			{:else}
-				<div class="text-5xl-r h-[12%] card variant-filled-surface p-5">
-					Round {state.round}/10
-				</div>
-			{/if}
+			<div class="text-5xl-r h-[12%] card variant-filled-surface p-5">
+				Round {state.round}/10
+			</div>
 		{:else if state.phase === 1}
 			<div class={shopTitle}>SHOP</div>
+		{:else if state.phase === 2}
+			<div class={shopTitle}>VOUCHERS</div>
 		{/if}
 
 		<!-- Show "Your vouchers" only in shop phase -->
@@ -1045,10 +818,8 @@
 					</div>
 				{/each}
 			</div>
-		{/if}
-
-		<!-- Active Vouchers Display - show in all phases except shop -->
-		{#if state.activeVouchers.length > 0 && state.phase !== 1}
+		{:else}
+			<!-- Active Vouchers Display - show in all phases except shop -->
 			<div class="text-2xl-r mt-[3%]">Active Effects</div>
 			<div
 				class="flex h-[20%] mt-[3%] justify-between"
@@ -1063,7 +834,6 @@
 							width="w-[12vh]"
 							voucherId={voucher.voucherId ?? 0}
 							animateCard={true}
-							isActive={true}
 						/>
 					</div>
 				{/each}
@@ -1186,162 +956,103 @@
 		<div class="text-left text-2xl-r">{state.jokers.length}/5</div>
 
 		{#if state.phase === 0}
-			{#if voucherPhase}
-				<!-- Voucher phase -->
-				<div class="h-[63vh] grid grid-rows-[33%_33%_12%] gap-[8%]">
-					<div class="">
-					</div>
-					
-					<!-- Hand (vouchers only) -->
-					<div
-						class="flex justify-between relative"
-						style="width: calc(100% - 9vh);"
-						use:dndzone={{
-							items: state.handCards,
-							flipDurationMs: animationSpeed,
-							type: "hand",
-							dropTargetStyle: { outline: "solid 0px" },
-						}}
-						on:consider={handleDndConsiderCards}
-						on:finalize={handleDndFinalizeCards}
-					>
-						{#each state.handCards as card, index (card.id)}
-							<!-- svelte-ignore a11y-click-events-have-key-events -->
-							<!-- svelte-ignore a11y-no-static-element-interactions -->
-							<div
-								animate:flip={{ duration: animationSpeed }}
-								class={`w-[5vh] h-full transition-transform duration-[${animationSpeed * 2}] ease-in-out
-										${card.picked ? "mt-[-5%]" : ""}`}
-								on:click={() => onClickHand(index)}
-							>
-								<VoucherCard
-									width="w-[14vh]"
-									voucherId={card.voucherId ?? 0}
-									animateCard={true}
-								/>
-							</div>
-						{/each}
-					</div>
-
-					<!-- Action buttons -->
-					<div class="flex justify-center gap-[4%]">
-						<button
-							class="btn variant-filled-tertiary w-[35%] text-5xl-r"
-							on:click={onPlay}
-							>Use Voucher
-						</button>
-						<button
-							class="btn variant-filled-error w-[35%] text-5xl-r"
-							on:click={onNextPhase}
-							>Next Round
-						</button>
-					</div>
-				</div>
-			{:else}
-				<!-- Fase normal de juego -->
-				<div class="h-[63vh] grid grid-rows-[33%_33%_12%] gap-[8%]">
-					<!--Played cards-->
-					<div
-						class="flex justify-between ml-[10%] mr-[10%]"
-						style="width: calc(80% - 13vh);"
-					>
-						{#each state.playedCards as card, index (card.id)}
-							<div
-								transition:fly={{
-									y: 100,
-									duration: animationSpeed * 5,
-								}}
-								class="w-[1vh]"
-							>
-								{#if index === indexToPlayAnim}
-									<div
-										in:fly={{
-											y: 150,
-											duration: animationSpeed * 3,
-										}}
-										out:fade={{ duration: animationSpeed * 3 }}
-										class="w-[14vh] text-center absolute mt-[-4vh] text-warning-300 text-3xl-r"
-									>
-										+{scorePlayAnim}
-									</div>
-								{/if}
-								<GameCard
-									width="w-[14vh]"
-									card={card.card}
-									animateCard={true}
-								/>
-							</div>
-						{/each}
-					</div>
-
-					<!--Hand-->
-					<div
-						class="flex justify-between relative"
-						style="width: calc(100% - 9vh);"
-						use:dndzone={{
-							items: state.handCards,
-							flipDurationMs: animationSpeed,
-							type: "hand",
-							dropTargetStyle: { outline: "solid 0px" },
-						}}
-						on:consider={handleDndConsiderCards}
-						on:finalize={handleDndFinalizeCards}
-					>
-						{#each state.handCards as card, index (card.id)}
-							<!-- svelte-ignore a11y-click-events-have-key-events -->
-							<!-- svelte-ignore a11y-no-static-element-interactions -->
-							<div
-								animate:flip={{ duration: animationSpeed }}
-								class={`w-[5vh] h-full transition-transform duration-[${animationSpeed * 2}] ease-in-out
-										${card.picked ? "mt-[-5%]" : ""}`}
-								on:click={() => onClickHand(index)}
-							>
-								{#if card.isVoucher}
-									<VoucherCard
-										width="w-[14vh]"
-										voucherId={card.voucherId ?? 0}
-										animateCard={true}
-									/>
-								{:else}
-									<GameCard
-										card={card.card}
-										width="w-[14vh]"
-										animateCard={true}
-									/>
-								{/if}
-							</div>
-						{/each}
-					</div>
-
-					<!--Action buttons-->
-					<div class="flex justify-center gap-[4%]">
-						<button
-							class="btn variant-filled-tertiary w-[35%] text-5xl-r"
-							on:click={onPlay}
-							>Play
-						</button>
-						<div class="flex w-[15%]">
-							<button
-								class="btn variant-filled-surface rounded-l-md rounded-r-none w-full text-5xl-r"
-								on:click={onSortR}
-							>
-								R
-							</button>
-							<button
-								class="btn variant-filled-surface rounded-r-md rounded-l-none w-full text-5xl-r"
-								on:click={onSortS}
-							>
-								S
-							</button>
+			<!-- Fase normal de juego -->
+			<div class="h-[63vh] grid grid-rows-[33%_33%_12%] gap-[8%]">
+				<!--Played cards-->
+				<div
+					class="flex justify-between ml-[10%] mr-[10%]"
+					style="width: calc(80% - 13vh);"
+				>
+					{#each state.playedCards as card, index (card.id)}
+						<div
+							transition:fly={{
+								y: 100,
+								duration: animationSpeed * 5,
+							}}
+							class="w-[1vh]"
+						>
+							{#if index === indexToPlayAnim}
+								<div
+									in:fly={{
+										y: 150,
+										duration: animationSpeed * 3,
+									}}
+									out:fade={{
+										duration: animationSpeed * 3,
+									}}
+									class="w-[14vh] text-center absolute mt-[-4vh] text-warning-300 text-3xl-r"
+								>
+									+{scorePlayAnim}
+								</div>
+							{/if}
+							<GameCard
+								width="w-[14vh]"
+								card={card.card}
+								animateCard={true}
+							/>
 						</div>
+					{/each}
+				</div>
+
+				<!--Hand-->
+				<div
+					class="flex justify-between relative"
+					style="width: calc(100% - 9vh);"
+					use:dndzone={{
+						items: state.handCards,
+						flipDurationMs: animationSpeed,
+						type: "hand",
+						dropTargetStyle: { outline: "solid 0px" },
+					}}
+					on:consider={handleDndConsiderCards}
+					on:finalize={handleDndFinalizeCards}
+				>
+					{#each state.handCards as card, index (card.id)}
+						<!-- svelte-ignore a11y-click-events-have-key-events -->
+						<!-- svelte-ignore a11y-no-static-element-interactions -->
+						<div
+							animate:flip={{ duration: animationSpeed }}
+							class={`w-[5vh] h-full transition-transform duration-[${animationSpeed * 2}] ease-in-out
+									${card.picked ? "mt-[-5%]" : ""}`}
+							on:click={() => onClickHand(index)}
+						>
+							<GameCard
+								card={card.card}
+								width="w-[14vh]"
+								animateCard={true}
+							/>
+						</div>
+					{/each}
+				</div>
+
+				<!--Action buttons-->
+				<div class="flex justify-center gap-[4%]">
+					<button
+						class="btn variant-filled-tertiary w-[35%] text-5xl-r"
+						on:click={onPlayHand}
+						>Play
+					</button>
+					<div class="flex w-[15%]">
 						<button
-							class="btn variant-filled-error w-[35%] text-5xl-r"
-							on:click={onDiscard}
-							>Discard
+							class="btn variant-filled-surface rounded-l-md rounded-r-none w-full text-5xl-r"
+							on:click={onSortR}
+						>
+							R
+						</button>
+						<button
+							class="btn variant-filled-surface rounded-r-md rounded-l-none w-full text-5xl-r"
+							on:click={onSortS}
+						>
+							S
 						</button>
 					</div>
+					<button
+						class="btn variant-filled-error w-[35%] text-5xl-r"
+						on:click={onDiscard}
+						>Discard
+					</button>
 				</div>
-			{/if}
+			</div>
 		{:else if state.phase === 1}
 			<!--Shop container-->
 			<div
@@ -1451,6 +1162,56 @@
 					</div>
 				</div>
 			</div>
+		{:else if state.phase == 2}
+			<!-- Voucher phase -->
+			<div class="h-[63vh] grid grid-rows-[33%_33%_12%] gap-[8%]">
+				<div class=""></div>
+
+				<!-- Voucher hand -->
+				<div
+					class="flex justify-between relative"
+					style="width: calc(100% - 9vh);"
+					use:dndzone={{
+						items: state.vouchers,
+						flipDurationMs: animationSpeed,
+						type: "vouchers",
+						dropTargetStyle: { outline: "solid 0px" },
+					}}
+					on:consider={handleDndConsiderVouchers}
+					on:finalize={handleDndFinalizeVouchers}
+				>
+					{#each state.vouchers as voucher, index (voucher.id)}
+						<!-- svelte-ignore a11y-click-events-have-key-events -->
+						<!-- svelte-ignore a11y-no-static-element-interactions -->
+						<div
+							animate:flip={{ duration: animationSpeed }}
+							class={`w-[5vh] h-full transition-transform duration-[${animationSpeed * 2}] ease-in-out
+									${voucher.picked ? "mt-[-5%]" : ""}`}
+							on:click={() => onClickHandVoucher(index)}
+						>
+							<VoucherCard
+								width="w-[14vh]"
+								voucherId={voucher.voucherId ?? 0}
+								animateCard={true}
+							/>
+						</div>
+					{/each}
+				</div>
+
+				<!-- Action buttons -->
+				<div class="flex justify-center gap-[4%]">
+					<button
+						class="btn variant-filled-tertiary w-[35%] text-5xl-r"
+						on:click={onPlayVoucher}
+						>Use Voucher
+					</button>
+					<button
+						class="btn variant-filled-error w-[35%] text-5xl-r"
+						on:click={onNextPhase}
+						>Next Round
+					</button>
+				</div>
+			</div>
 		{/if}
 	</div>
 
@@ -1489,7 +1250,7 @@
 			<button class="btn variant-filled-surface" on:click={onNextPhase}>
 				Next phase
 			</button>
-			<button class="btn variant-filled-surface" on:click={onDeck}>
+			<button class="btn variant-filled-surface" on:click={onAddCard}>
 				Add card
 			</button>
 			<button class="btn variant-filled-surface" on:click={onAddMoney}>
@@ -1522,6 +1283,8 @@
 		</div>
 	</div>
 </div>
+
+
 
 <style>
 	.game-div {
@@ -1593,61 +1356,3 @@
 		}
 	}
 </style>
-
-<!-- Player selection dialog -->
-{#if showPlayerSelection}
-<div 
-	class="fixed inset-0 bg-black/70 flex items-center justify-center z-50"
-	transition:fade={{ duration: animationSpeed * 3 }}
->
-	<div 
-		class="card variant-filled-surface p-8 max-w-4xl w-full text-center tv-filter"
-		in:fly={{ y: 50, duration: animationSpeed * 3 }}
-	>
-		<h2 class="text-6xl-r mb-8">
-			SEND VOUCHER TO PLAYER{#if Math.max(...actionCards.map(v => v.targetCount || 1)) > 1}S{/if}
-		</h2>
-		
-		<p class="text-3xl-r mb-4">
-			Select up to {Math.max(...actionCards.map(v => v.targetCount || 1))} player{Math.max(...actionCards.map(v => v.targetCount || 1)) > 1 ? 's' : ''}
-		</p>
-		
-		<div class="grid grid-cols-5 gap-4 mb-8">
-			{#each mockPlayers as player}
-				<!-- svelte-ignore a11y-click-events-have-key-events -->
-				<!-- svelte-ignore a11y-no-static-element-interactions -->
-				<div 
-					class="flex flex-col items-center cursor-pointer p-2"
-					class:border-4={selectedPlayers.some(p => p.id === player.id)}
-					class:border-warning-500={selectedPlayers.some(p => p.id === player.id)}
-					class:rounded-lg={selectedPlayers.some(p => p.id === player.id)}
-					on:click={() => selectPlayer(player)}
-				>
-					<img src={player.avatar} alt="Player avatar" class="w-16 h-16 rounded-full mb-2" />
-					<span class="text-2xl-r">{player.username}</span>
-				</div>
-			{/each}
-		</div>
-		
-		<div class="flex justify-center gap-8">
-			<button 
-				class="btn variant-filled-tertiary w-[40%] text-4xl-r"
-				on:click={sendActionToPlayer}
-				disabled={selectedPlayers.length === 0}
-			>
-				SEND
-			</button>
-			<button 
-				class="btn variant-filled-error w-[40%] text-4xl-r"
-				on:click={() => {
-					showPlayerSelection = false;
-					selectedPlayers = [];
-					actionCards = [];
-				}}
-			>
-				CANCEL
-			</button>
-		</div>
-	</div>
-</div>
-{/if}

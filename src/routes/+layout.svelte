@@ -30,6 +30,7 @@
     import { loadingStore } from '$lib/stores/loadingStore';
     import LoadingScreen from '$lib/components/LoadingScreen.svelte';
     import OpenPackModal from '$lib/components/OpenPackModal.svelte';
+    import UseVoucherModal from '$lib/components/UseVoucherModal.svelte';
 
 	// For all singletons
 	initializeStores();
@@ -47,6 +48,7 @@
 		leaveGameModal: {ref :LeaveGameModal},
 		handInfoModal: {ref: HandInfoModal},
 		openPackModal: {ref: OpenPackModal},
+		useVoucherModal: {ref: UseVoucherModal},
 	};
   
 </script>
@@ -58,13 +60,14 @@
 		<h1>ERROR!</h1>
 	{/if}
 </Drawer>
+
 <Modal components={modalRegistry}/>
 
 {#if $loadingStore.isLoading}
     <LoadingScreen message={$loadingStore.message} />
 {/if}
 
-<slot />
+<slot/>
 
 
 <style>
