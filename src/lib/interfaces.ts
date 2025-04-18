@@ -162,8 +162,9 @@ export type GameState = {
     handLevels: HandType[],
     shop: Shop,
     round: number,
-    phase: number, // 0 Play - 1 Shop - 2 Boucher
+    phase: number, // 0 Blind - 1 Play - 2 Shop - 3 Voucher
     minScore: number,
+    proposedBlind: number
     handType:number,
     blueScore:number,
     redScore:number,

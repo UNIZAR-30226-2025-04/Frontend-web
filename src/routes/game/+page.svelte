@@ -31,6 +31,7 @@
 		type DrawerSettings,
 		type ModalSettings,
 	} from "@skeletonlabs/skeleton";
+	import { stat } from "fs";
 	import { onDestroy, onMount } from "svelte";
 	import { dndzone } from "svelte-dnd-action";
 	import { flip } from "svelte/animate";
@@ -49,7 +50,8 @@
 		shop: { jokerRow: [], voucherRow: [], packageRow: [] },
 		round: 1,
 		phase: 0,
-		minScore: 100000,
+		minScore: 1000,
+		proposedBlind: 1000,
 		handType: 1,
 		blueScore: 0,
 		redScore: 0,
@@ -151,7 +153,6 @@
 	});
 	$: potText.set(state.pot);
 
-
 	/**
 	 * Handles the click event on the joker card, updating the state of the hand cards.
 	 * If the action is blocked, it prevents any changes.
@@ -162,10 +163,19 @@
 	function onClickJoker(index: number) {
 		if (actionBlocked) return;
 
-		if (state.phase === 1) {
+		if (state.phase === 2) {
 			state.money += state.jokers[index].sellAmount;
 			state.jokers.splice(index, 1);
 		}
+	}
+
+	/**
+	 * Adds the 'delta' to the state.proposedBlind taking into account the minimun of state.minScores
+	 * @param delta
+	 */
+	function updateBlind(delta: number) {
+		const newValue = state.proposedBlind + delta;
+		state.proposedBlind = Math.max(newValue, state.minScore); // nunca menor a 1000
 	}
 
 	/**
@@ -174,37 +184,45 @@
 	function onPlayVoucher() {
 		if (actionBlocked) return;
 
-		let pickedVouchers:VoucherItem[] = state.vouchers.filter((vouch:VoucherItem) => vouch.picked);
+		let pickedVouchers: VoucherItem[] = state.vouchers.filter(
+			(vouch: VoucherItem) => vouch.picked,
+		);
 
-		if(pickedVouchers.length === 1){
+		if (pickedVouchers.length === 1) {
+			let pickedVoucher: VoucherItem = pickedVouchers[0];
+			const index: number = state.vouchers.findIndex(
+				(vouch: VoucherItem) => vouch.picked,
+			);
 
-			let pickedVoucher:VoucherItem = pickedVouchers[0];
-			const index:number = state.vouchers.findIndex((vouch:VoucherItem) => vouch.picked);
-
-			if(isOffensiveVoucher(pickedVoucher.voucherId)){
+			if (isOffensiveVoucher(pickedVoucher.voucherId)) {
 				const useVoucherModal: ModalSettings = {
 					type: "component",
 					meta: { voucherId: pickedVoucher.voucherId },
 					component: "useVoucherModal",
-					response: (r: boolean | undefined) => removeVoucherModal(r,index)
-				}
+					response: (r: boolean | undefined) =>
+						removeVoucherModal(r, index),
+				};
 
 				modalStore.trigger(useVoucherModal);
-			}else{
+			} else {
 				state.activeVouchers.push(pickedVoucher);
-				state.vouchers.splice(index,1);
+				state.vouchers.splice(index, 1);
 			}
 
 			// Reset the picked voucher
-			state.vouchers.map((vouch:VoucherItem) => vouch.picked = false);
+			state.vouchers.map((vouch: VoucherItem) => (vouch.picked = false));
 			state.vouchers = [...state.vouchers];
 		}
-
 	}
 
-	function removeVoucherModal(response:boolean|undefined ,index:number){
-		if(response && response === true && index > 0 && index < state.vouchers.length){
-			state.vouchers.splice(index,1);
+	function removeVoucherModal(response: boolean | undefined, index: number) {
+		if (
+			response &&
+			response === true &&
+			index > 0 &&
+			index < state.vouchers.length
+		) {
+			state.vouchers.splice(index, 1);
 			state.vouchers = [...state.vouchers];
 		}
 	}
@@ -384,10 +402,6 @@
 		state.vouchers = e.detail.items;
 	}
 
-	
-
-	// ==== MOCKUP FUNCTIONS ====
-
 	// Function just to get more cards and play around
 	function onAddCard() {
 		state.handCards.push({
@@ -406,8 +420,6 @@
 		state.vouchers.splice(0, 1);
 		state.vouchers = state.vouchers;
 	}
-
-	
 
 	function generateCard(withOverlay: boolean, faceUp: boolean): Card {
 		const ranks: string[] = [
@@ -483,7 +495,7 @@
 	function onClickHand(index: number) {
 		if (actionBlocked) return;
 
-		const card:CardItem = state.handCards[index];
+		const card: CardItem = state.handCards[index];
 
 		// Switch state
 		card.picked = !card.picked;
@@ -496,10 +508,10 @@
 	 * Handles click on a voucher in hand
 	 * @param index Index of the clicked voucher
 	 */
-	function onClickHandVoucher(index:number){
+	function onClickHandVoucher(index: number) {
 		if (actionBlocked) return;
 
-		const voucher:VoucherItem = state.vouchers[index];
+		const voucher: VoucherItem = state.vouchers[index];
 		const prevState = voucher.picked;
 
 		// Deselect all vouchers
@@ -516,22 +528,37 @@
 	 * Modified onNextPhase function to handle transition between phases correctly
 	 */
 	function onNextPhase() {
-
 		// Closes all active modals
 		modalStore.close();
 
 		if (state.phase === 0) {
-			// Normal phase → Shop phase
+			// Blind phase → Normal phase
+
+			state.handCards = [];
+
+			// Deal new cards for the next round
+			for (let i = 0; i < 8; i++) {
+				setTimeout(
+					() => {
+						onAddCard();
+					},
+					drawCardAnimSpeed * i + drawCardDelay,
+				);
+			}
 			state.phase = 1;
-			setupShop();
 			state.timeLeft = 30;
 		} else if (state.phase === 1) {
-			// Shop phase → Voucher phase
-			state.activeVouchers = [];
+			// Normal phase → Shop phase
 			state.phase = 2;
+			setupShop();
 			state.timeLeft = 30;
 		} else if (state.phase === 2) {
-			// Voucher phase → Normal phase (next round)
+			// Shop phase → Voucher phase
+			state.activeVouchers = [];
+			state.phase = 3;
+			state.timeLeft = 30;
+		} else if (state.phase === 3) {
+			// Voucher phase → Blind phase (next round)
 			handleNextRound();
 		}
 	}
@@ -642,71 +669,63 @@
 	/**
 	 * Plays the selected cards on game phase
 	 */
-	 function onPlayHand() {
+	function onPlayHand() {
 		if (actionBlocked) return;
 
-		let pickedCards:CardItem[] = state.handCards.filter((cardItem:CardItem) => cardItem.picked);
-		
-		const played = pickedCards.map(({ card }: any) => ({
-			id: getNextKey(),
-			card,
-			picked: false,
-		}));
+		let pickedCards: CardItem[] = state.handCards.filter(
+			(cardItem: CardItem) => cardItem.picked,
+		);
 
-		state.playedCards.push(...played);
-		state.handCards = state.handCards.filter((card: any) => !card.picked);
-		state.playedCards = [...state.playedCards];
-		actionBlocked = true;
+		if (pickedCards.length > 0 && pickedCards.length < 6) {
+			const played = pickedCards.map(({ card }: any) => ({
+				id: getNextKey(),
+				card,
+				picked: false,
+			}));
 
-		// Animation. TODO put real values
-		for (let i = 0; i < state.playedCards.length; i++) {
+			state.playedCards.push(...played);
+			state.handCards = state.handCards.filter(
+				(card: any) => !card.picked,
+			);
+			state.playedCards = [...state.playedCards];
+			actionBlocked = true;
+
+			// Animation. TODO put real values
+			for (let i = 0; i < state.playedCards.length; i++) {
+				setTimeout(
+					() => {
+						indexToPlayAnim = i;
+						scorePlayAnim = getValueFromRank(
+							state.playedCards[i].card.rank,
+						);
+						state.blueScore += Math.floor(Math.random() * 1000);
+						state.redScore += Math.floor(Math.random() * 100);
+					},
+					playAnimSpeed * i + playAnimDelay,
+				);
+			}
+
+			setTimeout(() => {
+				indexToPlayAnim = -1;
+				actionBlocked = false;
+				state.playedCards = [];
+				state.minScore -= 10000;
+			}, playAnimSpeed * state.playedCards.length);
+
 			setTimeout(
 				() => {
-					indexToPlayAnim = i;
-					scorePlayAnim = getValueFromRank(
-						state.playedCards[i].card.rank,
-					);
-					state.blueScore += Math.floor(Math.random() * 1000);
-					state.redScore += Math.floor(Math.random() * 100);
+					state.blueScore = 0;
+					state.redScore = 0;
 				},
-				playAnimSpeed * i + playAnimDelay,
+				playAnimSpeed * (state.playedCards.length + 1),
 			);
 		}
-
-		setTimeout(() => {
-			indexToPlayAnim = -1;
-			actionBlocked = false;
-			state.playedCards = [];
-			state.minScore -= 10000;
-		}, playAnimSpeed * state.playedCards.length);
-
-		setTimeout(
-			() => {
-				state.blueScore = 0;
-				state.redScore = 0;
-			},
-			playAnimSpeed * (state.playedCards.length + 1),
-		);
 	}
-
 
 	/**
 	 * Handles the transition to the next round
 	 */
 	function handleNextRound() {
-		// Clear only normal cards, not vouchers from inventory
-		state.handCards = [];
-
-		// Deal new cards for the next round
-		for (let i = 0; i < 8; i++) {
-			setTimeout(
-				() => {
-					onAddCard();
-				},
-				drawCardAnimSpeed * i + drawCardDelay,
-			);
-		}
-
 		// Increment round counter
 		state.round++;
 
@@ -717,7 +736,6 @@
 		// Update minimum score for the new round
 		state.minScore = 100000 - state.round * 10000;
 	}
-
 
 	/**
 	 * Auxiliary function: Determines if a voucher is offensive (must choose players) or non-offensive (only own user affected)
@@ -778,7 +796,6 @@
 	onDestroy(() => {
 		clearInterval(interval);
 	});
-
 </script>
 
 <!-- Main body -->
@@ -790,16 +807,20 @@
 		<!--Title-->
 		{#if state.phase === 0}
 			<div class="text-5xl-r h-[12%] card variant-filled-surface p-5">
-				Round {state.round}/10
+				Choose a blind
 			</div>
 		{:else if state.phase === 1}
-			<div class={shopTitle}>SHOP</div>
+			<div class="text-5xl-r h-[12%] card variant-filled-surface p-5">
+				Round {state.round}/10
+			</div>
 		{:else if state.phase === 2}
+			<div class={shopTitle}>SHOP</div>
+		{:else if state.phase === 3}
 			<div class={vouchersTitle}>VOUCHERS</div>
 		{/if}
 
 		<!-- Show "Your vouchers" only in shop phase -->
-		{#if state.phase === 1}
+		{#if state.phase === 2}
 			<!--Vouchers label-->
 			<div class="text-2xl-r mt-[3%]">Your vouchers</div>
 			<!--Vouchers-->
@@ -950,7 +971,7 @@
 						editionId={joker.edition}
 						animateCard={true}
 						sellAmount={joker.sellAmount}
-						sellable={state.phase === 1}
+						sellable={state.phase === 2}
 					/>
 				</div>
 			{/each}
@@ -958,6 +979,67 @@
 		<div class="text-left text-2xl-r">{state.jokers.length}/5</div>
 
 		{#if state.phase === 0}
+			<div class="h-[63vh] content-end">
+				<div
+					class="h-[40vh] card p-3 flex flex-col gap-3 items-center"
+					transition:fly={{
+						y: 500,
+						duration: animationSpeed * 3,
+						easing: cubicOut,
+					}}
+				>
+					<div class="text-5xl-r">Choose a blind</div>
+					<div class="flex items-center gap-4">
+						<div class="text-4xl-r">Min score:</div>
+						<div
+							class="card variant-filled-surface text-4xl-r content-center p-3"
+						>
+							{$minScoreText.toFixed()}
+						</div>
+					</div>
+					<div
+						class="h-[15%] w-[80%] input-group grid-cols-[1fr_1fr_3fr_1fr_1fr] content-center"
+					>
+						<button
+							class="h-full text-5xl-r btn variant-filled-error rounded-none"
+							on:click={() => updateBlind(-100)}
+						>
+							-100
+						</button>
+						<button
+							class="h-full text-5xl-r btn variant-filled-error rounded-none"
+							on:click={() => updateBlind(-10)}
+						>
+							-10
+						</button>
+						<input
+							bind:value={state.proposedBlind}
+							class="h-full text-5xl-r input rounded-none"
+							type="number"
+							min={state.minScore}
+						/>
+						<button
+							class="h-full text-5xl-r btn variant-filled-tertiary rounded-none"
+							on:click={() => updateBlind(10)}
+						>
+							+10
+						</button>
+						<button
+							class="h-full text-5xl-r btn variant-filled-tertiary rounded-none"
+							on:click={() => updateBlind(100)}
+						>
+							+100
+						</button>
+					</div>
+					
+					<button
+						class="btn variant-filled-tertiary w-[35%] text-5xl-r"
+						on:click={onNextPhase}
+						>Place blind
+					</button>
+				</div>
+			</div>
+		{:else if state.phase === 1}
 			<!-- Fase normal de juego -->
 			<div class="h-[63vh] grid grid-rows-[33%_33%_12%] gap-[8%]">
 				<!--Played cards-->
@@ -1055,7 +1137,7 @@
 					</button>
 				</div>
 			</div>
-		{:else if state.phase === 1}
+		{:else if state.phase === 2}
 			<!--Shop container-->
 			<div
 				class="h-[63vh] card p-3 flex flex-col gap-3"
@@ -1164,7 +1246,7 @@
 					</div>
 				</div>
 			</div>
-		{:else if state.phase == 2}
+		{:else if state.phase == 3}
 			<!-- Voucher phase -->
 			<div class="h-[63vh] grid grid-rows-[33%_33%_12%] gap-[8%]">
 				<div class=""></div>
@@ -1285,8 +1367,6 @@
 		</div>
 	</div>
 </div>
-
-
 
 <style>
 	.game-div {
