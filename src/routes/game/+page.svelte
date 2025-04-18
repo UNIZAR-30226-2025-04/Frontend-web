@@ -88,6 +88,8 @@
 	// Styles tag that repeat or are too long
 	const shopTitle =
 		"text-6xl-r h-[12%] card p-5 text-center content-center text-warning-500 border-8 border-warning-500 shadow-[5px_15px_10px_rgba(0,0,0,0.5)]";
+	const vouchersTitle =
+		"text-6xl-r h-[12%] card p-5 text-center content-center text-secondary-500 border-8 border-secondary-500 shadow-[5px_15px_10px_rgba(0,0,0,0.5)]";
 	const infoChip: string =
 		"card text-center variant-filled-surface p-3 grid grid-rows-[25%_75%] gap-2";
 	const infoChipCard: string = "card text-5xl-r content-center";
@@ -793,7 +795,7 @@
 		{:else if state.phase === 1}
 			<div class={shopTitle}>SHOP</div>
 		{:else if state.phase === 2}
-			<div class={shopTitle}>VOUCHERS</div>
+			<div class={vouchersTitle}>VOUCHERS</div>
 		{/if}
 
 		<!-- Show "Your vouchers" only in shop phase -->
