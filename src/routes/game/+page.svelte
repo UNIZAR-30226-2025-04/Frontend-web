@@ -48,7 +48,7 @@
 		handLevels: structuredClone(HandTypesBase),
 		shop: { jokerRow: [], voucherRow: [], packageRow: [] },
 		round: 1,
-		phase: 2,
+		phase: 0,
 		minScore: 100000,
 		handType: 1,
 		blueScore: 0,
