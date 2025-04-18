@@ -9,18 +9,26 @@
     import { voucherDirectory } from "$lib/cardDirectory";
     import type { SvelteComponent } from "svelte";
     import AvatarDisplay from "./AvatarDisplay.svelte";
+    import { userDataStore } from "$lib/stores";
+    import { get } from "svelte/store";
 
     const modalStore = getModalStore();
 
+    // Meta variables
     let voucher: Voucher;
     let vId: number;
 
+    // Wich of the player as the user choosen
     let pickedUsers:boolean[] = Array(10).fill(false);
 
+    // For coloring the username if it is the user
+    let me:string = get(userDataStore).username;
+
+    // TODO Mock players, change later
     const mockPlayers: Player[] = [
         { key: 0, username: "Username", icon: 1, host: false },
         { key: 1, username: "User", icon: 2, host: false },
-        { key: 2, username: "Username Long", icon: 3, host: false },
+        { key: 2, username: "bictor", icon: 3, host: false },
         { key: 3, username: "Username2", icon: 4, host: false },
         { key: 4, username: "A", icon: 5, host: false },
         { key: 5, username: "Username s", icon: 6, host: false },
@@ -28,11 +36,7 @@
         { key: 7, username: "Username h", icon: 1, host: false },
     ];
 
-    /*
-    const cutN: number = 1;
-    mockPlayers.splice(-cutN);
-    */
-
+    // If the meta variables exists we fill the data 
     if ($modalStore[0]) {
         if ($modalStore[0].meta.voucherId) {
             vId = $modalStore[0].meta.voucherId;
@@ -42,6 +46,11 @@
         }
     }
 
+    /**
+     * Changes the state of the player in 'index' to picked if there is not enough
+     * If the player was picked it changes the state to not picked
+     * @param index
+     */
     function onClickUser(index:number){
         const numPicked:number = pickedUsers.filter((x) => x).length;
         if (pickedUsers[index] || (voucher.targetCount && numPicked < voucher.targetCount)){
@@ -49,10 +58,14 @@
         }
     }
 
+    /**
+     * Click on the "Use" button, returns response to the parent and closes modal
+     */
     function onUse() {
         if ($modalStore[0].response) $modalStore[0].response(true);
         modalStore.close();
     }
+
 </script>
 
 <div class="h-[45vh] w-[70vh] card p-4 grid grid-cols-[2fr_3fr] items-center">
@@ -116,9 +129,16 @@
                         <div>
                             <AvatarDisplay icon={player.icon} width={-1} classAdd="w-[4vh] aspect-square"/>
                         </div>
-                        <div>
-                            {player.username}
-                        </div>
+                        <!--Username, yellow if is the own user-->
+                        {#if me === player.username}
+                            <div class="text-warning-500">
+                                {player.username}
+                            </div>
+                        {:else}
+                            <div>
+                                {player.username}
+                            </div>
+                        {/if}
                     </div>
                 {/each}
             </div>
