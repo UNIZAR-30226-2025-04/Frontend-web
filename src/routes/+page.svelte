@@ -8,7 +8,6 @@
 
 	onMount(async () => {
 		// If user is cached and wants to be remembered we log in and get info
-		/*
 		if( $userDataStore.token !== "" && $userDataStore.remember === true){
 			try{
 				await loginFetch($userDataStore.email,$userDataStore.password,true);
@@ -22,8 +21,6 @@
 				}));
 			}
 		}
-			*/
-			goto(base+"/game");
 	});
 		
 

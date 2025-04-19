@@ -1,6 +1,6 @@
 <script lang="ts">
   import { getModalStore, type ModalComponent, type ModalSettings } from '@skeletonlabs/skeleton';
-  import { lobbyStore, userDataStore } from '$lib/stores';
+  import { gameStore, lobbyStore, socketStore, userDataStore } from '$lib/stores';
   import { base } from '$app/paths';
   import { goto } from '$app/navigation';
   import { onMount } from 'svelte';
@@ -8,6 +8,7 @@
   import AvatarDisplay from "$lib/components/AvatarDisplay.svelte";
   import { initializeSocket } from "$lib/sockets-utils/lobbySocket";
   import WebSocketTest from "$lib/components/WebSocketTest.svelte";
+    import { get } from 'svelte/store';
 
   const modalStore = getModalStore();
   
@@ -65,6 +66,13 @@
       isPublic: false
     }
     lobbyStore.set(defaultLobby);
+
+    // TODO reset game state store
+    //gameStore.set();
+    
+    if (get(socketStore)) {
+			get(socketStore).disconnect();
+		}
     
     if (!$userDataStore.token) {
       goto(base + '/');

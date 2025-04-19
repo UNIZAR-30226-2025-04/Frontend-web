@@ -5,10 +5,10 @@ import type { Voucher, Joker, JokerEdition, Overlay, Suit, HandType, Package } f
 // Function to get numerical value from a rank string
 export function getValueFromRank(rank:string):number{
     switch(rank){
-        case "A": return 14;
-        case "K": return 13;
-        case "Q": return 12;
-        case "J": return 11;
+        case "A": return 10;
+        case "K": return 10;
+        case "Q": return 10;
+        case "J": return 10;
         default:
             return Number(rank);
     }
@@ -26,7 +26,7 @@ export const suitDirectory:Suit[] = [
     {name:"h",color:0,image:"cards/suits/h.png"},
     {name:"s",color:1,image:"cards/suits/s.png"},
     {name:"d",color:0,image:"cards/suits/d.png"},
-    {name:"t",color:1,image:"cards/suits/t.png"},
+    {name:"c",color:1,image:"cards/suits/t.png"},
 ];
 
 // Color of text of a suit

@@ -173,10 +173,11 @@ export type GameState = {
     pot:number,
     money:number,
     rerollAmount:number,
-    deckSize:number,
-    deckLeft:number,
+    deckLeft:Card[],
+    deckPlayed:Card[],
     timeLeft:number,
 }
+
 
 export type CardItem = {
     id: number,

@@ -6,6 +6,7 @@ import { addMessage } from "./chatAddMessage";
 import type { Lobby, Player } from "$lib/interfaces";
 import { goto } from "$app/navigation";
 import { base } from "$app/paths";
+import { blindPhaseSetup, fullStateUpdate, updateMinimunScore } from "./gameSocket";
 
 /**
    * Adds user to the list in lobbySocket
@@ -72,14 +73,17 @@ export function initializeSocket() {
 		transports: ["websocket"],
 	});
 
+	// =========================
 	// Connection/Default events
+	// =========================
+
 	socket.on("connect", () => {
 		console.log("-> connect:", socket.id);
 		socketStore.set(socket);
 	});
 
-	socket.on("disconnect", () => {
-		console.log("-> disconnect");
+	socket.on("disconnect", (args:any) => {
+		console.log("-> disconnect:", args);
 	});
 
 	socket.on("connection_success", (args:any) => {
@@ -108,7 +112,9 @@ export function initializeSocket() {
 		console.log(`-> Event recieved: ${event}`, args);
 	});
 
+	// ===========
 	// Lobby events
+	// ===========
 
 	// New message in chat
 	socket.on("new_lobby_message", (args: any) => {
@@ -155,11 +161,28 @@ export function initializeSocket() {
 		goto(base + "/home");
 	});
 
+	// ===========
 	// Game events
-	socket.on("game_starting", (args: any) => {
-		console.log("-> game_starting", args);
-		// Redirect to the game screen when the server confirms that the game has started
+	// ===========
+
+	socket.on("starting_next_blind", (args: any) => {
+		console.log("-> starting_next_blind", args);
 		goto(base + "/game");
+		blindPhaseSetup(args);
+	});
+
+	socket.on("game_phase_player_info", (args: any) => {
+		console.log("-> game_phase_player_info", args);
+		fullStateUpdate(args);
+	});
+
+	socket.on("blind_updated", (args: any) => {
+		console.log("-> blind_updated", args);
+		updateMinimunScore(args);
+	});
+
+	socket.on("starting_round", (args: any) => {
+		console.log("-> starting_round", args);
 	});
 
 	socket.on("played_hand", (args: any) => {
@@ -178,8 +201,6 @@ export function initializeSocket() {
 
 	socket.on("full_deck", (args: any) => {
 		console.log("-> full_deck", args);
-		// Update the deck information in the store
-		// For example: deckStore.set({ totalCards: args.total_cards, playedCards: args.played_cards });
 	});
 }
 

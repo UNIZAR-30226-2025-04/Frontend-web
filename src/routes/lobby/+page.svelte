@@ -49,9 +49,7 @@
 
 	// Function to start the game
 	function onStart() {
-		// We now make the ws call
 		startGame();
-		goto(base + "/game");
 	}
 	
 	// Function to copy code to clipboard
@@ -91,9 +89,7 @@
 	});
 
 	onDestroy(() => {
-		if (get(socketStore)) {
-			get(socketStore).disconnect();
-		}
+		
 	});
 
 </script>

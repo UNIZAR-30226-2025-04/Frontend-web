@@ -1,81 +1,57 @@
 <script lang="ts">
-	import {
-		getValueFromRank,
-		getValueFromSuit,
-		HandTypesBase,
-		jokerDirectory,
-		jokerEditionsDirectory,
-		overlayDirectory,
-		packageDirectory,
-		suitDirectory,
-		voucherDirectory,
-	} from "$lib/cardDirectory";
-	import GameCard from "$lib/components/GameCard.svelte";
-	import JokerCard from "$lib/components/JokerCard.svelte";
-	import PackageCard from "$lib/components/PackageCard.svelte";
-	import VoucherCard from "$lib/components/VoucherCard.svelte";
-	import {
-		type Card,
-		type CardItem,
-		type GameState,
-		type JokerItem,
-		type Package,
-		type PackageItem,
-		type VoucherItem,
-	} from "$lib/interfaces";
-	import { getNextKey } from "$lib/keyGenerator";
-	import { initializeSocket } from "$lib/sockets-utils/lobbySocket";
-	import {
-		getDrawerStore,
-		getModalStore,
-		type DrawerSettings,
-		type ModalSettings,
-	} from "@skeletonlabs/skeleton";
-	import { stat } from "fs";
-	import { onDestroy, onMount } from "svelte";
-	import { dndzone } from "svelte-dnd-action";
-	import { flip } from "svelte/animate";
-	import { bounceOut, cubicOut } from "svelte/easing";
-	import { tweened } from "svelte/motion";
-	import { fade, fly } from "svelte/transition";
+    import {
+        getValueFromRank,
+        getValueFromSuit,
+        jokerDirectory,
+        jokerEditionsDirectory,
+        packageDirectory,
+        voucherDirectory
+    } from "$lib/cardDirectory";
+    import GameCard from "$lib/components/GameCard.svelte";
+    import JokerCard from "$lib/components/JokerCard.svelte";
+    import PackageCard from "$lib/components/PackageCard.svelte";
+    import VoucherCard from "$lib/components/VoucherCard.svelte";
+    import { logFullState, setPhaseTo } from "$lib/game-utils/phaseManager";
+    import { draw8FromDeck } from "$lib/game-utils/playPhaseManager";
+    import {
+        type Card,
+        type CardItem,
+        type GameState,
+        type Package,
+        type PackageItem,
+        type VoucherItem
+    } from "$lib/interfaces";
+    import { getNextKey } from "$lib/keyGenerator";
+    import { proposeBlind, requestGamePhasePlayerInfo } from "$lib/sockets-utils/gameSocket";
+    import { animationSpeedStore, gameStore } from "$lib/stores";
+    import {
+        getDrawerStore,
+        getModalStore,
+        type DrawerSettings,
+        type ModalSettings,
+    } from "@skeletonlabs/skeleton";
+    import { onDestroy, onMount } from "svelte";
+    import { dndzone } from "svelte-dnd-action";
+    import { flip } from "svelte/animate";
+    import { bounceOut, cubicOut } from "svelte/easing";
+    import { tweened } from "svelte/motion";
+    import { get } from "svelte/store";
+    import { fade, fly } from "svelte/transition";
 
 	// Main state variable
-	let state: GameState = {
-		playedCards: [],
-		handCards: [],
-		jokers: [],
-		activeVouchers: [],
-		vouchers: [],
-		handLevels: structuredClone(HandTypesBase),
-		shop: { jokerRow: [], voucherRow: [], packageRow: [] },
-		round: 1,
-		phase: 0,
-		minScore: 1000,
-		proposedBlind: 1000,
-		handType: 1,
-		blueScore: 0,
-		redScore: 0,
-		hands: 3,
-		discards: 3,
-		pot: 5,
-		money: 1000,
-		rerollAmount: 3,
-		deckSize: 52,
-		deckLeft: 44,
-		timeLeft: 300,
-	};
+
+	let state:GameState = get(gameStore);
+
+	$: state = $gameStore;
+
 
 	// If true it disables the button controls
 	let actionBlocked: boolean = false;
 
 	// Global speed of animations
-	const animationSpeed: number = 100; // ms
+	const animationSpeed:number = get(animationSpeedStore); // ms
 
 	// For the play animation
-	const playAnimSpeed: number = animationSpeed * 7.5; //ms
-	const playAnimDelay: number = animationSpeed * 2; //ms
-	const drawCardAnimSpeed: number = animationSpeed; //ms
-	const drawCardDelay: number = animationSpeed * 2; //ms
 	let indexToPlayAnim: number = -1;
 	let scorePlayAnim: number = 0;
 
@@ -122,52 +98,94 @@
 	};
 
 	// Reactivity animations
-
-	const minScoreText = tweened(state.minScore, {
-		duration: animationSpeed * 4,
-		easing: cubicOut,
+	const minScoreText = tweened(0, {
+		duration: animationSpeed*4,
+		easing: cubicOut
 	});
-	$: minScoreText.set(state.minScore);
-
-	const blueScoreText = tweened(state.blueScore, {
-		duration: animationSpeed * 4,
-		easing: cubicOut,
+	$: $gameStore, minScoreText.set($gameStore.minScore);
+	const blueScoreText = tweened(0, {
+		duration: animationSpeed*4,
+		easing: cubicOut
 	});
-	$: blueScoreText.set(state.blueScore);
-
-	const redScoreText = tweened(state.redScore, {
-		duration: animationSpeed * 4,
-		easing: cubicOut,
+	$: $gameStore, blueScoreText.set($gameStore.blueScore);
+	const redScoreText = tweened(0, {
+		duration: animationSpeed*4,
+		easing: cubicOut
 	});
-	$: redScoreText.set(state.redScore);
-
-	const moneyText = tweened(state.money, {
-		duration: animationSpeed * 4,
-		easing: cubicOut,
+	$: $gameStore, redScoreText.set($gameStore.redScore);
+	const moneyText = tweened(0, {
+		duration: animationSpeed*4,
+		easing: cubicOut
 	});
-	$: moneyText.set(state.money);
-
-	const potText = tweened(state.pot, {
-		duration: animationSpeed * 4,
-		easing: cubicOut,
+	$: $gameStore, moneyText.set($gameStore.money);
+	const potText = tweened(0, {
+		duration: animationSpeed*4,
+		easing: cubicOut
 	});
-	$: potText.set(state.pot);
+	$: $gameStore, potText.set($gameStore.pot);
+
+
+	// Drag and drop functions
+	function handleDndConsiderCards(e: any) {
+		state.handCards = e.detail.items;
+	}
+	function handleDndFinalizeCards(e: any) {
+		state.handCards = e.detail.items;
+	}
+	function handleDndConsiderJokers(e: any) {
+		state.jokers = e.detail.items;
+	}
+	function handleDndFinalizeJokers(e: any) {
+		state.jokers = e.detail.items;
+	}
+	function handleDndConsiderVouchers(e: any) {
+		state.vouchers = e.detail.items;
+	}
+	function handleDndFinalizeVouchers(e: any) {
+		state.vouchers = e.detail.items;
+	}
+
+	// -----------------------
+	// ALL PHASE FUNCS
+	// -----------------------
 
 	/**
-	 * Handles the click event on the joker card, updating the state of the hand cards.
-	 * If the action is blocked, it prevents any changes.
-	 * Resets the `picked` status of all hand cards and sets the picked joker card index.
-	 * If on shop phase it sells the joker
-	 * @param index  of the joker card that was clicked.
+	 * Opens chat modal
 	 */
-	function onClickJoker(index: number) {
-		if (actionBlocked) return;
+	function onChat() {
+		drawerStore.open(settingsChat);
+	}
 
-		if (state.phase === 2) {
-			state.money += state.jokers[index].sellAmount;
-			state.jokers.splice(index, 1);
+	/**
+	 * Opens leave modal
+	 */
+	function onExit() {
+		modalStore.trigger(leaveGameModal);
+	}
+
+	/**
+	 * Go to the next adjacent phase
+	 */
+	 function onNextPhase() {
+		if (state.phase === 0) {
+			// Blind phase → Normal phase
+			setPhaseTo(1);
+		} else if (state.phase === 1) {
+			// Normal phase → Shop phase
+			setPhaseTo(2);
+		} else if (state.phase === 2) {
+			// Shop phase → Voucher phase
+			setPhaseTo(3);
+		} else if (state.phase === 3) {
+			// Voucher phase → Blind phase (next round)
+			setPhaseTo(0);
 		}
 	}
+
+
+	// -----------------------
+	// BLIND PHASE FUNCS
+	// -----------------------
 
 	/**
 	 * Adds the 'delta' to the state.proposedBlind taking into account the minimun of state.minScores
@@ -179,53 +197,15 @@
 	}
 
 	/**
-	 * Handles the play action on vouchers phase
+	 * Places blind from the state.proposedBlind variable to the server
 	 */
-	function onPlayVoucher() {
-		if (actionBlocked) return;
-
-		let pickedVouchers: VoucherItem[] = state.vouchers.filter(
-			(vouch: VoucherItem) => vouch.picked,
-		);
-
-		if (pickedVouchers.length === 1) {
-			let pickedVoucher: VoucherItem = pickedVouchers[0];
-			const index: number = state.vouchers.findIndex(
-				(vouch: VoucherItem) => vouch.picked,
-			);
-
-			if (isOffensiveVoucher(pickedVoucher.voucherId)) {
-				const useVoucherModal: ModalSettings = {
-					type: "component",
-					meta: { voucherId: pickedVoucher.voucherId },
-					component: "useVoucherModal",
-					response: (r: boolean | undefined) =>
-						removeVoucherModal(r, index),
-				};
-
-				modalStore.trigger(useVoucherModal);
-			} else {
-				state.activeVouchers.push(pickedVoucher);
-				state.vouchers.splice(index, 1);
-			}
-
-			// Reset the picked voucher
-			state.vouchers.map((vouch: VoucherItem) => (vouch.picked = false));
-			state.vouchers = [...state.vouchers];
-		}
+	function onPlaceBlind(){
+		proposeBlind(state.proposedBlind);
 	}
 
-	function removeVoucherModal(response: boolean | undefined, index: number) {
-		if (
-			response &&
-			response === true &&
-			index > 0 &&
-			index < state.vouchers.length
-		) {
-			state.vouchers.splice(index, 1);
-			state.vouchers = [...state.vouchers];
-		}
-	}
+	// -----------------------
+	// PLAY PHASE FUNCS
+	// -----------------------
 
 	/**
 	 * Sort cards on hand by rank
@@ -254,30 +234,105 @@
 	 * - If no action is blocked, it filters out the picked cards from the `handCards` array, effectively discarding them.
 	 * - This function is used to remove selected cards from the player's hand once they are discarded.
 	 */
-	function onDiscard() {
+	 function onDiscard() {
 		if (actionBlocked) return;
 		state.handCards = state.handCards.filter(
 			(cardItem) => !cardItem.picked,
 		);
 	}
 
+	/**
+	 * Activates the hand types info modal
+	 */
 	function onHandInfo() {
 		modalStore.trigger(handInfoModal);
 	}
 
-	function onChat() {
-		drawerStore.open(settingsChat);
+	/**
+	 * Handles click on a hand card
+	 * @param index Index of the clicked card
+	 */
+	 function onClickHand(index: number) {
+		if (actionBlocked) return;
+
+		const card: CardItem = state.handCards[index];
+
+		// Switch state
+		card.picked = !card.picked;
+
+		// Update state to reflect changes in UI
+		state.handCards = [...state.handCards];
 	}
 
-	function onExit() {
-		modalStore.trigger(leaveGameModal);
+	/**
+	 * Plays the selected cards on game phase
+	 */
+	 function onPlayHand() {
+		if (actionBlocked) return;
+
+		let pickedCards: CardItem[] = state.handCards.filter(
+			(cardItem: CardItem) => cardItem.picked,
+		);
+
+		if (pickedCards.length > 0 && pickedCards.length < 6) {
+			const played = pickedCards.map(({ card }: any) => ({
+				id: getNextKey(),
+				card,
+				picked: false,
+			}));
+
+			state.playedCards.push(...played);
+			state.handCards = state.handCards.filter(
+				(card: any) => !card.picked,
+			);
+			state.playedCards = [...state.playedCards];
+			actionBlocked = true;
+
+			draw8FromDeck();
+
+			setTimeout(() => {
+				indexToPlayAnim = -1;
+				actionBlocked = false;
+				state.playedCards = [];
+				state.minScore -= 10000;
+			}, animationSpeed * (7.5 + state.playedCards.length));
+
+			setTimeout(
+				() => {
+					state.blueScore = 0;
+					state.redScore = 0;
+				},
+				animationSpeed * (state.playedCards.length + 8.5),
+			);
+		}
+	}
+
+
+	// -----------------------
+	// SHOP PHASE FUNCS
+	// -----------------------
+
+	/**
+	 * Handles the click event on the joker card, updating the state of the hand cards.
+	 * If the action is blocked, it prevents any changes.
+	 * Resets the `picked` status of all hand cards and sets the picked joker card index.
+	 * If on shop phase it sells the joker
+	 * @param index  of the joker card that was clicked.
+	 */
+	 function onClickJoker(index: number) {
+		if (actionBlocked) return;
+
+		if (state.phase === 2) {
+			state.money += state.jokers[index].sellAmount;
+			state.jokers.splice(index, 1);
+		}
 	}
 
 	/**
 	 * Buys the joker at 'index' from the shop if the user has the aviable money and space
 	 * @param index
 	 */
-	function onBuyJoker(index: number) {
+	 function onBuyJoker(index: number) {
 		if (
 			state.jokers.length < 5 &&
 			state.shop.jokerRow[index].sellAmount <= state.money
@@ -382,73 +437,116 @@
 		}
 	}
 
-	// Drag and drop functions
-	function handleDndConsiderCards(e: any) {
-		state.handCards = e.detail.items;
-	}
-	function handleDndFinalizeCards(e: any) {
-		state.handCards = e.detail.items;
-	}
-	function handleDndConsiderJokers(e: any) {
-		state.jokers = e.detail.items;
-	}
-	function handleDndFinalizeJokers(e: any) {
-		state.jokers = e.detail.items;
-	}
-	function handleDndConsiderVouchers(e: any) {
-		state.vouchers = e.detail.items;
-	}
-	function handleDndFinalizeVouchers(e: any) {
-		state.vouchers = e.detail.items;
+	// -----------------------
+	// CONSUMBALE PHASE FUNCS
+	// -----------------------
+
+	/**
+	 * Handles the play action on vouchers phase
+	 */
+	 function onPlayVoucher() {
+		if (actionBlocked) return;
+
+		let pickedVouchers: VoucherItem[] = state.vouchers.filter(
+			(vouch: VoucherItem) => vouch.picked,
+		);
+
+		if (pickedVouchers.length === 1) {
+			let pickedVoucher: VoucherItem = pickedVouchers[0];
+			const index: number = state.vouchers.findIndex(
+				(vouch: VoucherItem) => vouch.picked,
+			);
+
+			if (isOffensiveVoucher(pickedVoucher.voucherId)) {
+				const useVoucherModal: ModalSettings = {
+					type: "component",
+					meta: { voucherId: pickedVoucher.voucherId },
+					component: "useVoucherModal",
+					response: (r: boolean | undefined) =>
+						removeVoucherModal(r, index),
+				};
+
+				modalStore.trigger(useVoucherModal);
+			} else {
+				state.activeVouchers.push(pickedVoucher);
+				state.vouchers.splice(index, 1);
+			}
+
+			// Reset the picked voucher
+			state.vouchers.map((vouch: VoucherItem) => (vouch.picked = false));
+			state.vouchers = [...state.vouchers];
+		}
 	}
 
-	// Function just to get more cards and play around
-	function onAddCard() {
-		state.handCards.push({
-			id: getNextKey(),
-			card: generateCard(true, true),
-			picked: false,
-		});
-		state.handCards = state.handCards;
+	/**
+	 * Auxiliary function: Determines if a voucher is offensive (must choose players) or non-offensive (only own user affected)
+	 * @param voucherId The ID of the voucher to check
+	 * @returns True if the voucher is offensive
+	 */
+	 function isOffensiveVoucher(voucherId: number): boolean {
+		if (voucherId > 0 && voucherId < voucherDirectory.length) {
+			// Get voucher info from directory
+			const voucherInfo = voucherDirectory[voucherId];
+
+			// Check if it's offensive based on targetType
+			return voucherInfo.targetType;
+		} else {
+			return false;
+		}
 	}
 
+	/**
+	 * Function for the modal to dictate whenever to delete a voucher
+	 * Only deletes if response is true and index is valid
+	 * @param response from the modal
+	 * @param index to delete
+	 */
+	function removeVoucherModal(response: boolean | undefined, index: number) {
+		if (
+			response &&
+			response === true &&
+			index > 0 &&
+			index < state.vouchers.length
+		) {
+			state.vouchers.splice(index, 1);
+			state.vouchers = [...state.vouchers];
+		}
+	}
+
+	/**
+	 * Handles click on a voucher in hand
+	 * @param index Index of the clicked voucher
+	 */
+	 function onClickHandVoucher(index: number) {
+		if (actionBlocked) return;
+
+		const voucher: VoucherItem = state.vouchers[index];
+		const prevState = voucher.picked;
+
+		// Deselect all vouchers
+		state.vouchers.map((voucherItem) => (voucherItem.picked = false));
+
+		// Switch state
+		voucher.picked = !prevState;
+
+		// Update state to reflect changes in UI
+		state.vouchers = [...state.vouchers];
+	}
+
+	// -----------------------
+	// MOCKUP FUNCS
+	// -----------------------
+
+	/**
+	 * Adds +10 money to state
+	 */
 	function onAddMoney() {
 		state.money += 10;
 	}
 
-	function onRemoveVoucher() {
-		state.vouchers.splice(0, 1);
-		state.vouchers = state.vouchers;
-	}
-
-	function generateCard(withOverlay: boolean, faceUp: boolean): Card {
-		const ranks: string[] = [
-			"A",
-			"K",
-			"Q",
-			"J",
-			"10",
-			"9",
-			"8",
-			"7",
-			"6",
-			"5",
-			"4",
-			"3",
-			"2",
-		];
-		return {
-			rank: ranks[Math.floor(Math.random() * ranks.length)],
-			suit: suitDirectory[
-				Math.floor(Math.random() * suitDirectory.length)
-			].name,
-			faceUp: faceUp,
-			overlay: withOverlay
-				? Math.floor(Math.random() * overlayDirectory.length)
-				: 0,
-		};
-	}
-
+	/**
+	 * Creates a new joker for the state.jokers
+	 */
 	function onAddJoker() {
 		const newJoker = Math.floor(Math.random() * jokerDirectory.length);
 		const newEdition = Math.floor(
@@ -465,7 +563,7 @@
 	}
 
 	/**
-	 * Creates a new voucher for the vouchers collection only
+	 * Creates a new voucher for the state.vouchers
 	 */
 	function onAddVoucher() {
 		const newVoucher = Math.floor(Math.random() * voucherDirectory.length);
@@ -482,313 +580,42 @@
 		// Only add to state.vouchers, not to activeVouchers
 		state.vouchers.push(newVoucherItem);
 		state.vouchers = [...state.vouchers];
-
-		console.log(
-			`Added voucher ID ${newVoucher} to inventory, total: ${state.vouchers.length}`,
-		);
 	}
 
-	/**
-	 * Handles click on a hand card
-	 * @param index Index of the clicked card
-	 */
-	function onClickHand(index: number) {
-		if (actionBlocked) return;
+	
 
-		const card: CardItem = state.handCards[index];
-
-		// Switch state
-		card.picked = !card.picked;
-
-		// Update state to reflect changes in UI
-		state.handCards = [...state.handCards];
+	function testA(){
+		requestGamePhasePlayerInfo();
 	}
 
-	/**
-	 * Handles click on a voucher in hand
-	 * @param index Index of the clicked voucher
-	 */
-	function onClickHandVoucher(index: number) {
-		if (actionBlocked) return;
-
-		const voucher: VoucherItem = state.vouchers[index];
-		const prevState = voucher.picked;
-
-		// Deselect all vouchers
-		state.vouchers.map((voucherItem) => (voucherItem.picked = false));
-
-		// Switch state
-		voucher.picked = !prevState;
-
-		// Update state to reflect changes in UI
-		state.vouchers = [...state.vouchers];
+	function testB(){
+		
 	}
 
-	/**
-	 * Modified onNextPhase function to handle transition between phases correctly
-	 */
-	function onNextPhase() {
-		// Closes all active modals
-		modalStore.close();
-
-		if (state.phase === 0) {
-			// Blind phase → Normal phase
-
-			state.handCards = [];
-
-			// Deal new cards for the next round
-			for (let i = 0; i < 8; i++) {
-				setTimeout(
-					() => {
-						onAddCard();
-					},
-					drawCardAnimSpeed * i + drawCardDelay,
-				);
-			}
-			state.phase = 1;
-			state.timeLeft = 30;
-		} else if (state.phase === 1) {
-			// Normal phase → Shop phase
-			state.phase = 2;
-			setupShop();
-			state.timeLeft = 30;
-		} else if (state.phase === 2) {
-			// Shop phase → Voucher phase
-			state.activeVouchers = [];
-			state.phase = 3;
-			state.timeLeft = 30;
-		} else if (state.phase === 3) {
-			// Voucher phase → Blind phase (next round)
-			handleNextRound();
-		}
+	function testC(){
+		
 	}
 
-	/**
-	 * Configures the shop with new items, MOCKUP change later
-	 */
-	function setupShop() {
-		state.shop = { jokerRow: [], voucherRow: [], packageRow: [] };
-
-		// Add jokers to the shop
-		for (let i = 0; i < 3; i++) {
-			const newJoker = Math.floor(Math.random() * jokerDirectory.length);
-			const newEdition = Math.floor(
-				Math.random() * jokerEditionsDirectory.length,
-			);
-			state.shop.jokerRow.push({
-				id: getNextKey(),
-				jokerId: newJoker,
-				edition: newEdition,
-				sellAmount: Math.floor(Math.random() * 30) + 1,
-				picked: false,
-			});
-		}
-
-		// Add vouchers to the shop
-		for (let i = 0; i < 2; i++) {
-			const newVoucher = Math.floor(
-				Math.random() * voucherDirectory.length,
-			);
-			// Get voucher info from directory
-			const voucherInfo = voucherDirectory[newVoucher];
-
-			state.shop.voucherRow.push({
-				id: getNextKey(),
-				voucherId: newVoucher,
-				sellAmount: Math.floor(Math.random() * 30) + 1,
-				picked: false,
-			});
-		}
-
-		// Add packages to the shop
-		for (let i = 0; i < 2; i++) {
-			const newPack = Math.floor(Math.random() * packageDirectory.length);
-			const pack = packageDirectory[newPack];
-			let content: CardItem[] | JokerItem[] | VoucherItem[] = [];
-
-			// Configure content based on package type
-			if (pack.contentType === 0) {
-				// Card content
-				content = <CardItem[]>[];
-				for (let j = 0; j < pack.contentSize; j++) {
-					content.push({
-						id: getNextKey(),
-						card: generateCard(true, true),
-						picked: false,
-					});
-				}
-			} else if (pack.contentType === 1) {
-				// Joker content
-				content = <JokerItem[]>[];
-				for (let j = 0; j < pack.contentSize; j++) {
-					const newJoker = Math.floor(
-						Math.random() * jokerDirectory.length,
-					);
-					const newEdition = Math.floor(
-						Math.random() * jokerEditionsDirectory.length,
-					);
-					content.push({
-						id: getNextKey(),
-						jokerId: newJoker,
-						edition: newEdition,
-						sellAmount: Math.floor(Math.random() * 30) + 1,
-						picked: false,
-					});
-				}
-			} else {
-				// Voucher content
-				content = <VoucherItem[]>[];
-				for (let j = 0; j < pack.contentSize; j++) {
-					const newVoucher = Math.floor(
-						Math.random() * voucherDirectory.length,
-					);
-					const voucherInfo = voucherDirectory[newVoucher];
-					content.push({
-						id: getNextKey(),
-						voucherId: newVoucher,
-						sellAmount: Math.floor(Math.random() * 30) + 1,
-						picked: false,
-					});
-				}
-			}
-
-			state.shop.packageRow.push({
-				id: getNextKey(),
-				packageId: newPack,
-				sellAmount: Math.floor(Math.random() * 30) + 1,
-				contents: content,
-			});
-		}
-
-		// Update shop to reflect in UI
-		state.shop.jokerRow = [...state.shop.jokerRow];
-		state.shop.voucherRow = [...state.shop.voucherRow];
-		state.shop.packageRow = [...state.shop.packageRow];
+	function testD(){
+		logFullState();
 	}
 
-	/**
-	 * Plays the selected cards on game phase
-	 */
-	function onPlayHand() {
-		if (actionBlocked) return;
 
-		let pickedCards: CardItem[] = state.handCards.filter(
-			(cardItem: CardItem) => cardItem.picked,
-		);
-
-		if (pickedCards.length > 0 && pickedCards.length < 6) {
-			const played = pickedCards.map(({ card }: any) => ({
-				id: getNextKey(),
-				card,
-				picked: false,
-			}));
-
-			state.playedCards.push(...played);
-			state.handCards = state.handCards.filter(
-				(card: any) => !card.picked,
-			);
-			state.playedCards = [...state.playedCards];
-			actionBlocked = true;
-
-			// Animation. TODO put real values
-			for (let i = 0; i < state.playedCards.length; i++) {
-				setTimeout(
-					() => {
-						indexToPlayAnim = i;
-						scorePlayAnim = getValueFromRank(
-							state.playedCards[i].card.rank,
-						);
-						state.blueScore += Math.floor(Math.random() * 1000);
-						state.redScore += Math.floor(Math.random() * 100);
-					},
-					playAnimSpeed * i + playAnimDelay,
-				);
-			}
-
-			setTimeout(() => {
-				indexToPlayAnim = -1;
-				actionBlocked = false;
-				state.playedCards = [];
-				state.minScore -= 10000;
-			}, playAnimSpeed * state.playedCards.length);
-
-			setTimeout(
-				() => {
-					state.blueScore = 0;
-					state.redScore = 0;
-				},
-				playAnimSpeed * (state.playedCards.length + 1),
-			);
-		}
-	}
-
-	/**
-	 * Handles the transition to the next round
-	 */
-	function handleNextRound() {
-		// Increment round counter
-		state.round++;
-
-		// Reset phase and timer
-		state.phase = 0;
-		state.timeLeft = 30;
-
-		// Update minimum score for the new round
-		state.minScore = 100000 - state.round * 10000;
-	}
-
-	/**
-	 * Auxiliary function: Determines if a voucher is offensive (must choose players) or non-offensive (only own user affected)
-	 * @param voucherId The ID of the voucher to check
-	 * @returns True if the voucher is offensive
-	 */
-	function isOffensiveVoucher(voucherId: number): boolean {
-		if (voucherId > 0 && voucherId < voucherDirectory.length) {
-			// Get voucher info from directory
-			const voucherInfo = voucherDirectory[voucherId];
-
-			// Check if it's offensive based on targetType
-			return voucherInfo.targetType;
-		} else {
-			return false;
-		}
-	}
+	// -----------------------
+	// MOUNT & DESTROY FUNCS
+	// -----------------------
 
 	// Interval for timer, aux variable
 	let interval: any;
 
 	onMount(() => {
-		// State mockup initialization
-		for (let i = 0; i < 0; i++) {
-			state.playedCards.push({
-				id: getNextKey(),
-				card: generateCard(true, true),
-				picked: false,
-			});
-		}
-
-		for (let i = 0; i < 8; i++) {
-			state.handCards.push({
-				id: getNextKey(),
-				card: generateCard(true, true),
-				picked: false,
-			});
-		}
-
-		for (let j = 0; j < 5; j++) {
-			onAddJoker();
-		}
-
-		for (let j = 0; j < 6; j++) {
-			onAddVoucher();
-		}
+		// Initial state 
+		requestGamePhasePlayerInfo();
 
 		// Interval for the Time left clock
 		interval = setInterval(() => {
 			if (state.timeLeft > 0) {
 				state.timeLeft--;
-			} else if (state.timeLeft === 0) {
-				onNextPhase();
 			}
 		}, 1000);
 	});
@@ -796,6 +623,7 @@
 	onDestroy(() => {
 		clearInterval(interval);
 	});
+	
 </script>
 
 <!-- Main body -->
@@ -994,7 +822,7 @@
 						<div
 							class="card variant-filled-surface text-4xl-r content-center p-3"
 						>
-							{$minScoreText.toFixed()}
+						{$minScoreText.toFixed()}
 						</div>
 					</div>
 					<div
@@ -1034,8 +862,13 @@
 					
 					<button
 						class="btn variant-filled-tertiary w-[35%] text-5xl-r"
-						on:click={onNextPhase}
-						>Place blind
+						on:click={onPlaceBlind}
+						>
+						{#if actionBlocked}
+							...
+						{:else}
+							Place blind
+						{/if}
 					</button>
 				</div>
 			</div>
@@ -1334,17 +1167,32 @@
 			<button class="btn variant-filled-surface" on:click={onNextPhase}>
 				Next phase
 			</button>
-			<button class="btn variant-filled-surface" on:click={onAddCard}>
-				Add card
-			</button>
 			<button class="btn variant-filled-surface" on:click={onAddMoney}>
 				Add money
 			</button>
 			<button
 				class="btn variant-filled-surface"
-				on:click={onRemoveVoucher}
+				on:click={testA}
 			>
-				Remove voucher
+				Test A
+			</button>
+			<button
+				class="btn variant-filled-surface"
+				on:click={testB}
+			>
+				Test B
+			</button>
+			<button
+				class="btn variant-filled-surface"
+				on:click={testC}
+			>
+				Test C
+			</button>
+			<button
+				class="btn variant-filled-surface"
+				on:click={testD}
+			>
+				Test D
 			</button>
 		</div>
 
@@ -1362,7 +1210,7 @@
 				</div>
 			</div>
 			<div class="w-full text-right text-2xl-r mt-[10%]">
-				{state.deckLeft}/{state.deckSize}
+				{state.deckLeft.length}/{state.deckLeft.length+state.deckPlayed.length}
 			</div>
 		</div>
 	</div>
@@ -1410,31 +1258,7 @@
 
 	.tv-filter {
 		text-shadow:
-			0.06rem 0 0.06rem #ea36af,
-			-0.125rem 0 0.06rem #75fa69;
-		animation-duration: 0.01s;
-		animation-name: textflicker;
-		animation-iteration-count: infinite;
-		animation-direction: alternate;
-	}
-
-	@media (max-height: 640px) {
-		.tv-filter {
-			text-shadow: none;
-			animation: none;
-		}
-	}
-
-	@keyframes textflicker {
-		from {
-			text-shadow:
-				1px 0 0 #ea36af,
-				-2px 0 0 #75fa69;
-		}
-		to {
-			text-shadow:
-				2px 0.5px 2px #ea36af,
-				-1px -0.5px 2px #75fa69;
-		}
+			2px 0.5px 2px #ea36af,
+			-1px -0.5px 2px #75fa69;
 	}
 </style>
