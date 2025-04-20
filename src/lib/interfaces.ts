@@ -164,7 +164,7 @@ export type GameState = {
     round: number,
     phase: number, // 0 Blind - 1 Play - 2 Shop - 3 Voucher
     minScore: number,
-    proposedBlind: number
+    proposedBlind: number,
     handType:number,
     blueScore:number,
     redScore:number,

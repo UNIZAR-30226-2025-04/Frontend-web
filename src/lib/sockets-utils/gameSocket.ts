@@ -1,6 +1,6 @@
 import { HandTypesBase, voucherDirectory } from "$lib/cardDirectory";
 import type { Card, GameState } from "$lib/interfaces";
-import { gameStore, lobbyStore, socketStore } from "$lib/stores";
+import { gameStore, lobbyStore, socketStore, userDataStore } from "$lib/stores";
 import { get } from "svelte/store";
 import { timePerPhase } from "$lib/gameDirectory";
 import { logFullState, setPhaseTo } from "$lib/game-utils/phaseManager";
@@ -145,10 +145,12 @@ export function blindPhaseSetup(args:any){
  * @param args of the response from server
  */
 export function updateMinimunScore(args:any) {
-	gameStore.update((state: GameState) => ({
-		...state,
-		minScore: args.new_blind
-	  }));
+	if(args.proposed_by === get(userDataStore).username){
+		gameStore.update((state: GameState) => ({
+			...state,
+			minScore: args.new_blind
+		}));
+	}
 }
 
 
