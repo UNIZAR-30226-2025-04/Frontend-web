@@ -6,7 +6,7 @@ import { addMessage } from "./chatAddMessage";
 import type { Lobby, Player } from "$lib/interfaces";
 import { goto } from "$app/navigation";
 import { base } from "$app/paths";
-import { blindPhaseSetup, fullStateUpdate, updateMinimunScore } from "./gameSocket";
+import { blindPhaseSetup, fullStateUpdate, playPhaseSetup, updateMinimunScore } from "./gameSocket";
 
 /**
    * Adds user to the list in lobbySocket
@@ -169,6 +169,11 @@ export function initializeSocket() {
 		console.log("-> starting_next_blind", args);
 		goto(base + "/game");
 		blindPhaseSetup(args);
+	});
+	
+	socket.on("starting_round", (args: any) => {
+		console.log("-> starting_round", args);
+		playPhaseSetup(args);
 	});
 
 	socket.on("game_phase_player_info", (args: any) => {

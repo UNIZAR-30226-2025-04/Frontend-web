@@ -132,7 +132,8 @@ export function blindPhaseSetup(args:any){
 	// Update base blind (minScore)
 	gameStore.update((state: GameState) => ({
 		...state,
-		minScore: args.base_blind
+		minScore: args.base_blind,
+		proposedBlind: args.base_blind
 	}));
 	
 	// Update phase
@@ -170,6 +171,22 @@ export function updateDeck(args:any) {
 		deckLeft: argsToCards(args.total_cards),
 		deckPlayed: argsToCards(args.played_cards),
 	}));
+}
+
+/**
+ * Function called on 'starting_round' event
+ * @param args given by the server
+ */
+export function playPhaseSetup(args:any){
+	// Update base blind (minScore), and round
+	gameStore.update((state: GameState) => ({
+		...state,
+		minScore: args.blind,
+		round: args.round_number
+	}));
+
+	// Update phase
+	setPhaseTo(1);	
 }
 
 
