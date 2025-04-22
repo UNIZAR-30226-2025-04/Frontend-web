@@ -2,7 +2,6 @@ import { jokerDirectory, jokerEditionsDirectory, overlayDirectory, packageDirect
 import { timePerPhase } from "$lib/gameDirectory";
 import type { Card, CardItem, GameState, JokerItem, VoucherItem } from "$lib/interfaces";
 import { getNextKey } from "$lib/keyGenerator";
-import { drawCards, getFullDeck } from "$lib/sockets-utils/gameSocket";
 import { actionBlockedStore, gameStore } from "$lib/stores";
 import { getModalStore } from "@skeletonlabs/skeleton";
 import { get } from "svelte/store";

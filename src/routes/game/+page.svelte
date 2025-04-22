@@ -1,6 +1,6 @@
 <script lang="ts">
     import {
-        getValueFromRank,
+        getHierarchyFromRank,
         getValueFromSuit,
         jokerDirectory,
         jokerEditionsDirectory,
@@ -14,7 +14,6 @@
     import PackageCard from "$lib/components/PackageCard.svelte";
     import VoucherCard from "$lib/components/VoucherCard.svelte";
     import { logFullState, setPhaseTo } from "$lib/game-utils/phaseManager";
-    import { playAnimation } from "$lib/game-utils/playPhaseManager";
     import {
         type Card,
         type CardItem,
@@ -24,7 +23,7 @@
         type VoucherItem
     } from "$lib/interfaces";
     import { getNextKey } from "$lib/keyGenerator";
-    import { drawCards, getFullDeck, proposeBlind, requestGamePhasePlayerInfo } from "$lib/sockets-utils/gameSocket";
+    import { discardHand, getFullHand, playHand, proposeBlind, requestGamePhasePlayerInfo } from "$lib/sockets-utils/gameSocket";
     import { animationSpeedStore, gameStore } from "$lib/stores";
     import {
         getDrawerStore,
@@ -213,8 +212,8 @@
 	function onSortR() {
 		state.handCards = state.handCards.sort(
 			(cardA, cardB: CardItem) =>
-				getValueFromRank(cardB.card.rank) -
-				getValueFromRank(cardA.card.rank),
+				getHierarchyFromRank(cardB.card.rank) -
+				getHierarchyFromRank(cardA.card.rank),
 		);
 	}
 
@@ -230,15 +229,42 @@
 	}
 
 	/**
+	 * Plays the selected cards on game phase
+	 */
+	 function onPlayHand() {
+		if (actionBlocked) return;
+
+		let pickedCards: CardItem[] = state.handCards.filter(
+			(cardItem: CardItem) => cardItem.picked,
+		);
+
+		if (pickedCards.length > 0 && pickedCards.length < 6) {
+			const played = pickedCards.map(({ card }: any) => ({
+				id: getNextKey(),
+				card,
+				picked: false,
+			}));
+
+			state.playedCards.push(...played);
+			state.handCards = state.handCards.filter(
+				(card: any) => !card.picked,
+			);
+			state.playedCards = [...state.playedCards];
+			actionBlocked = true;
+
+			playHand();
+		}
+	}
+
+	/**
 	 * Handles the discard action, removing all picked cards from the hand.
 	 * - If no action is blocked, it filters out the picked cards from the `handCards` array, effectively discarding them.
 	 * - This function is used to remove selected cards from the player's hand once they are discarded.
 	 */
 	 function onDiscard() {
 		if (actionBlocked) return;
-		state.handCards = state.handCards.filter(
-			(cardItem) => !cardItem.picked,
-		);
+		
+		discardHand();
 	}
 
 	/**
@@ -264,37 +290,7 @@
 		state.handCards = [...state.handCards];
 	}
 
-	/**
-	 * Plays the selected cards on game phase
-	 */
-	function onPlayHand() {
-		if (actionBlocked) return;
-
-		let pickedCards: CardItem[] = state.handCards.filter(
-			(cardItem: CardItem) => cardItem.picked,
-		);
-
-		if (pickedCards.length > 0 && pickedCards.length < 6) {
-			const played = pickedCards.map(({ card }: any) => ({
-				id: getNextKey(),
-				card,
-				picked: false,
-			}));
-
-			state.playedCards.push(...played);
-			state.handCards = state.handCards.filter(
-				(card: any) => !card.picked,
-			);
-			state.playedCards = [...state.playedCards];
-			actionBlocked = true;
-
-			playAnimation("Royal flush", 200, 300, 60000);
-		}
-	}
-
 	
-
-
 	// -----------------------
 	// SHOP PHASE FUNCS
 	// -----------------------
@@ -617,11 +613,11 @@
 	}
 
 	function testB(){
-		drawCards([],false);
+
 	}
 
 	function testC(){
-		getFullDeck();
+		getFullHand();
 	}
 
 	function testD(){
@@ -1258,7 +1254,7 @@
 				</div>
 			</div>
 			<div class="w-full text-right text-2xl-r mt-[10%]">
-				{state.deckLeft.length}/{state.deckLeft.length+state.deckPlayed.length}
+				{state.deckLeft}/{state.deckLeft+state.deckPlayed}
 			</div>
 		</div>
 	</div>

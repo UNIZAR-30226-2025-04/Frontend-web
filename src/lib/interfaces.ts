@@ -174,8 +174,8 @@ export type GameState = {
     pot:number,
     money:number,
     rerollAmount:number,
-    deckLeft:Card[],
-    deckPlayed:Card[],
+    deckLeft:number,
+    deckPlayed:number,
     timeLeft:number,
     actionBlocked:boolean,
     animVariables:AnimationVariables,
@@ -236,4 +236,5 @@ export type AnimationVariables = {
     jokerIndexToPlayAnim:number,
     scorePlayAnim:number,
     activatedJokers:boolean[],
+    scoreCards:Card[]
 }

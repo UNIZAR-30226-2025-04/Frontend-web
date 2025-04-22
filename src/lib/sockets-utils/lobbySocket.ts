@@ -1,12 +1,12 @@
+import { goto } from "$app/navigation";
+import { base } from "$app/paths";
+import type { Lobby, Player } from "$lib/interfaces";
 import { wsBase } from "$lib/paths";
 import { lobbyStore, socketStore, userDataStore } from "$lib/stores";
 import { io, Socket } from "socket.io-client";
 import { get } from "svelte/store";
 import { addMessage } from "./chatAddMessage";
-import type { Lobby, Player } from "$lib/interfaces";
-import { goto } from "$app/navigation";
-import { base } from "$app/paths";
-import { blindPhaseSetup, fullStateUpdate, playPhaseSetup, updateMinimunScore } from "./gameSocket";
+import { blindPhaseSetup, discardedCards, fullStateUpdate, playedHand, playPhaseSetup, updateHand, updateMinimunScore } from "./gameSocket";
 
 /**
    * Adds user to the list in lobbySocket
@@ -188,10 +188,17 @@ export function initializeSocket() {
 
 	socket.on("played_hand", (args: any) => {
 		console.log("-> played_hand", args);
+		playedHand(args);
 	});
 
-	socket.on("drawed_cards", (args: any) => {
-		console.log("-> drawed_cards", args);
+	socket.on("discarded_cards", (args: any) => {
+		console.log("-> discarded_cards", args);
+		discardedCards(args);
+	});
+
+	socket.on("got_cards", (args: any) => {
+		console.log("-> got_cards", args);
+		updateHand(args);
 	});
 
 	socket.on("full_deck", (args: any) => {

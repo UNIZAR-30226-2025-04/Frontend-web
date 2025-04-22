@@ -52,15 +52,16 @@ let stateInit: GameState = {
     pot: 5,
     money: 0,
     rerollAmount: 3,
-    deckLeft: [],
-    deckPlayed: [],
+    deckLeft: 52,
+    deckPlayed: 52,
     timeLeft: 300,
     actionBlocked:false,
     animVariables:{
         cardIndexToPlayAnim:-1,
         jokerIndexToPlayAnim:-1,
         scorePlayAnim:0,
-        activatedJokers:[false,false,false,false,false]
+        activatedJokers:[false,false,false,false,false],
+        scoreCards:[],
     }
     
 };
