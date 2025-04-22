@@ -186,22 +186,12 @@ export function initializeSocket() {
 		updateMinimunScore(args);
 	});
 
-	socket.on("starting_round", (args: any) => {
-		console.log("-> starting_round", args);
-	});
-
 	socket.on("played_hand", (args: any) => {
 		console.log("-> played_hand", args);
-		// TODO: Once we have a response we will be able to operate
-		// Update the score and the game state
-		// For example: updatePoints(args.points, args.gold);
 	});
 
 	socket.on("drawed_cards", (args: any) => {
 		console.log("-> drawed_cards", args);
-		// TODO: Once we have a response we will be able to operate
-		// Add the new cards to the player's hand
-		// For example: addCardsToHand(JSON.parse(args.new_cards));
 	});
 
 	socket.on("full_deck", (args: any) => {

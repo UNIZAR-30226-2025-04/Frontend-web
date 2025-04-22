@@ -133,7 +133,8 @@ export function blindPhaseSetup(args:any){
 	gameStore.update((state: GameState) => ({
 		...state,
 		minScore: args.base_blind,
-		proposedBlind: args.base_blind
+		proposedBlind: args.base_blind,
+		timeLeft: args.timeout
 	}));
 	
 	// Update phase
@@ -160,6 +161,28 @@ export function updateMinimunScore(args:any) {
 // -----------------------
 
 /**
+ * Calls server to draw cards from the deck to put in the hand 
+ * @param isDiscard true only if ths function is called by the discard button
+ */
+export function drawCards(cards:Card[],isDiscard:boolean){
+
+	const state:GameState = get(gameStore);
+	const handData = {
+		cards: cards,
+		jokers: {
+			juglares: state.jokers,
+		},
+		gold: state.money,
+	};
+	
+	console.log("<- draw_cards", handData, isDiscard);
+	get(socketStore).emit("draw_cards",
+		handData
+		,isDiscard
+	);
+}
+
+/**
  * Requests the complete deck information
  */
 export function getFullDeck() {
@@ -167,6 +190,20 @@ export function getFullDeck() {
 	get(socketStore).emit("get_full_deck", get(lobbyStore).code);
 } 
 
+/**
+ * Function called on 'drawed_cards' event
+ * Gtes the cards in args and adds them in th state.handCards
+ * @param args given by the server
+ */
+export function updateHand(args:any){
+
+}
+
+/**
+ * Function called on 'full_deck' event
+ * Updates the current game state to update the deckLeft and deckPlayed
+ * @param args given by the server
+ */
 export function updateDeck(args:any) {
 	gameStore.update((state: GameState) => ({
 		...state,
@@ -184,7 +221,8 @@ export function playPhaseSetup(args:any){
 	gameStore.update((state: GameState) => ({
 		...state,
 		minScore: args.blind,
-		round: args.round_number
+		round: args.round_number,
+		timeLeft: args.timeout
 	}));
 
 	// Update phase

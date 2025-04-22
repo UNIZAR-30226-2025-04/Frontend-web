@@ -4,7 +4,9 @@
         getValueFromSuit,
         jokerDirectory,
         jokerEditionsDirectory,
+        overlayDirectory,
         packageDirectory,
+        suitDirectory,
         voucherDirectory
     } from "$lib/cardDirectory";
     import GameCard from "$lib/components/GameCard.svelte";
@@ -12,7 +14,7 @@
     import PackageCard from "$lib/components/PackageCard.svelte";
     import VoucherCard from "$lib/components/VoucherCard.svelte";
     import { logFullState, setPhaseTo } from "$lib/game-utils/phaseManager";
-    import { draw8FromDeck } from "$lib/game-utils/playPhaseManager";
+    import { playAnimation } from "$lib/game-utils/playPhaseManager";
     import {
         type Card,
         type CardItem,
@@ -22,7 +24,7 @@
         type VoucherItem
     } from "$lib/interfaces";
     import { getNextKey } from "$lib/keyGenerator";
-    import { proposeBlind, requestGamePhasePlayerInfo } from "$lib/sockets-utils/gameSocket";
+    import { drawCards, getFullDeck, proposeBlind, requestGamePhasePlayerInfo } from "$lib/sockets-utils/gameSocket";
     import { animationSpeedStore, gameStore } from "$lib/stores";
     import {
         getDrawerStore,
@@ -47,13 +49,11 @@
 
 	// If true it disables the button controls
 	let actionBlocked: boolean = false;
+	$: actionBlocked = $gameStore.actionBlocked;
 
 	// Global speed of animations
 	const animationSpeed:number = get(animationSpeedStore); // ms
 
-	// For the play animation
-	let indexToPlayAnim: number = -1;
-	let scorePlayAnim: number = 0;
 
 	// To draw the deck
 	let dummyCard: Card = {
@@ -267,7 +267,7 @@
 	/**
 	 * Plays the selected cards on game phase
 	 */
-	 function onPlayHand() {
+	function onPlayHand() {
 		if (actionBlocked) return;
 
 		let pickedCards: CardItem[] = state.handCards.filter(
@@ -288,24 +288,11 @@
 			state.playedCards = [...state.playedCards];
 			actionBlocked = true;
 
-			draw8FromDeck();
-
-			setTimeout(() => {
-				indexToPlayAnim = -1;
-				actionBlocked = false;
-				state.playedCards = [];
-				state.minScore -= 10000;
-			}, animationSpeed * (7.5 + state.playedCards.length));
-
-			setTimeout(
-				() => {
-					state.blueScore = 0;
-					state.redScore = 0;
-				},
-				animationSpeed * (state.playedCards.length + 8.5),
-			);
+			playAnimation("Royal flush", 200, 300, 60000);
 		}
 	}
+
+	
 
 
 	// -----------------------
@@ -545,6 +532,46 @@
 	}
 
 	/**
+	 * Creates a new joker for the state.handCards
+	 */
+	function onAddCard() {
+		state.handCards.push({
+			id: getNextKey(),
+			card: generateCard(false,true),
+			picked:false
+		});
+		state.handCards  = [...state.handCards];
+	}
+
+	function generateCard(withOverlay: boolean, faceUp: boolean): Card {
+		const ranks: string[] = [
+			"A",
+			"K",
+			"Q",
+			"J",
+			"10",
+			"9",
+			"8",
+			"7",
+			"6",
+			"5",
+			"4",
+			"3",
+			"2",
+		];
+		return {
+			rank: ranks[Math.floor(Math.random() * ranks.length)],
+			suit: suitDirectory[
+				Math.floor(Math.random() * suitDirectory.length)
+			].name,
+			faceUp: faceUp,
+			overlay: withOverlay
+				? Math.floor(Math.random() * overlayDirectory.length)
+				: 0,
+		};
+	}
+
+	/**
 	 * Creates a new joker for the state.jokers
 	 */
 	function onAddJoker() {
@@ -561,6 +588,7 @@
 		});
 		state.jokers = state.jokers;
 	}
+	
 
 	/**
 	 * Creates a new voucher for the state.vouchers
@@ -589,11 +617,11 @@
 	}
 
 	function testB(){
-		
+		drawCards([],false);
 	}
 
 	function testC(){
-		
+		getFullDeck();
 	}
 
 	function testD(){
@@ -610,7 +638,7 @@
 
 	onMount(() => {
 		// Initial state 
-		requestGamePhasePlayerInfo();
+		//requestGamePhasePlayerInfo();
 
 		// Interval for the Time left clock
 		interval = setInterval(() => {
@@ -639,7 +667,7 @@
 			</div>
 		{:else if state.phase === 1}
 			<div class="text-5xl-r h-[12%] card variant-filled-surface p-5">
-				Round {state.round}/10
+				Round {state.round}/{state.maxRounds}
 			</div>
 		{:else if state.phase === 2}
 			<div class={shopTitle}>SHOP</div>
@@ -793,6 +821,20 @@
 					class={`w-[5vh] h-full transition-transform duration-[${animationSpeed * 2}] ease-in-out`}
 					on:click={() => onClickJoker(index)}
 				>
+					{#if index === state.animVariables.jokerIndexToPlayAnim}
+						<div
+							in:fly={{
+								y: -150,
+								duration: animationSpeed * 2,
+							}}
+							out:fade={{
+								duration: animationSpeed * 2,
+							}}
+							class="w-[14vh] text-center absolute mt-[25vh] text-warning-300 text-3xl-r"
+						>
+							Activated
+						</div>
+					{/if}
 					<JokerCard
 						width="w-[16vh]"
 						jokerId={joker.jokerId}
@@ -888,18 +930,18 @@
 							}}
 							class="w-[1vh]"
 						>
-							{#if index === indexToPlayAnim}
+							{#if index === state.animVariables.cardIndexToPlayAnim}
 								<div
 									in:fly={{
 										y: 150,
-										duration: animationSpeed * 3,
+										duration: animationSpeed * 2,
 									}}
 									out:fade={{
-										duration: animationSpeed * 3,
+										duration: animationSpeed * 2,
 									}}
 									class="w-[14vh] text-center absolute mt-[-4vh] text-warning-300 text-3xl-r"
 								>
-									+{scorePlayAnim}
+									+{state.animVariables.scorePlayAnim}
 								</div>
 							{/if}
 							<GameCard
@@ -1170,6 +1212,12 @@
 			<button class="btn variant-filled-surface" on:click={onAddMoney}>
 				Add money
 			</button>
+			<button class="btn variant-filled-surface" on:click={onAddCard}>
+				Add card
+			</button>
+			<button class="btn variant-filled-surface" on:click={onAddJoker}>
+				Add joker
+			</button>
 			<button
 				class="btn variant-filled-surface"
 				on:click={testA}
@@ -1250,7 +1298,7 @@
 	}
 
 	/*
-	Filter taken from https://github.com/D3nn7/crt-css
+	Filter taken from https://github.com/D3nn7/crt-css (Heavily modified)
 	License says: "I love Open Source and decide that this small project don't need a license. 
 	You can use it without any restrictions."
 	Thank you Danny Schapeit!

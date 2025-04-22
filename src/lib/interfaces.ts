@@ -162,6 +162,7 @@ export type GameState = {
     handLevels: HandType[],
     shop: Shop,
     round: number,
+    maxRounds: number,
     phase: number, // 0 Blind - 1 Play - 2 Shop - 3 Voucher
     minScore: number,
     proposedBlind: number,
@@ -176,6 +177,8 @@ export type GameState = {
     deckLeft:Card[],
     deckPlayed:Card[],
     timeLeft:number,
+    actionBlocked:boolean,
+    animVariables:AnimationVariables,
 }
 
 
@@ -227,3 +230,10 @@ export type PackageItem = {
     sellAmount: number,
     contents: CardItem[] | JokerItem[] | VoucherItem[],
 } 
+
+export type AnimationVariables = {
+    cardIndexToPlayAnim:number,
+    jokerIndexToPlayAnim:number,
+    scorePlayAnim:number,
+    activatedJokers:boolean[],
+}

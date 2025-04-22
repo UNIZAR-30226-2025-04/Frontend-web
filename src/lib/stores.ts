@@ -40,6 +40,7 @@ let stateInit: GameState = {
     handLevels: structuredClone(HandTypesBase),
     shop: { jokerRow: [], voucherRow: [], packageRow: [] },
     round: 1,
+    maxRounds: 10,
     phase: 0,
     minScore: 0,
     proposedBlind: 0,
@@ -54,6 +55,14 @@ let stateInit: GameState = {
     deckLeft: [],
     deckPlayed: [],
     timeLeft: 300,
+    actionBlocked:false,
+    animVariables:{
+        cardIndexToPlayAnim:-1,
+        jokerIndexToPlayAnim:-1,
+        scorePlayAnim:0,
+        activatedJokers:[false,false,false,false,false]
+    }
+    
 };
 
 export const gameStore = writable<GameState>(stateInit);

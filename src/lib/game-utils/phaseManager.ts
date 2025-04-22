@@ -2,11 +2,10 @@ import { jokerDirectory, jokerEditionsDirectory, overlayDirectory, packageDirect
 import { timePerPhase } from "$lib/gameDirectory";
 import type { Card, CardItem, GameState, JokerItem, VoucherItem } from "$lib/interfaces";
 import { getNextKey } from "$lib/keyGenerator";
-import { getFullDeck } from "$lib/sockets-utils/gameSocket";
+import { drawCards, getFullDeck } from "$lib/sockets-utils/gameSocket";
 import { actionBlockedStore, gameStore } from "$lib/stores";
 import { getModalStore } from "@skeletonlabs/skeleton";
 import { get } from "svelte/store";
-import { draw8FromDeck } from "./playPhaseManager";
 
 /**
  * Logs on console the value of gameStore
@@ -35,17 +34,16 @@ export function setPhaseTo(phase:number){
     // Sets the timer
     state.timeLeft = timePerPhase[phase];
 
-    
-
     // Phase dependent variable values
     switch(phase){
         case 0:
             
             break;
         case 1:
-            getFullDeck();
+            //getFullDeck();
             state.handCards = [];
             state.playedCards = []; 
+            //drawCards(false);
             break;
         case 2:
             setupShop();
@@ -55,11 +53,13 @@ export function setPhaseTo(phase:number){
             break;
     }
 
+    gameStore.set(state);
+
 }
 
 /**
-	 * Configures the shop with new items, MOCKUP change later
-	 */
+ * Configures the shop with new items, MOCKUP change later
+ */
 function setupShop() {
     let state:GameState = get(gameStore);
     

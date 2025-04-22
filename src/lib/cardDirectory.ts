@@ -43,19 +43,19 @@ export const overlayDirectory:Overlay[] = [
 
 // Base scores for diferent hands
 export const HandTypesBase:HandType[] = [
-    {name:"Flush five",lvl:1,baseBlue:160,baseRed:16},
-    {name:"Flush house",lvl:1,baseBlue:140,baseRed:14},
-    {name:"Five of a kind",lvl:1,baseBlue:120,baseRed:12},
-    {name:"Royal flush",lvl:1,baseBlue:100,baseRed:8},
-    {name:"Straight flush",lvl:1,baseBlue:100,baseRed:8},
-    {name:"Four of a kind",lvl:1,baseBlue:60,baseRed:7},
-    {name:"Full house",lvl:1,baseBlue:40,baseRed:4},
-    {name:"Flush",lvl:1,baseBlue:35,baseRed:4},
-    {name:"Straight",lvl:1,baseBlue:30,baseRed:4},
-    {name:"Three of a kind",lvl:1,baseBlue:30,baseRed:3},
-    {name:"Two pair",lvl:1,baseBlue:20,baseRed:2},
-    {name:"One pair",lvl:1,baseBlue:10,baseRed:2},
-    {name:"High card",lvl:1,baseBlue:5,baseRed:1},
+    {name:"Royal flush",lvl:1,baseBlue:65,baseRed:50},
+    {name:"Straight flush",lvl:1,baseBlue:50,baseRed:40},
+    {name:"Flush five",lvl:1,baseBlue:35,baseRed:25},
+    {name:"Flush house",lvl:1,baseBlue:32,baseRed:22},
+    {name:"Five of a kind",lvl:1,baseBlue:30,baseRed:20},
+    {name:"Four of a kind",lvl:1,baseBlue:25,baseRed:15},
+    {name:"Full house",lvl:1,baseBlue:20,baseRed:12},
+    {name:"Flush",lvl:1,baseBlue:15,baseRed:8},
+    {name:"Straight",lvl:1,baseBlue:12,baseRed:5},
+    {name:"Three of a kind",lvl:1,baseBlue:10,baseRed:4},
+    {name:"Two pair",lvl:1,baseBlue:8,baseRed:3},
+    {name:"Pair",lvl:1,baseBlue:4,baseRed:2},
+    {name:"High card",lvl:1,baseBlue:1,baseRed:1},
 ]
 
 // Jokers
