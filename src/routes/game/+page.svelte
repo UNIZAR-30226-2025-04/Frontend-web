@@ -238,7 +238,7 @@
 			(cardItem: CardItem) => cardItem.picked,
 		);
 
-		if (pickedCards.length > 0 && pickedCards.length < 6) {
+		if (state.hands > 0 && pickedCards.length > 0 && pickedCards.length < 6) {
 			const played = pickedCards.map(({ card }: any) => ({
 				id: getNextKey(),
 				card,
@@ -264,7 +264,13 @@
 	 function onDiscard() {
 		if (actionBlocked) return;
 		
-		discardHand();
+		let pickedCards: CardItem[] = state.handCards.filter(
+			(cardItem: CardItem) => cardItem.picked,
+		);
+
+		if (state.discards > 0 && pickedCards.length > 0 && pickedCards.length < 6) {
+			discardHand();
+		}
 	}
 
 	/**
@@ -1254,7 +1260,7 @@
 				</div>
 			</div>
 			<div class="w-full text-right text-2xl-r mt-[10%]">
-				{state.deckLeft}/{state.deckLeft+state.deckPlayed}
+				{state.deckLeft}/{state.deckSize}
 			</div>
 		</div>
 	</div>

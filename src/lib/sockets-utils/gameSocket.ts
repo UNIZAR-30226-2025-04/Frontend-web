@@ -53,6 +53,9 @@ export function fullStateUpdate(args:any){
 				money: args.player_data.players_money,
 				timeLeft: timeLeft,
 			}));
+
+			// Change later when full state getter is done
+			getFullHand()
 		}else{
 			// If state is none, try again in 500ms
 			setTimeout(() => {requestGamePhasePlayerInfo();},500,);
@@ -102,11 +105,20 @@ function argsToCards(deck:any): Card[]{
 			rank: deck[i].Rank,
 			suit: deck[i].Suit,
 			faceUp: true,
-			overlay: 0
+			overlay: deck[i].Enhancement
 		}
 		ret.push(newCard);
 	}
 	return ret;
+}
+
+/**
+ * Converts a :Card to a format the server understands
+ * @param card To convert
+ * @returns Converted card
+ */
+function cardToArgs(card:Card):{rank:string, suit:string, Enhancement:number}{
+	return {rank:card.rank, suit: card.suit, Enhancement:card.overlay};
 }
 
 
@@ -136,7 +148,7 @@ export function blindPhaseSetup(args:any){
 		...state,
 		minScore: args.base_blind,
 		proposedBlind: args.base_blind,
-		timeLeft: args.timeout
+		timeLeft: secondsSince(args.timeout_start_date)
 	}));
 	
 	// Update phase
@@ -280,8 +292,7 @@ export function discardedCards(args:any){
 		...state,
 		handCards: newHand,
 		discards:args.left_discards,
-		deckLeft:args.unplayed_cards+args.played_cards,
-		deckPlayed:args.unplayed_cards,
+		deckLeft:args.unplayed_cards,
 	}));
 
 	addToHand(argsToCards(args.new_cards));
@@ -290,7 +301,7 @@ export function discardedCards(args:any){
 
 /**
  * Function called on 'full_deck' event
- * Updates the current game state to update the deckLeft and deckPlayed
+ * Updates the current game state to update the deckLeft
  * @param args given by the server
  */
 export function updateDeck(args:any) {
@@ -307,7 +318,11 @@ export function playPhaseSetup(args:any){
 		...state,
 		minScore: args.blind,
 		round: args.round_number,
-		timeLeft: args.timeout
+		timeLeft: secondsSince(args.timeout_start_date),
+		deckSize: args.current_deck_size,
+		pot: args.current_pot,
+		hands: args.total_hand_plays,
+		discards: args.total_discards
 	}));
 
 	// Update phase
@@ -317,14 +332,7 @@ export function playPhaseSetup(args:any){
 	getFullHand();
 }
 
-/**
- * Converts a :Card to a format the server understands
- * @param card To convert
- * @returns Converted card
- */
-function cardToArgs(card:Card):{rank:string, suit:string}{
-	return {rank:card.rank, suit: card.suit};
-}
+
 
 
 // -----------------------

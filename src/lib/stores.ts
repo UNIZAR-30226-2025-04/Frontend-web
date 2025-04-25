@@ -52,8 +52,8 @@ let stateInit: GameState = {
     pot: 5,
     money: 0,
     rerollAmount: 3,
+    deckSize: 52,
     deckLeft: 52,
-    deckPlayed: 52,
     timeLeft: 300,
     actionBlocked:false,
     animVariables:{
