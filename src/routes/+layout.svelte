@@ -31,6 +31,8 @@
     import LoadingScreen from '$lib/components/LoadingScreen.svelte';
     import OpenPackModal from '$lib/components/OpenPackModal.svelte';
     import UseVoucherModal from '$lib/components/UseVoucherModal.svelte';
+    import WinModal from '$lib/components/WinModal.svelte';
+    import LoseModal from '$lib/components/LoseModal.svelte';
 
 	// For all singletons
 	initializeStores();
@@ -49,6 +51,8 @@
 		handInfoModal: {ref: HandInfoModal},
 		openPackModal: {ref: OpenPackModal},
 		useVoucherModal: {ref: UseVoucherModal},
+		winModal: {ref: WinModal},
+		loseModal: {ref: LoseModal},
 	};
   
 </script>

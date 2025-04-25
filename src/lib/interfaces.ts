@@ -238,3 +238,8 @@ export type AnimationVariables = {
     activatedJokers:boolean[],
     scoreCards:Card[]
 }
+
+export type GameEndInfo = {
+    winner:string
+    points:number
+}

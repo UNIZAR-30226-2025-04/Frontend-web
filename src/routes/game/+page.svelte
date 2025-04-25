@@ -17,6 +17,7 @@
     import {
         type Card,
         type CardItem,
+        type GameEndInfo,
         type GameState,
         type Package,
         type PackageItem,
@@ -24,7 +25,7 @@
     } from "$lib/interfaces";
     import { getNextKey } from "$lib/keyGenerator";
     import { discardHand, getFullHand, playHand, proposeBlind, requestGamePhasePlayerInfo } from "$lib/sockets-utils/gameSocket";
-    import { animationSpeedStore, gameStore } from "$lib/stores";
+    import { animationSpeedStore, gameEndStore, gameStore } from "$lib/stores";
     import {
         getDrawerStore,
         getModalStore,
@@ -94,6 +95,16 @@
 		type: "component",
 		meta: { levels: state.handLevels },
 		component: "handInfoModal",
+	};
+
+	const winModal: ModalSettings = {
+		type: "component",
+		component: "winModal",
+	};
+
+	const loseModal: ModalSettings = {
+		type: "component",
+		component: "loseModal",
 	};
 
 	// Reactivity animations
@@ -619,11 +630,21 @@
 	}
 
 	function testB(){
-
+		const newInfo:GameEndInfo = {
+			winner:"bictor",
+			points:6545348
+		}
+		gameEndStore.set(newInfo);
+		modalStore.trigger(winModal);
 	}
 
 	function testC(){
-		getFullHand();
+		const newInfo:GameEndInfo = {
+			winner:"Evil Victor",
+			points:63521
+		}
+		gameEndStore.set(newInfo);
+		modalStore.trigger(loseModal);
 	}
 
 	function testD(){
