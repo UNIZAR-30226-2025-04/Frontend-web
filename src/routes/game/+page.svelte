@@ -750,7 +750,11 @@
 			<div
 				class="card h-[6vh] text-5xl-r content-center align-middle mt-[3%] mr-[5%] p-0"
 			>
-				{$minScoreText.toFixed()}
+				{#if $minScoreText >= 0}
+					{$minScoreText.toFixed()}
+				{:else}
+					Reached!
+				{/if}
 			</div>
 		</div>
 
