@@ -1,4 +1,6 @@
 <script lang="ts">
+    import { goto } from "$app/navigation";
+    import { base } from "$app/paths";
     import type { GameEndInfo } from "$lib/interfaces";
     import { gameEndStore } from "$lib/stores";
     import { getModalStore } from "@skeletonlabs/skeleton";
@@ -11,12 +13,13 @@
 
     function onExit(){
         modalStore.close();
+        goto(base+"/home");
     }
 
 </script>
 
 
-<div class="card p-6 w-[18vw] shadow-xl space-y-4">
+<div class="card p-6 w-[32vh] shadow-xl space-y-4">
     <!--Image of crown-->
     <div class="relative w-full flex justify-center items-center mt-4">
         <img
