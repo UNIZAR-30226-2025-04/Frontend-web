@@ -1,6 +1,6 @@
 <script lang="ts">
   import { getModalStore, type ModalComponent, type ModalSettings } from '@skeletonlabs/skeleton';
-  import { gameStore, lobbyStore, socketStore, userDataStore } from '$lib/stores';
+  import { actionBlockedStore, gameStore, lobbyStore, socketStore, stateInit, userDataStore } from '$lib/stores';
   import { base } from '$app/paths';
   import { goto } from '$app/navigation';
   import { onMount } from 'svelte';
@@ -68,7 +68,8 @@
     lobbyStore.set(defaultLobby);
 
     // TODO reset game state store
-    //gameStore.set();
+    gameStore.set(stateInit);
+    actionBlockedStore.set(false);
     
     if (get(socketStore)) {
 			get(socketStore).disconnect();

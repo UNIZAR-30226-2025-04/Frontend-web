@@ -31,7 +31,7 @@ export const chatFeedElem = writable<HTMLElement>()
 
 export const socketStore = writable<Socket>()
 
-let stateInit: GameState = {
+export const stateInit: GameState = {
     playedCards: [],
     handCards: [],
     jokers: [],
