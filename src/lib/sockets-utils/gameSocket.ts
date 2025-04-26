@@ -42,20 +42,26 @@ export function fullStateUpdate(args:any){
 
 			gameStore.update((state: GameState) => ({
 				...state,
-				jokers: [],
-				activeVouchers: [],
-				vouchers: [],
-				shop: { jokerRow: [], voucherRow: [], packageRow: [] },
-				round: args.current_round,
-				phase: stringToPhase(args.phase),
-				hands: args.player_data.hand_plays_left,
-				discards: args.player_data.discards_left,
-				money: args.player_data.players_money,
 				timeLeft: timeLeft,
+				phase: newPhase,
+				minScore: args.current_base_blind - args.player_data.total_points,
+				pot: args.current_pot,
+				maxRounds: args.max_rounds,
+				round: args.current_round,
+				handCards: [],
+				discards: args.player_data.discards_left,
+				hands: args.player_data.hand_plays_left,
+				deckSize: args.player_data.unplayed_cards + args.player_data.played_cards,
+				deckLeft: args.player_data.unplayed_cards,
+				money: args.player_data.players_money,
 			}));
 
+			addToHand(argsToCards(args.player_data.current_hand));
+
 			// Change later when full state getter is done
-			getFullHand()
+			if(newPhase === 1 && get(gameStore).handCards.length === 0){
+				getFullHand()
+			}
 		}else{
 			// If state is none, try again in 500ms
 			setTimeout(() => {requestGamePhasePlayerInfo();},500,);
@@ -148,7 +154,7 @@ export function blindPhaseSetup(args:any){
 		...state,
 		minScore: args.base_blind,
 		proposedBlind: args.base_blind,
-		timeLeft: secondsSince(args.timeout_start_date)
+		timeLeft: timePerPhase[0] - secondsSince(args.timeout_start_date)
 	}));
 	
 	// Update phase
@@ -318,7 +324,7 @@ export function playPhaseSetup(args:any){
 		...state,
 		minScore: args.blind,
 		round: args.round_number,
-		timeLeft: secondsSince(args.timeout_start_date),
+		timeLeft: timePerPhase[1] - secondsSince(args.timeout_start_date),
 		deckSize: args.current_deck_size,
 		pot: args.current_pot,
 		hands: args.total_hand_plays,

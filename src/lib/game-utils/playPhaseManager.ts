@@ -1,14 +1,19 @@
-import { getValueFromRank } from "$lib/cardDirectory";
-import type { Card, GameState, HandType } from "$lib/interfaces";
+import { getHierarchyFromRank, getValueFromRank, getValueFromSuit } from "$lib/cardDirectory";
+import type { Card, CardItem, GameState, HandType } from "$lib/interfaces";
 import { getNextKey } from "$lib/keyGenerator";
 import { animationSpeedStore, gameStore } from "$lib/stores";
 import { get } from "svelte/store";
 
 /**
- * Adds cards to hand with a nice animation
+ * Adds cards to hand with a nice animation, sorted woth rank
  * @param cards to add
  */
 export function addToHand(cards:Card[]){
+    cards = cards.sort(
+        (cardA, cardB: Card) =>
+            getHierarchyFromRank(cardA.rank) -
+            getHierarchyFromRank(cardB.rank),
+    );
     const drawDelay:number = get(animationSpeedStore)*3;
 
     for(let i=0; i<cards.length; i++){

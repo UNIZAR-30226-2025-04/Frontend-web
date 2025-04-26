@@ -10,10 +10,10 @@ import { loadingStore } from '$lib/stores/loadingStore';
  * @param isPublic Define if the lobby is public or not
  * @async
  */
-export async function createLobbyFetch(isPublic: boolean = false): Promise<boolean> {
+export async function createLobbyFetch(mode: number = 0): Promise<boolean> {
     try {
         const formData = new URLSearchParams();
-        formData.append('public', isPublic ? 'true' : 'false');
+        formData.append('public', mode.toString());
 
         const response = await fetch(createLobbyPath, {
             method: 'POST',
@@ -38,7 +38,7 @@ export async function createLobbyFetch(isPublic: boolean = false): Promise<boole
             code: lobbyCode,
             host: true,
             players: [],
-            isPublic: isPublic
+            isPublic: mode === 1
         });
         
         return await joinLobbyFetch(lobbyCode);

@@ -21,29 +21,46 @@
     let isLoading = false;    
     let publicValue = true;
 
-/**
- * Function to switch the public value
- */
-function onSwitchPublic(){
-    publicValue = !publicValue;
-    console.log(publicValue);
-}
+    /**
+     * Function to switch the public value
+     */
+    function onSwitchPublic(){
+        publicValue = !publicValue;
+        console.log(publicValue);
+    }
 
 
     /**
-     * Function to create a lobby
+     * Function to create a lobby, takes into account the isPublic variable
      * @async
      */
     async function onCreateLobby() {
-        loadingStore.startLoading('Creando lobby...');
-        const result = await createLobbyFetch(isPublic);
+        loadingStore.startLoading('Creating lobby...');
+        const result = await createLobbyFetch(isPublic? 1:0);
+        
+        if (result) {
+            parent.onClose();
+            goto(base + "/lobby");
+        } else {
+            console.error("Error when creating lobby");
+            loadingStore.stopLoading();
+        }
+    }
+
+    /**
+     * Creates a lobby againsts a bot
+     * @async
+     */
+    async function onCreateBotLobby() {
+        loadingStore.startLoading('Creating lobby...');
+        const result = await createLobbyFetch(2);
         
         if (result) {
             parent.onClose();
             goto(base + "/lobby");
         } else {
             // Manejar el error
-            console.error("No se pudo crear el lobby");
+            console.error("Error when creating lobby");
             loadingStore.stopLoading();
         }
     }
@@ -58,8 +75,6 @@ function onSwitchPublic(){
 {#if $modalStore[0]}
     <div class="modal-form card p-4 w-400 shadow-xl space-y-4">
         <h1 style="text-align: center; font-size:150%">Create game lobby</h1>
-        <p style="font-size:108%">Lorem ipsum dolor sit amet, consectetur adipiscing elit, <br>sed do
-            eiusmod tempor incididunt ut</p>
 
         <div class="form-control">
             <label class="flex items-center space-x-2">
@@ -73,7 +88,7 @@ function onSwitchPublic(){
         
         <!--Button section-->
         <div class="flex gap-6 justify-stretch">
-			<button style="font-size:112%"class="block btn {parent.buttonNeutral} w-full" on:click={parent.onClose}>Vs AI</button>
+			<button style="font-size:112%"class="block btn {parent.buttonNeutral} w-full" on:click={onCreateBotLobby}>Vs AI</button>
 			<button style="font-size:112%" class="block btn {parent.buttonPositive} w-full" on:click={parent.onClose}>Cancel</button>
         </div>
         <button style="font-size:112%" class="block btn {parent.buttonNeutral} w-full" type="button" on:click={onCreateLobby} disabled={isLoading}>

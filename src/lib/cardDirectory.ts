@@ -9,7 +9,7 @@ import type { Voucher, Joker, JokerEdition, Overlay, Suit, HandType, Package } f
  */
 export function getValueFromRank(rank:string):number{
     switch(rank){
-        case "A": return 10;
+        case "A": return 11;
         case "K": return 10;
         case "Q": return 10;
         case "J": return 10;
@@ -25,10 +25,10 @@ export function getValueFromRank(rank:string):number{
  */
 export function getHierarchyFromRank(rank:string):number{
     switch(rank){
-        case "A": return 13;
-        case "K": return 12;
-        case "Q": return 11;
-        case "J": return 10;
+        case "A": return 14;
+        case "K": return 13;
+        case "Q": return 12;
+        case "J": return 11;
         default:
             return Number(rank);
     }
