@@ -18,7 +18,7 @@ export function addToHand(cards:Card[]){
 
     for(let i=0; i<cards.length; i++){
         setTimeout(() => {
-            gameStore.update((state: GameState) => ({
+            gameStore.update((state: GameState) => ({   
                 ...state,
                 handCards: state.handCards.concat([{
                     id:getNextKey(),
