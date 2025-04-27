@@ -37,6 +37,15 @@
 	import { bounceOut, cubicOut } from "svelte/easing";
 	import { tweened } from "svelte/motion";
 	import { fade, fly } from "svelte/transition";
+	import { 
+		buyJoker, 
+		buyVoucher, 
+		sellJoker, 
+		rerollShop, 
+		selectPackItems 
+	} from "$lib/sockets-utils/lobbySocket";
+	import { get } from "svelte/store";
+	import { socketStore } from "$lib/stores";
 
 	// Main state variable
 	let state: GameState = {
@@ -178,12 +187,16 @@
 	 * If the action is blocked, it prevents any changes.
 	 * Resets the `picked` status of all hand cards and sets the picked joker card index.
 	 * If on shop phase it sells the joker
-	 * @param index  of the joker card that was clicked.
+	 * @param index of the joker card that was clicked.
 	 */
 	function onClickJoker(index: number) {
 		if (actionBlocked) return;
 
 		if (state.phase === 1) {
+			// Emit socket event to sell joker
+			sellJoker(state.jokers[index].jokerId);
+			
+			// Local state update (will be overwritten when server responds)
 			state.money += state.jokers[index].sellAmount;
 			state.jokers.splice(index, 1);
 		}
@@ -342,89 +355,21 @@
 	}
 
 	/**
-	 * Buys the joker at 'index' from the shop if the user has the aviable money and space
-	 * @param index
-	 */
-	function onBuyJoker(index: number) {
-		if (
-			state.jokers.length < 5 &&
-			state.shop.jokerRow[index].sellAmount <= state.money
-		) {
-			state.money -= state.shop.jokerRow[index].sellAmount;
-			state.jokers.push(state.shop.jokerRow[index]);
-			state.shop.jokerRow.splice(index, 1);
-		}
-	}
-
-	/**
-	 * Buys the voucher at 'index' from the shop if the user has the aviable money
-	 * @param index
-	 */
-	function onBuyVoucher(index: number) {
-		if (state.shop.voucherRow[index].sellAmount <= state.money) {
-			state.money -= state.shop.voucherRow[index].sellAmount;
-			
-			// Create a copy of the voucher to add to the collection
-			const boughtVoucher = {
-				...state.shop.voucherRow[index],
-				id: getNextKey() // Assign a new unique ID
-			};
-			
-			// Add to player's voucher inventory
-			state.vouchers.push(boughtVoucher);
-			
-			// Ensure reactivity
-			state.vouchers = [...state.vouchers]; 
-			
-			// Remove the voucher from the shop
-			state.shop.voucherRow.splice(index, 1);
-			state.shop.voucherRow = [...state.shop.voucherRow]; 
-			
-			console.log(`Bought voucher ID ${boughtVoucher.voucherId}, total in inventory: ${state.vouchers.length}`);
-		}
-	}
-
-	/**
-	 * Buys the package at 'index' from the shop if the user has the aviable money
-	 * If the pack contains joker it doesn't open if the user has already 5/5 jokers
-	 * @param index
-	 */
-	function onBuyPack(index: number) {
-		let packItem: PackageItem = state.shop.packageRow[index];
-		if (state.shop.packageRow[index].sellAmount <= state.money) {
-			if (
-				packItem.packageId >= 0 &&
-				packItem.packageId < packageDirectory.length
-			) {
-				let pack: Package = packageDirectory[packItem.packageId];
-				if (pack.contentType !== 1 || state.jokers.length < 5) {
-					const openPackModal: ModalSettings = {
-						type: "component",
-						meta: {
-							state: state,
-							packItem: state.shop.packageRow[index],
-							animationSpeed: animationSpeed,
-						},
-						component: "openPackModal",
-					};
-
-					state.money -= state.shop.packageRow[index].sellAmount;
-					state.shop.packageRow.splice(index, 1);
-
-					modalStore.trigger(openPackModal);
-				}
-			}
-		}
-	}
-
-	/**
 	 * If the user has enough money it rerolls the joker row from the shop
 	 */
 	function onReroll() {
+		if (state.phase !== 1) {
+			console.log("Cannot reroll: not in shop phase");
+			return;
+		}
+		
 		if (
 			state.money >= state.rerollAmount &&
 			state.shop.jokerRow.length > 0
 		) {
+			// Emit socket event for reroll
+			rerollShop();
+			
 			let aux: number = state.shop.jokerRow.length;
 			state.shop.jokerRow = [];
 			for (let i = 0; i < aux; i++) {
@@ -442,9 +387,118 @@
 					picked: false,
 				});
 			}
-			state.shop.jokerRow = state.shop.jokerRow;
+			state.shop.jokerRow = [...state.shop.jokerRow]; // Ensure reactivity
 			state.money -= state.rerollAmount;
 			state.rerollAmount += Math.floor(Math.random() * 5) + 1;
+		}
+	}
+
+	/**
+	 * Buys the joker at 'index' from the shop regardless of conditions
+	 */
+	function onBuyJoker(index: number) {
+		console.log("Attempting to buy joker at index:", index);
+		
+		// Verify that the index is valid
+		if (index < state.shop.jokerRow.length && state.shop.jokerRow[index]) {
+			console.log("Buying joker:", state.shop.jokerRow[index]);
+			
+			// Emit socket event to buy joker
+			buyJoker(state.shop.jokerRow[index].id, state.shop.jokerRow[index].sellAmount);
+			
+			// Local state update
+			state.money -= state.shop.jokerRow[index].sellAmount;
+			
+			// If you already have 5 jokers, remove the first one to make space
+			if (state.jokers.length >= 5) {
+				state.jokers.shift();
+			}
+			
+			state.jokers.push(state.shop.jokerRow[index]);
+			state.shop.jokerRow.splice(index, 1);
+			state.shop.jokerRow = [...state.shop.jokerRow]; // Ensure reactivity
+		}
+	}
+
+	/**
+	 * Buys the voucher at 'index' from the shop regardless of conditions
+	 */
+	function onBuyVoucher(index: number) {
+		console.log("Attempting to buy voucher at index:", index);
+		
+		// Verify that the index is valid
+		if (index < state.shop.voucherRow.length && state.shop.voucherRow[index]) {
+			console.log("Buying voucher:", state.shop.voucherRow[index]);
+			
+			// Emit socket event to buy voucher
+			buyVoucher(state.shop.voucherRow[index].id, state.shop.voucherRow[index].sellAmount);
+			
+			// Local state update
+			state.money -= state.shop.voucherRow[index].sellAmount;
+			
+			// Create a copy of the voucher to add to the collection
+			const boughtVoucher = {
+				...state.shop.voucherRow[index],
+				id: getNextKey()
+			};
+			
+			// Add to player's voucher inventory
+			state.vouchers.push(boughtVoucher);
+			state.vouchers = [...state.vouchers]; 
+			
+			// Remove the voucher from the shop
+			state.shop.voucherRow.splice(index, 1);
+			state.shop.voucherRow = [...state.shop.voucherRow]; 
+			
+			console.log(`Bought voucher ID ${boughtVoucher.voucherId}, total in inventory: ${state.vouchers.length}`);
+		}
+	}
+
+	/**
+	 * Buys the package at 'index' from the shop if the user has the aviable money
+	 * If the pack contains joker it doesn't open if the user has already 5/5 jokers
+	 * @param index
+	 */
+	function onBuyPack(index: number) {
+		if (state.phase !== 1) {
+			console.log("Cannot buy pack: not in shop phase");
+			return;
+		}
+		
+		if (index >= state.shop.packageRow.length || !state.shop.packageRow[index]) {
+			console.log("Invalid pack index:", index);
+			return;
+		}
+		
+		let packItem: PackageItem = state.shop.packageRow[index];
+		
+		if (packItem.sellAmount <= state.money) {
+			if (
+				packItem.packageId >= 0 &&
+				packItem.packageId < packageDirectory.length
+			) {
+				let pack: Package = packageDirectory[packItem.packageId];
+				if (pack.contentType !== 1 || state.jokers.length < 5) {
+					// Emit socket event to purchase pack
+					buyPack(packItem.id, packItem.sellAmount);
+					
+					const openPackModal: ModalSettings = {
+						type: "component",
+						meta: {
+							state: state,
+							packItem: state.shop.packageRow[index],
+							animationSpeed: animationSpeed,
+						},
+						component: "openPackModal",
+					};
+
+					state.money -= packItem.sellAmount;
+					state.shop.packageRow.splice(index, 1);
+					state.shop.packageRow = [...state.shop.packageRow]; // Ensure reactivity
+
+					modalStore.trigger(openPackModal);
+				}
+			}
 		}
 	}
 
@@ -1002,6 +1056,21 @@
 		// Check if it's offensive based on targetType
 		return voucherInfo.targetType === 'offensive';
 	}
+
+	// Function to buy packs (not in original lobbySocket.ts)
+	function buyPack(packId: number, price: number): void {
+		console.log("<- purchase_pack:", packId, price);
+		get(socketStore).emit("purchase_pack", packId, price);
+	}
+
+	// Function to handle the selection of elements from a pack
+	function handlePackSelection(packId: number, selectedCard: any, selectedJokerId: number) {
+		// Emit socket event for pack selection
+		selectPackItems(packId, selectedCard, selectedJokerId);
+	}
+
+	// This for debugging
+	console.log("Current jokers:", state.jokers);
 </script>
 
 <!-- Main body -->
@@ -1063,7 +1132,6 @@
 							width="w-[12vh]"
 							voucherId={voucher.voucherId ?? 0}
 							animateCard={true}
-							isActive={true}
 						/>
 					</div>
 				{/each}

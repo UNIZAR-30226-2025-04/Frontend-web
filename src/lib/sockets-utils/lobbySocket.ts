@@ -210,3 +210,61 @@ export function sendMessage(message:string): void {
 	console.log("<- broadcast_to_lobby:", get(lobbyStore).code, message);
 	get(socketStore).emit("broadcast_to_lobby", get(lobbyStore).code, message);
 }
+
+/**
+ * Buys a joker from the shop
+ * @param index Index of the joker in the shop
+ * @param price Price of the joker
+ */
+export function buyJoker(index: number, price: number): void {
+	console.log("<- buy_joker:", index, price);
+	get(socketStore).emit("buy_joker", index, price);
+}
+
+/**
+ * Buys a voucher from the shop
+ * @param index Index of the voucher in the shop
+ * @param price Price of the voucher
+ */
+export function buyVoucher(index: number, price: number): void {
+	console.log("<- buy_voucher:", index, price);
+	get(socketStore).emit("buy_voucher", index, price);
+}
+
+/**
+ * Buys a pack from the shop
+ * @param index Index of the pack in the shop
+ * @param price Price of the pack
+ */
+export function buyPackage(index: number, price: number): void {
+	console.log("<- purchase_pack:", index, price);
+	get(socketStore).emit("purchase_pack", index, price);
+}
+
+/**
+ * Sells a joker from the inventory
+ * @param jokerId ID of the joker to sell
+ */
+export function sellJoker(jokerId: number): void {
+	console.log("<- sell_joker:", jokerId);
+	get(socketStore).emit("sell_joker", jokerId);
+}
+
+/**
+ * Requests a reroll of the shop
+ */
+export function rerollShop(): void {
+	console.log("<- reroll_shop");
+	get(socketStore).emit("reroll_shop");
+}
+
+/**
+ * Sends the selection of items from a pack
+ * @param packId ID of the pack
+ * @param selectedCard Selected card
+ * @param selectedJokerId ID of the selected joker
+ */
+export function selectPackItems(packId: number, selectedCard: any, selectedJokerId: number): void {
+	console.log("<- pack_selection:", packId, selectedCard, selectedJokerId);
+	get(socketStore).emit("pack_selection", packId, selectedCard, selectedJokerId);
+}
