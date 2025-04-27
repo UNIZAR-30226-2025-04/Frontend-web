@@ -24,7 +24,14 @@
         type VoucherItem
     } from "$lib/interfaces";
     import { getNextKey } from "$lib/keyGenerator";
-    import { discardHand, getFullHand, playHand, proposeBlind, requestGamePhasePlayerInfo } from "$lib/sockets-utils/gameSocket";
+    import { 
+        addMoney,
+        discardHand, 
+        getFullHand, 
+        playHand, 
+        proposeBlind, 
+        requestGamePhasePlayerInfo 
+    } from "$lib/sockets-utils/gameSocket";
     import { animationSpeedStore, gameEndStore, gameStore } from "$lib/stores";
     import {
         getDrawerStore,
@@ -344,31 +351,14 @@
 	}
 
 	/**
-	 * Buys the voucher at 'index' from the shop if the user has the aviable money
+	 * Buys the voucher at 'index' from the shop if the user has the available money
 	 * @param index
 	 */
 	function onBuyVoucher(index: number) {
 		if (state.shop.voucherRow[index].sellAmount <= state.money) {
-			state.money -= state.shop.voucherRow[index].sellAmount;
-
-			// Create a copy of the voucher to add to the collection
-			const boughtVoucher = {
-				...state.shop.voucherRow[index],
-				id: getNextKey(), // Assign a new unique ID
-			};
-
-			// Add to player's voucher inventory
-			state.vouchers.push(boughtVoucher);
-
-			// Ensure reactivity
-			state.vouchers = [...state.vouchers];
-
-			// Remove the voucher from the shop
-			state.shop.voucherRow.splice(index, 1);
-			state.shop.voucherRow = [...state.shop.voucherRow];
-
-			console.log(
-				`Bought voucher ID ${boughtVoucher.voucherId}, total in inventory: ${state.vouchers.length}`,
+			buyVoucher(
+				state.shop.voucherRow[index].voucherId, 
+				state.shop.voucherRow[index].sellAmount
 			);
 		}
 	}
@@ -541,7 +531,7 @@
 	 * Adds +10 money to state
 	 */
 	function onAddMoney() {
-		state.money += 10;
+		addMoney(1000000);
 	}
 
 	/**

@@ -6,7 +6,21 @@ import { lobbyStore, socketStore, userDataStore } from "$lib/stores";
 import { io, Socket } from "socket.io-client";
 import { get } from "svelte/store";
 import { addMessage } from "./chatAddMessage";
-import { blindPhaseSetup, discardedCards, fullStateUpdate, playedHand, playPhaseSetup, updateHand, updateMinimunScore } from "./gameSocket";
+import { 
+	blindPhaseSetup, 
+	discardedCards, 
+	fullStateUpdate, 
+	jokerPurchased,
+	jokerSold,
+	packPurchased, 
+	playedHand, 
+	playPhaseSetup, 
+	shopPhaseSetup,
+	updateHand, 
+	updateMinimunScore,
+	updateShop,
+	voucherPurchased
+} from "./gameSocket";
 
 /**
    * Adds user to the list in lobbySocket
@@ -203,6 +217,36 @@ export function initializeSocket() {
 
 	socket.on("full_deck", (args: any) => {
 		console.log("-> full_deck", args);
+	});
+
+	socket.on("shop_phase_setup", (args: any) => {
+		console.log("-> shop_phase_setup", args);
+		shopPhaseSetup(args);
+	});
+
+	socket.on("shop_updated", (args: any) => {
+		console.log("-> shop_updated", args);
+		updateShop(args);
+	});
+
+	socket.on("joker_purchased", (args: any) => {
+		console.log("-> joker_purchased", args);
+		jokerPurchased(args);
+	});
+
+	socket.on("voucher_purchased", (args: any) => {
+		console.log("-> voucher_purchased", args);
+		voucherPurchased(args);
+	});
+
+	socket.on("pack_purchased", (args: any) => {
+		console.log("-> pack_purchased", args);
+		packPurchased(args);
+	});
+
+	socket.on("joker_sold", (args: any) => {
+		console.log("-> joker_sold", args);
+		jokerSold(args);
 	});
 }
 
