@@ -219,8 +219,8 @@ export function initializeSocket() {
 		console.log("-> full_deck", args);
 	});
 
-	socket.on("shop_phase_setup", (args: any) => {
-		console.log("-> shop_phase_setup", args);
+	socket.on("starting_shop", (args: any) => {
+		console.log("-> starting_shop", args);
 		shopPhaseSetup(args);
 	});
 

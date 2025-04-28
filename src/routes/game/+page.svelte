@@ -26,11 +26,20 @@
     import { getNextKey } from "$lib/keyGenerator";
     import { 
         addMoney,
+        //buyJoker,
+        buyVoucher,
+        buyPackage,
+        sellJoker,
+        rerollShop,
         discardHand, 
         getFullHand, 
         playHand, 
-        proposeBlind, 
-        requestGamePhasePlayerInfo 
+        proposeBlind,
+        requestGamePhasePlayerInfo,
+        onClickJoker,
+        onBuyJoker,
+        onBuyVoucher,
+		onReroll
     } from "$lib/sockets-utils/gameSocket";
     import { animationSpeedStore, gameEndStore, gameStore } from "$lib/stores";
     import {
@@ -314,55 +323,6 @@
 		state.handCards = [...state.handCards];
 	}
 
-	
-	// -----------------------
-	// SHOP PHASE FUNCS
-	// -----------------------
-
-	/**
-	 * Handles the click event on the joker card, updating the state of the hand cards.
-	 * If the action is blocked, it prevents any changes.
-	 * Resets the `picked` status of all hand cards and sets the picked joker card index.
-	 * If on shop phase it sells the joker
-	 * @param index  of the joker card that was clicked.
-	 */
-	 function onClickJoker(index: number) {
-		if (actionBlocked) return;
-
-		if (state.phase === 2) {
-			state.money += state.jokers[index].sellAmount;
-			state.jokers.splice(index, 1);
-		}
-	}
-
-	/**
-	 * Buys the joker at 'index' from the shop if the user has the aviable money and space
-	 * @param index
-	 */
-	 function onBuyJoker(index: number) {
-		if (
-			state.jokers.length < 5 &&
-			state.shop.jokerRow[index].sellAmount <= state.money
-		) {
-			state.money -= state.shop.jokerRow[index].sellAmount;
-			state.jokers.push(state.shop.jokerRow[index]);
-			state.shop.jokerRow.splice(index, 1);
-		}
-	}
-
-	/**
-	 * Buys the voucher at 'index' from the shop if the user has the available money
-	 * @param index
-	 */
-	function onBuyVoucher(index: number) {
-		if (state.shop.voucherRow[index].sellAmount <= state.money) {
-			buyVoucher(
-				state.shop.voucherRow[index].voucherId, 
-				state.shop.voucherRow[index].sellAmount
-			);
-		}
-	}
-
 	/**
 	 * Buys the package at 'index' from the shop if the user has the aviable money
 	 * If the pack contains joker it doesn't open if the user has already 5/5 jokers
@@ -377,6 +337,8 @@
 			) {
 				let pack: Package = packageDirectory[packItem.packageId];
 				if (pack.contentType !== 1 || state.jokers.length < 5) {
+					buyPackage(packItem.id, packItem.sellAmount);
+					
 					const openPackModal: ModalSettings = {
 						type: "component",
 						meta: {
@@ -386,44 +348,10 @@
 						},
 						component: "openPackModal",
 					};
-
-					state.money -= state.shop.packageRow[index].sellAmount;
-					state.shop.packageRow.splice(index, 1);
-
+					
 					modalStore.trigger(openPackModal);
 				}
 			}
-		}
-	}
-
-	/**
-	 * If the user has enough money it rerolls the joker row from the shop
-	 */
-	function onReroll() {
-		if (
-			state.money >= state.rerollAmount &&
-			state.shop.jokerRow.length > 0
-		) {
-			let aux: number = state.shop.jokerRow.length;
-			state.shop.jokerRow = [];
-			for (let i = 0; i < aux; i++) {
-				const newJoker = Math.floor(
-					Math.random() * jokerDirectory.length,
-				);
-				const newEdition = Math.floor(
-					Math.random() * jokerEditionsDirectory.length,
-				);
-				state.shop.jokerRow.push({
-					id: getNextKey(),
-					jokerId: newJoker,
-					edition: newEdition,
-					sellAmount: Math.floor(Math.random() * 30) + 1,
-					picked: false,
-				});
-			}
-			state.shop.jokerRow = state.shop.jokerRow;
-			state.money -= state.rerollAmount;
-			state.rerollAmount += Math.floor(Math.random() * 5) + 1;
 		}
 	}
 
