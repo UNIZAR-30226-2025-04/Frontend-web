@@ -1,14 +1,11 @@
 import { HandTypesBase, voucherDirectory, packageDirectory } from "$lib/cardDirectory";
 import type { Card, CardItem, GameState, VoucherItem, JokerItem, PackageItem, Package } from "$lib/interfaces";
-import { gameStore, lobbyStore, socketStore, userDataStore } from "$lib/stores";
+import { gameStore, lobbyStore, packageStore, socketStore, userDataStore } from "$lib/stores";
 import { get } from "svelte/store";
 import { timePerPhase } from "$lib/gameDirectory";
 import { logFullState, setPhaseTo } from "$lib/game-utils/phaseManager";
 import { getNextKey } from "$lib/keyGenerator";
 import { addToHand, playAnimation } from "$lib/game-utils/playPhaseManager";
-import type { ModalSettings } from "@skeletonlabs/skeleton";
-import { goto } from "$app/navigation";
-import { base } from "$app/paths";
 
 // -----------------------
 // ALL PHASE FUNCS
@@ -346,18 +343,6 @@ export function playPhaseSetup(args:any){
 // SHOP PHASE FUNCS
 // -----------------------
 
-/**
- * Handles the click event on the joker card.
- * If on shop phase it sells the joker
- * @param index of the joker card that was clicked.
- */
-export function onClickJoker(index: number) {
-    if (get(gameStore).actionBlocked) return;
-
-    if (get(gameStore).phase === 2) {
-        sellJoker(get(gameStore).jokers[index].jokerId);
-    }
-}
 
 /**
  * Handles the shop phase setup
@@ -481,6 +466,7 @@ export function shopPhaseSetup(args: any) {
         
         // CRITICAL: Update phase to shop phase (2)
         state.phase = 2;
+        state.actionBlocked = false;
         
         // Set timeLeft for the shop phase
         if (args.timeout && args.timeout_start_date) {
@@ -495,7 +481,8 @@ export function shopPhaseSetup(args: any) {
             vouchers: state.shop.voucherRow.length,
             packages: state.shop.packageRow.length,
             money: state.money,
-            phase: state.phase
+            phase: state.phase,
+            actionBlocked: state.actionBlocked
         });
         
         return state;
@@ -505,65 +492,6 @@ export function shopPhaseSetup(args: any) {
     setPhaseTo(2);
 }
 
-/**
- * Buys the joker at 'index' from the shop if the user has the available money and space
- * @param index
- */
-export function onBuyJoker(index: number) {
-    const state = get(gameStore);
-    
-    if (state.actionBlocked) return;
-    
-    if (index >= 0 && index < state.shop.jokerRow.length) {
-        const jokerItem = state.shop.jokerRow[index];
-        
-        console.log("Attempting to buy joker:", {
-            index,
-            jokerItem,
-            playerMoney: state.money,
-            jokersCount: state.jokers.length
-        });
-        
-        if (state.jokers.length < 5 && jokerItem.sellAmount <= state.money) {
-            // Use correct ID for purchase
-            buyJoker(jokerItem.id, jokerItem.sellAmount);
-        } else {
-            console.log("Cannot buy joker: " + 
-                (state.jokers.length >= 5 ? "joker slots full" : "not enough money"));
-        }
-    } else {
-        console.error("Invalid joker index:", index);
-    }
-}
-
-/**
- * Buys the voucher at 'index' from the shop if the user has the available money
- * @param index
- */
-export function onBuyVoucher(index: number) {
-    const state = get(gameStore);
-    
-    if (state.actionBlocked) return;
-    
-    if (index >= 0 && index < state.shop.voucherRow.length) {
-        const voucherItem = state.shop.voucherRow[index];
-        
-        console.log("Attempting to buy voucher:", {
-            index,
-            voucherItem,
-            playerMoney: state.money
-        });
-        
-        if (voucherItem.sellAmount <= state.money) {
-            // Use correct ID for purchase
-            buyVoucher(voucherItem.id, voucherItem.sellAmount);
-        } else {
-            console.log("Cannot buy voucher: not enough money");
-        }
-    } else {
-        console.error("Invalid voucher index:", index);
-    }
-}
 
 /**
  * Emits a buy_joker event to purchase a joker from the shop
@@ -585,53 +513,6 @@ export function buyVoucher(voucherId: number, price: number) {
     get(socketStore).emit("buy_voucher", voucherId, price);
 }
 
-/**
- * Buys the package at 'index' from the shop if the user has the aviable money
- * If the pack contains joker it doesn't open if the user has already 5/5 jokers
- * @param index
- */
-export function onBuyPack(index: number) {
-    const state = get(gameStore);
-    
-    if (state.actionBlocked) return;
-    
-    if (index >= 0 && index < state.shop.packageRow.length) {
-        const packItem = state.shop.packageRow[index];
-        
-        console.log("Attempting to buy package:", {
-            index,
-            packItem,
-            playerMoney: state.money,
-            jokersCount: state.jokers.length
-        });
-        
-        if (packItem.sellAmount <= state.money) {
-            if (packItem.packageId >= 0 && packItem.packageId < packageDirectory.length) {
-                let pack = packageDirectory[packItem.packageId];
-                if (pack.contentType !== 1 || state.jokers.length < 5) {
-                    buyPackage(packItem.id, packItem.sellAmount);
-                    
-                    // Instead of using modalStore directly, we'll store the data in gameStore
-                    // and let the component handle showing the modal
-                    gameStore.update(state => ({
-                        ...state,
-                        pendingPackModal: {
-                            packItem: packItem
-                        }
-                    }));
-                } else {
-                    console.log("Cannot buy pack: joker slots full");
-                }
-            } else {
-                console.error("Invalid package ID:", packItem.packageId);
-            }
-        } else {
-            console.log("Cannot buy package: not enough money");
-        }
-    } else {
-        console.error("Invalid package index:", index);
-    }
-}
 
 /**
  * If the user has enough money it rerolls the joker row from the shop
@@ -658,13 +539,13 @@ export function addMoney(amount: number = 10000) {
 }
 
 /**
- * Emits a purchase_pack event to buy a pack from the shop
+ * Emits a buy_pack event to buy a pack from the shop
  * @param packId ID of the pack to buy
  * @param price Price of the pack
  */
 export function buyPackage(packId: number, price: number) {
-	console.log("<- purchase_pack:", packId, price);
-	get(socketStore).emit("purchase_pack", packId, price);
+	console.log("<- buy_pack:", packId, price);
+	get(socketStore).emit("buy_pack", packId, price);
 }
 
 /**
@@ -744,97 +625,80 @@ export function updateShop(args: any) {
 }
 
 /**
- * Handles the joker purchase response from server
+ * Handles the joker sold event from server
  * @param args given by the server
  */
-export function jokerPurchased(args: any) {
-    console.log("Joker purchased with data:", args);
+export function jokerSold(args: any) {
     
     gameStore.update((state: GameState) => {
-        // Remove the purchased joker from the shop
-        const updatedJokerRow = state.shop.jokerRow.filter(
-            joker => joker.id !== args.item_id
+        // Remove the sold joker from player's collection
+        state.jokers = state.jokers.filter(
+            joker => joker.jokerId !== args.joker_id
         );
         
-        state.shop.jokerRow = updatedJokerRow;
-        
-        // Add the joker to player's collection
-        if (args.joker) {
-            const newJoker: JokerItem = {
-                id: args.joker.id,
-                jokerId: args.joker.joker_id,
-                edition: args.joker.edition || 0,
-                sellAmount: args.joker.sell_price || 0,
-                picked: false
-            };
-            
-            state.jokers.push(newJoker);
-        }
-        
         // Update player's money
-        if (args.money !== undefined) {
-            state.money = args.money;
-        }
+        state.money = args.remaining_money;
         
         return state;
     });
 }
 
 /**
- * Handles the joker sold event from server
+ * Handles the joker purchase response from server
  * @param args given by the server
  */
-export function jokerSold(args: any) {
-    console.log("Joker sold with data:", args);
+export function jokerPurchased(args: any) {
     
     gameStore.update((state: GameState) => {
-        // Remove the sold joker from player's collection
-        const updatedJokers = state.jokers.filter(
+        // Remove the purchased joker from the shop
+        state.shop.jokerRow = state.shop.jokerRow.filter(
             joker => joker.id !== args.item_id
         );
         
-        state.jokers = updatedJokers;
+        // Add the joker to player's collection
+        const newJoker: JokerItem = {
+            id: args.item_id,
+            jokerId: args.joker_id,
+            edition: args.edition || 0,
+            sellAmount: args.sell_price,
+            picked: false
+        };
+        
+        state.jokers.push(newJoker);
         
         // Update player's money
-        if (args.money !== undefined) {
-            state.money = args.money;
-        }
+        state.money = args.remaining_money;
         
         return state;
     });
 }
+
+
 
 /**
  * Handles the voucher purchase response from server
  * @param args given by the server
  */
 export function voucherPurchased(args: any) {
-    console.log("Voucher purchased with data:", args);
     
     gameStore.update((state: GameState) => {
         // Remove the purchased voucher from the shop
-        const updatedVoucherRow = state.shop.voucherRow.filter(
+        state.shop.voucherRow = state.shop.voucherRow.filter(
             voucher => voucher.id !== args.item_id
         );
         
-        state.shop.voucherRow = updatedVoucherRow;
-        
         // Add the voucher to player's collection
-        if (args.voucher) {
-            const newVoucher: VoucherItem = {
-                id: args.voucher.id,
-                voucherId: args.voucher.voucher_id,
-                sellAmount: args.voucher.sell_price || 0,
-                picked: false
-            };
-            
-            state.vouchers.push(newVoucher);
-        }
+        const newVoucher: VoucherItem = {
+            id: getNextKey(),
+            voucherId: args.voucher_id,
+            sellAmount: 0,
+            picked: false
+        };
+        
+        state.vouchers.push(newVoucher);
         
         // Update player's money
-        if (args.money !== undefined) {
-            state.money = args.money;
-        }
+        state.money = args.remaining_money;
         
         return state;
     });
@@ -845,28 +709,34 @@ export function voucherPurchased(args: any) {
  * @param args given by the server
  */
 export function packPurchased(args: any) {
-    console.log("Pack purchased with data:", args);
     
     gameStore.update((state: GameState) => {
         // Remove the purchased pack from the shop
-        const updatedPackageRow = state.shop.packageRow.filter(
-            pack => pack.id !== args.item_id
+        let packItem:any = state.shop.packageRow.find(
+            pack => pack.id === args.item_id
         );
-        
-        state.shop.packageRow = updatedPackageRow;
+
+        if(packItem){
+            if(args.cards){
+                packItem.contents = args.cards;
+            }else if(args.jokers){
+                packItem.contents = args.jokers;
+            }else{
+                console.error("Pack contents are empty")
+            }
+        }else{
+            console.error("Pack id not recognized");
+        }
         
         // Update player's money
-        if (args.money !== undefined) {
-            state.money = args.money;
-        }
-        
-        // Simply store the contents directly in the component's modalStore
-        // instead of using GameState to avoid TypeScript errors
-        if (args.contents) {
-            // Using a direct function call or event to display modal
-            // instead of storing in GameState
-            displayPackContentsModal(args.contents, args.item_id);
-        }
+        state.money = args.remaining_money;
+
+        state.shop.packageRow = state.shop.packageRow.filter(
+            pack => pack.id !== args.item_id
+        );
+
+        packageStore.set(packItem);
+        console.log("PackPurchased:",packItem);
         
         return state;
     });

@@ -13,14 +13,15 @@
     import JokerCard from "./JokerCard.svelte";
     import VoucherCard from "./VoucherCard.svelte";
     import { flip } from "svelte/animate";
+    import { packageStore } from "$lib/stores";
 
     const modalStore = getModalStore();
 
     let packItem: PackageItem;
+    $: packItem = $packageStore;
     let pack: Package;
 
-    if ($modalStore[0]) {
-        packItem = $modalStore[0].meta.packItem;
+    $: if (packItem) {
         if (
             packItem.packageId >= 0 &&
             packItem.packageId < packageDirectory.length
@@ -47,23 +48,23 @@
      * Adds the picked card to the game state and closes modal
      */
     function onChoose(){
-        if($modalStore[0] && $modalStore[0].meta.state){
+        if(packItem){
             if(pack.contentType === 0){
                 toCardItems(packItem.contents).forEach(cardItem => {
                     if(cardItem.picked){
-                        // TODO add to deck or smt
+                        console.log("Picked card:",cardItem);
                     }
-                });
+                }); 
             }else if(pack.contentType === 1){
                 toJokerItems(packItem.contents).forEach(jokerItem => {
                     if(jokerItem.picked){
-                        $modalStore[0].meta.state.jokers.push(jokerItem);
+                        console.log("Picked joker:",jokerItem);
                     }
                 });
             }else{
                 toVoucherItems(packItem.contents).forEach(voucherItem => {
                     if(voucherItem.picked){
-                        $modalStore[0].meta.state.vouchers.push(voucherItem);
+                        console.log("Picked voucher:",voucherItem);
                     }
                 });
             }
@@ -87,10 +88,10 @@
 
 </script>
 
-<div
-    class="w-[45vh] card p-4 grid grid-rows-[1fr_3fr_4fr_1fr] items-center"
->
-    {#if $modalStore[0] && pack && packItem}
+{#if $modalStore[0] && $modalStore[0].meta && packItem && pack}
+    <div
+        class="w-[45vh] card p-4 grid grid-rows-[1fr_3fr_4fr_1fr] items-center"
+    >
         <!--Title card-->
         <div
             class="w-full card variant-filled-surface text-[2.5vh] leading-none p-2"
@@ -202,8 +203,8 @@
                 >Omit</button
             >
         </div>
-    {/if}
-</div>
+    </div>
+{/if}
 
 <style>
     .pulse-shadow {

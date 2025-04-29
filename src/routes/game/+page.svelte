@@ -24,22 +24,19 @@
         type VoucherItem
     } from "$lib/interfaces";
     import { getNextKey } from "$lib/keyGenerator";
-    import { 
+    import {
         addMoney,
-        //buyJoker,
-        buyVoucher,
+        buyJoker,
         buyPackage,
-        sellJoker,
-        rerollShop,
-        discardHand, 
-        getFullHand, 
-        playHand, 
+        buyVoucher,
+        discardHand,
+        onReroll,
+        playHand,
         proposeBlind,
         requestGamePhasePlayerInfo,
-        onClickJoker,
-        onBuyJoker,
-        onBuyVoucher,
-		onReroll
+
+        sellJoker
+
     } from "$lib/sockets-utils/gameSocket";
     import { animationSpeedStore, gameEndStore, gameStore } from "$lib/stores";
     import {
@@ -326,6 +323,61 @@
 	// -----------------------
 	// SHOP PHASE FUNCS
 	// -----------------------
+
+	/**
+	 * Handles the click event on the joker card.
+	 * If on shop phase it sells the joker
+	 * @param index of the joker card that was clicked.
+	 */
+	export function onClickJoker(index: number) {
+		if (state.actionBlocked) return;
+
+		if (state.phase === 2) {
+			sellJoker(state.jokers[index].jokerId);
+		}
+	}
+
+	/**
+	 * Buys the joker at 'index' from the shop if the user has the available money and space
+	 * @param index
+	 */
+	export function onBuyJoker(index: number) {
+		console.log("onBuyJoker");
+		if (state.actionBlocked) return;
+		
+		if (index >= 0 && index < state.shop.jokerRow.length) {
+			const jokerItem = state.shop.jokerRow[index];
+			
+			if (state.jokers.length < 5 && jokerItem.sellAmount <= state.money) {
+				buyJoker(jokerItem.id, jokerItem.sellAmount);
+			} else {
+				console.log("Cannot buy joker: " + 
+					(state.jokers.length >= 5 ? "joker slots full" : "not enough money"));
+			}
+		} else {
+			console.error("Invalid joker index:", index);
+		}
+	}
+
+	/**
+	 * Buys the voucher at 'index' from the shop if the user has the available money
+	 * @param index
+	 */
+	export function onBuyVoucher(index: number) {
+		if (state.actionBlocked) return;
+		
+		if (index >= 0 && index < state.shop.voucherRow.length) {
+			const voucherItem = state.shop.voucherRow[index];
+			
+			if (voucherItem.sellAmount <= state.money) {
+				buyVoucher(voucherItem.id, voucherItem.sellAmount);
+			} else {
+				console.log("Cannot buy voucher: not enough money");
+			}
+		} else {
+			console.error("Invalid voucher index:", index);
+		}
+	}
 
 	/**
 	 * Buys the package at 'index' from the shop if the user has the aviable money
@@ -1155,38 +1207,38 @@
 
 		<!--Debug buttons-->
 		<div class="flex flex-col gap-2">
-			<button class="btn variant-filled-surface" on:click={onNextPhase}>
+			<button class="btn variant-filled-surface h-[3vh]" on:click={onNextPhase}>
 				Next phase
 			</button>
-			<button class="btn variant-filled-surface" on:click={onAddMoney}>
+			<button class="btn variant-filled-surface h-[3vh]" on:click={onAddMoney}>
 				Add money
 			</button>
-			<button class="btn variant-filled-surface" on:click={onAddCard}>
+			<button class="btn variant-filled-surface h-[3vh]" on:click={onAddCard}>
 				Add card
 			</button>
-			<button class="btn variant-filled-surface" on:click={onAddJoker}>
+			<button class="btn variant-filled-surface h-[3vh]" on:click={onAddJoker}>
 				Add joker
 			</button>
 			<button
-				class="btn variant-filled-surface"
+				class="btn variant-filled-surface h-[3vh]"
 				on:click={testA}
 			>
 				Test A
 			</button>
 			<button
-				class="btn variant-filled-surface"
+				class="btn variant-filled-surface h-[3vh]"
 				on:click={testB}
 			>
 				Test B
 			</button>
 			<button
-				class="btn variant-filled-surface"
+				class="btn variant-filled-surface h-[3vh]"
 				on:click={testC}
 			>
 				Test C
 			</button>
 			<button
-				class="btn variant-filled-surface"
+				class="btn variant-filled-surface h-[3vh]"
 				on:click={testD}
 			>
 				Test D

@@ -2,7 +2,7 @@ import { jokerDirectory, jokerEditionsDirectory, overlayDirectory, packageDirect
 import { timePerPhase } from "$lib/gameDirectory";
 import type { Card, CardItem, GameState, JokerItem, VoucherItem } from "$lib/interfaces";
 import { getNextKey } from "$lib/keyGenerator";
-import { actionBlockedStore, gameStore } from "$lib/stores";
+import { gameStore } from "$lib/stores";
 import { getModalStore } from "@skeletonlabs/skeleton";
 import { get } from "svelte/store";
 
@@ -28,7 +28,7 @@ export function setPhaseTo(phase:number){
     //modalStore.close();
 
     // Reset all blocks
-    actionBlockedStore.set(false);
+    state.actionBlocked = false;
 
     // Sets the timer
     state.timeLeft = timePerPhase[phase];
@@ -53,34 +53,5 @@ export function setPhaseTo(phase:number){
 
     gameStore.set(state);
 
-}
-
-
-function generateCard(withOverlay: boolean, faceUp: boolean): Card {
-    const ranks: string[] = [
-        "A",
-        "K",
-        "Q",
-        "J",
-        "10",
-        "9",
-        "8",
-        "7",
-        "6",
-        "5",
-        "4",
-        "3",
-        "2",
-    ];
-    return {
-        rank: ranks[Math.floor(Math.random() * ranks.length)],
-        suit: suitDirectory[
-            Math.floor(Math.random() * suitDirectory.length)
-        ].name,
-        faceUp: faceUp,
-        overlay: withOverlay
-            ? Math.floor(Math.random() * overlayDirectory.length)
-            : 0,
-    };
 }
 
