@@ -85,7 +85,14 @@
 		flex-direction: column;
 		text-align: center;
 		color: black;
-		font-family: 'Pixelify Sans';
+		font-family: 'Modified pixelfy font';
+	}
+
+	@font-face {
+		font-family: 'Modified pixelfy font';
+		src: url('/fonts/Pixelify Sans Med Mod.ttf') format('truetype');
+		font-weight: normal;
+		font-style: normal;
 	}
 
 </style>

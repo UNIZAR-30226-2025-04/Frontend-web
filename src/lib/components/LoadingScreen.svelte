@@ -40,7 +40,7 @@
         font-size: 2rem;
         color: white;
         text-align: center;
-        font-family: 'Pixelify Sans', 'Press Start 2P', 'Courier New', monospace;
+		font-family: 'Modified pixelfy font';
         text-transform: uppercase;
         letter-spacing: 0.1em;
     }
@@ -48,5 +48,12 @@
     @keyframes pixel-spin {
         to { transform: rotate(360deg); }
     }
+
+    @font-face {
+		font-family: 'Modified pixelfy font';
+		src: url('/fonts/Pixelify Sans Med Mod.ttf') format('truetype');
+		font-weight: normal;
+		font-style: normal;
+	}
     
 </style> 
