@@ -219,7 +219,7 @@
 	 */
 	function updateBlind(delta: number) {
 		const newValue = state.proposedBlind + delta;
-		state.proposedBlind = Math.max(newValue, state.minScore); // nunca menor a 1000
+		state.proposedBlind = Math.max(newValue, state.minScore);
 	}
 
 	/**
@@ -323,6 +323,10 @@
 		state.handCards = [...state.handCards];
 	}
 
+	// -----------------------
+	// SHOP PHASE FUNCS
+	// -----------------------
+
 	/**
 	 * Buys the package at 'index' from the shop if the user has the aviable money
 	 * If the pack contains joker it doesn't open if the user has already 5/5 jokers
@@ -397,6 +401,24 @@
 	}
 
 	/**
+	 * Function for the modal to dictate whenever to delete a voucher
+	 * Only deletes if response is true and index is valid
+	 * @param response from the modal
+	 * @param index to delete
+	 */
+	 function removeVoucherModal(response: boolean | undefined, index: number) {
+		if (
+			response &&
+			response === true &&
+			index > 0 &&
+			index < state.vouchers.length
+		) {
+			state.vouchers.splice(index, 1);
+			state.vouchers = [...state.vouchers];
+		}
+	}
+
+	/**
 	 * Auxiliary function: Determines if a voucher is offensive (must choose players) or non-offensive (only own user affected)
 	 * @param voucherId The ID of the voucher to check
 	 * @returns True if the voucher is offensive
@@ -410,24 +432,6 @@
 			return voucherInfo.targetType;
 		} else {
 			return false;
-		}
-	}
-
-	/**
-	 * Function for the modal to dictate whenever to delete a voucher
-	 * Only deletes if response is true and index is valid
-	 * @param response from the modal
-	 * @param index to delete
-	 */
-	function removeVoucherModal(response: boolean | undefined, index: number) {
-		if (
-			response &&
-			response === true &&
-			index > 0 &&
-			index < state.vouchers.length
-		) {
-			state.vouchers.splice(index, 1);
-			state.vouchers = [...state.vouchers];
 		}
 	}
 

@@ -75,7 +75,7 @@ export function fullStateUpdate(args:any){
 }
 
 /**
- * Turns the phase from a string given vy the server to the number
+ * Turns the phase from a string given by the server to the number
  * @param phase 
  */
 function stringToPhase(phase:string):number{
@@ -104,10 +104,10 @@ function secondsSince(time: string): number {
 
 /**
  * Turns the string array given by te server to a Card[]
- * @param deck Array of {Rank:string, Suit:string}
+ * @param deck
  * @returns 
  */
-function argsToCards(deck:any): Card[]{
+function argsToCards(deck:{Rank:string, Suit:string, Enhancement:number}[]): Card[]{
 	let ret:Card[] = [];
 	for(let i=0; i<deck.length; i++){
 		let newCard:Card = {
@@ -129,8 +129,6 @@ function argsToCards(deck:any): Card[]{
 function cardToArgs(card:Card):{rank:string, suit:string, Enhancement:number}{
 	return {rank:card.rank, suit: card.suit, Enhancement:card.overlay};
 }
-
-
 
 
 
@@ -357,7 +355,6 @@ export function onClickJoker(index: number) {
     if (get(gameStore).actionBlocked) return;
 
     if (get(gameStore).phase === 2) {
-        // Usar la función del socket en lugar de modificar el estado directamente
         sellJoker(get(gameStore).jokers[index].jokerId);
     }
 }
@@ -367,12 +364,6 @@ export function onClickJoker(index: number) {
  * @param args given by the server
  */
 export function shopPhaseSetup(args: any) {
-    console.log("Setting up shop phase with data:", args);
-    
-    // Navigate to game page if needed
-    if (window.location.pathname !== "/game") {
-        goto(base + "/game");
-    }
     
     gameStore.update((state: GameState) => {
         // Initialize empty shop arrays
@@ -618,7 +609,6 @@ export function onBuyPack(index: number) {
             if (packItem.packageId >= 0 && packItem.packageId < packageDirectory.length) {
                 let pack = packageDirectory[packItem.packageId];
                 if (pack.contentType !== 1 || state.jokers.length < 5) {
-                    // Usar la función del socket en lugar de modificar el estado directamente
                     buyPackage(packItem.id, packItem.sellAmount);
                     
                     // Instead of using modalStore directly, we'll store the data in gameStore
@@ -651,7 +641,6 @@ export function onReroll() {
         get(gameStore).money >= get(gameStore).rerollAmount &&
         get(gameStore).shop.jokerRow.length > 0
     ) {
-        // Usar la función del socket en lugar de modificar el estado directamente
         rerollShop();
     }
 }

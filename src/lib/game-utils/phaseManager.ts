@@ -45,7 +45,6 @@ export function setPhaseTo(phase:number){
             //drawCards(false);
             break;
         case 2:
-            setupShop();
             state.activeVouchers = [];
             break;
         case 3:
@@ -56,110 +55,6 @@ export function setPhaseTo(phase:number){
 
 }
 
-/**
- * Configures the shop with new items, MOCKUP change later
- */
-function setupShop() {
-    let state:GameState = get(gameStore);
-    
-    state.shop = { jokerRow: [], voucherRow: [], packageRow: [] };
-
-    // Add jokers to the shop
-    for (let i = 0; i < 3; i++) {
-        const newJoker = Math.floor(Math.random() * jokerDirectory.length);
-        const newEdition = Math.floor(
-            Math.random() * jokerEditionsDirectory.length,
-        );
-        state.shop.jokerRow.push({
-            id: getNextKey(),
-            jokerId: newJoker,
-            edition: newEdition,
-            sellAmount: Math.floor(Math.random() * 30) + 1,
-            picked: false,
-        });
-    }
-
-    // Add vouchers to the shop
-    for (let i = 0; i < 2; i++) {
-        const newVoucher = Math.floor(
-            Math.random() * voucherDirectory.length,
-        );
-        // Get voucher info from directory
-        const voucherInfo = voucherDirectory[newVoucher];
-
-        state.shop.voucherRow.push({
-            id: getNextKey(),
-            voucherId: newVoucher,
-            sellAmount: Math.floor(Math.random() * 30) + 1,
-            picked: false,
-        });
-    }
-
-    // Add packages to the shop
-    for (let i = 0; i < 2; i++) {
-        const newPack = Math.floor(Math.random() * packageDirectory.length);
-        const pack = packageDirectory[newPack];
-        let content: CardItem[] | JokerItem[] | VoucherItem[] = [];
-
-        // Configure content based on package type
-        if (pack.contentType === 0) {
-            // Card content
-            content = <CardItem[]>[];
-            for (let j = 0; j < pack.contentSize; j++) {
-                content.push({
-                    id: getNextKey(),
-                    card: generateCard(true, true),
-                    picked: false,
-                });
-            }
-        } else if (pack.contentType === 1) {
-            // Joker content
-            content = <JokerItem[]>[];
-            for (let j = 0; j < pack.contentSize; j++) {
-                const newJoker = Math.floor(
-                    Math.random() * jokerDirectory.length,
-                );
-                const newEdition = Math.floor(
-                    Math.random() * jokerEditionsDirectory.length,
-                );
-                content.push({
-                    id: getNextKey(),
-                    jokerId: newJoker,
-                    edition: newEdition,
-                    sellAmount: Math.floor(Math.random() * 30) + 1,
-                    picked: false,
-                });
-            }
-        } else {
-            // Voucher content
-            content = <VoucherItem[]>[];
-            for (let j = 0; j < pack.contentSize; j++) {
-                const newVoucher = Math.floor(
-                    Math.random() * voucherDirectory.length,
-                );
-                const voucherInfo = voucherDirectory[newVoucher];
-                content.push({
-                    id: getNextKey(),
-                    voucherId: newVoucher,
-                    sellAmount: Math.floor(Math.random() * 30) + 1,
-                    picked: false,
-                });
-            }
-        }
-
-        state.shop.packageRow.push({
-            id: getNextKey(),
-            packageId: newPack,
-            sellAmount: Math.floor(Math.random() * 30) + 1,
-            contents: content,
-        });
-    }
-
-    // Update shop to reflect in UI
-    state.shop.jokerRow = [...state.shop.jokerRow];
-    state.shop.voucherRow = [...state.shop.voucherRow];
-    state.shop.packageRow = [...state.shop.packageRow];
-}
 
 function generateCard(withOverlay: boolean, faceUp: boolean): Card {
     const ranks: string[] = [
