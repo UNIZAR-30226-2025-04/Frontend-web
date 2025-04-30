@@ -417,6 +417,8 @@
 	 * If the user has enough money it rerolls the joker row from the shop
 	 */
 	export function onReroll() {
+		if(state.actionBlocked) return;
+
 		if (
 			state.money >= state.rerollAmount &&
 			state.shop.jokerRow.length > 0
@@ -1004,7 +1006,12 @@
 					<button
 						class="btn variant-filled-tertiary w-[35%] text-5xl-r"
 						on:click={onPlayHand}
-						>Play
+						>
+							{#if state.actionBlocked}
+								...
+							{:else}
+								Play
+							{/if}
 					</button>
 					<div class="flex w-[15%]">
 						<button
@@ -1023,7 +1030,12 @@
 					<button
 						class="btn variant-filled-error w-[35%] text-5xl-r"
 						on:click={onDiscard}
-						>Discard
+						>
+						{#if state.actionBlocked}
+							...
+						{:else}
+							Discard
+						{/if}
 					</button>
 				</div>
 			</div>
@@ -1057,8 +1069,12 @@
 							class="w-full h-[50%] card variant-filled-primary tv-filter"
 							on:click={onReroll}
 						>
-							<p>Reroll</p>
-							<p class="text-5xl-r">{state.rerollAmount}$</p>
+							{#if state.actionBlocked}
+								<p>...</p>
+							{:else}
+								<p>Reroll</p>
+								<p class="text-5xl-r">{state.rerollAmount}$</p>
+							{/if}
 						</button>
 					</div>
 					<div
