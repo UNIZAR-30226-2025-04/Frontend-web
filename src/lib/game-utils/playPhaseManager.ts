@@ -116,7 +116,7 @@ export function playAnimation(handType:number, blueScore:number, redScore:number
             ...state,
             playedCards: [],
             minScore: state.minScore - totalScore,
-            actionBlocked: state.minScore - totalScore < 0,
+            actionBlocked: state.phase === 1 ? state.minScore - totalScore < 0 : state.actionBlocked,
             animVariables :{
                 ...state.animVariables,
                 cardIndexToPlayAnim: -1,

@@ -514,17 +514,7 @@ export function buyVoucher(voucherId: number, price: number) {
 }
 
 
-/**
- * If the user has enough money it rerolls the joker row from the shop
- */
-export function onReroll() {
-    if (
-        get(gameStore).money >= get(gameStore).rerollAmount &&
-        get(gameStore).shop.jokerRow.length > 0
-    ) {
-        rerollShop();
-    }
-}
+
 
 /**
  * Adds money to the player's balance (for testing purposes)
@@ -574,6 +564,15 @@ export function rerollShop() {
 export function selectPackItems(packId: number, selectedCard: any, selectedJokerId: number) {
 	console.log("<- pack_selection:", packId, selectedCard, selectedJokerId);
 	get(socketStore).emit("pack_selection", packId, selectedCard, selectedJokerId);
+}
+
+export function continueShop(){
+    console.log("<- continue_to_vouchers");
+    get(socketStore).emit("continue_to_vouchers");
+    gameStore.update((state: GameState) => ({
+        ...state,
+        actionBlocked: true
+    }));
 }
 
 /**

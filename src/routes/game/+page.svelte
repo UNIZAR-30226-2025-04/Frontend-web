@@ -29,11 +29,13 @@
         buyJoker,
         buyPackage,
         buyVoucher,
+        continueShop,
         discardHand,
-        onReroll,
         playHand,
         proposeBlind,
         requestGamePhasePlayerInfo,
+
+        rerollShop,
 
         sellJoker
 
@@ -408,6 +410,18 @@
 					modalStore.trigger(openPackModal);
 				}
 			}
+		}
+	}
+
+	/**
+	 * If the user has enough money it rerolls the joker row from the shop
+	 */
+	export function onReroll() {
+		if (
+			state.money >= state.rerollAmount &&
+			state.shop.jokerRow.length > 0
+		) {
+			rerollShop();
 		}
 	}
 
@@ -1030,10 +1044,14 @@
 					>
 						<button
 							class="w-full h-[50%] card variant-filled-error tv-filter"
-							on:click={onNextPhase}
+							on:click={continueShop}
 						>
-							<p>Next</p>
-							<p>Round</p>
+							{#if state.actionBlocked}
+								<p>...</p>
+							{:else}
+								<p>Next</p>
+								<p>Round</p>
+							{/if}
 						</button>
 						<button
 							class="w-full h-[50%] card variant-filled-primary tv-filter"
