@@ -422,7 +422,7 @@ export function shopPhaseItemsSetup(args: any) {
         if (args.rerolled_items && Array.isArray(args.rerolled_items) &&
 		args.rerolled_items[0] && Array.isArray(args.rerolled_items[0].jokers)) {
             args.rerolled_items[0].jokers.forEach((item: any) => {
-                if (item.type === 'joker') {
+                if (item.type === 'joker' && item.id > 0) {
                     state.shop.jokerRow.push({
                         id: item.id,
                         jokerId: item.joker_id,
@@ -675,13 +675,15 @@ export function jokersRerolled(args:any){
         // Process rerollable items (jokers)
 		args.new_jokers.jokers.forEach((item: any) => {
 			if (item.type === 'joker') {
-				state.shop.jokerRow.push({
-					id: item.id,
-					jokerId: item.joker_id,
-					edition: item.edition || 0,
-					sellAmount: item.price || 0,
-					picked: false
-				});
+				if(item.id > 0){
+					state.shop.jokerRow.push({
+						id: item.id,
+						jokerId: item.joker_id,
+						edition: item.edition || 0,
+						sellAmount: item.price || 0,
+						picked: false
+					});
+				}
 			}
 		});
         return state;
