@@ -44,8 +44,10 @@
     import {
         getDrawerStore,
         getModalStore,
+        getToastStore,
         type DrawerSettings,
         type ModalSettings,
+        type ToastSettings,
     } from "@skeletonlabs/skeleton";
     import { onDestroy, onMount } from "svelte";
     import { dndzone } from "svelte-dnd-action";
@@ -93,6 +95,7 @@
 
 	const modalStore = getModalStore();
 	const drawerStore = getDrawerStore();
+	const toastStore = getToastStore();
 
 	const settingsChat: DrawerSettings = {
 		id: "chat",
@@ -120,6 +123,20 @@
 	const loseModal: ModalSettings = {
 		type: "component",
 		component: "loseModal",
+	};
+
+	const notEnoughMoneyToast:ToastSettings = {
+		message: 'Not enough money!',
+		background: 'variant-filled-error',
+		timeout: 3500,
+		classes: 'gap-[0px]'
+	};
+
+	const notEnoughSpaceToast:ToastSettings = {
+		message: 'Not enough space!',
+		background: 'variant-filled-error',
+		timeout: 3500,
+		classes: 'gap-[0px]'
 	};
 
 	// Reactivity animations
@@ -350,11 +367,14 @@
 		if (index >= 0 && index < state.shop.jokerRow.length) {
 			const jokerItem = state.shop.jokerRow[index];
 			
-			if (state.jokers.length < 5 && jokerItem.sellAmount <= state.money) {
-				buyJoker(jokerItem.id, jokerItem.sellAmount);
+			if (state.jokers.length < 5) {
+				if(jokerItem.sellAmount <= state.money){
+					buyJoker(jokerItem.id, jokerItem.sellAmount);
+				}else{
+					toastStore.trigger(notEnoughMoneyToast);
+				}
 			} else {
-				console.log("Cannot buy joker: " + 
-					(state.jokers.length >= 5 ? "joker slots full" : "not enough money"));
+				toastStore.trigger(notEnoughSpaceToast);
 			}
 		} else {
 			console.error("Invalid joker index:", index);
@@ -375,6 +395,7 @@
 				buyVoucher(voucherItem.id, voucherItem.sellAmount);
 			} else {
 				console.log("Cannot buy voucher: not enough money");
+				toastStore.trigger(notEnoughMoneyToast);
 			}
 		} else {
 			console.error("Invalid voucher index:", index);
@@ -408,8 +429,12 @@
 					};
 					
 					modalStore.trigger(openPackModal);
+				}else{
+					toastStore.trigger(notEnoughSpaceToast);
 				}
 			}
+		}else{
+			toastStore.trigger(notEnoughMoneyToast);
 		}
 	}
 
