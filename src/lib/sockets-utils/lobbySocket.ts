@@ -12,13 +12,13 @@ import {
 	fullStateUpdate, 
 	jokerPurchased,
 	jokerSold,
+	jokersRerolled,
 	packPurchased, 
 	playedHand, 
 	playPhaseSetup, 
 	shopPhaseSetup,
 	updateHand, 
 	updateMinimunScore,
-	updateShop,
 	voucherPurchased
 } from "./gameSocket";
 
@@ -112,6 +112,7 @@ export function initializeSocket() {
 		// Getting all info on the lobby
 		console.log("<- get_lobby_info:", get(lobbyStore).code);
 		socket.emit("get_lobby_info", get(lobbyStore).code);
+		
 	});
 
 	socket.on("connection_error", (args:any) => {
@@ -134,6 +135,14 @@ export function initializeSocket() {
 	socket.on("new_lobby_message", (args: any) => {
 		console.log("-> new_lobby_message", args);
 		addMessage(args.username, args.user_icon, args.message);
+	});
+
+	// Users joined the lobby correctly, it request further info on game state
+	socket.on("joined_lobby", (args: any) => {
+		console.log("-> joined_lobby", args);
+
+		console.log("<- request_game_phase_player_info:", get(lobbyStore).code);
+		get(socketStore).emit("request_game_phase_player_info", get(lobbyStore).code);
 	});
 
 	// New user joins the lobby
@@ -224,11 +233,6 @@ export function initializeSocket() {
 		shopPhaseSetup(args);
 	});
 
-	socket.on("shop_updated", (args: any) => {
-		console.log("-> shop_updated", args);
-		updateShop(args);
-	});
-
 	socket.on("joker_purchased", (args: any) => {
 		console.log("-> joker_purchased", args);
 		jokerPurchased(args);
@@ -247,6 +251,11 @@ export function initializeSocket() {
 	socket.on("joker_sold", (args: any) => {
 		console.log("-> joker_sold", args);
 		jokerSold(args);
+	});
+
+	socket.on("rerolled_jokers", (args: any) => {
+		console.log("-> rerolled_jokers", args);
+		jokersRerolled(args);
 	});
 }
 

@@ -24,7 +24,7 @@ const lobbyInitial: Lobby = {
 
 export const lobbyStore = writable<Lobby>(lobbyInitial)
 
-const chatInitial: ChatBuble[] = []
+export const chatInitial: ChatBuble[] = []
 
 export const chatStore = writable<ChatBuble[]>(chatInitial)
 export const chatFeedElem = writable<HTMLElement>()

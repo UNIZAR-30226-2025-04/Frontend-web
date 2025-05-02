@@ -3,6 +3,7 @@
     import { getModalStore } from "@skeletonlabs/skeleton";
     import { goto } from '$app/navigation';
     import { base } from '$app/paths';
+    import { exitLobby } from "$lib/sockets-utils/lobbySocket";
     
 
     // Props
@@ -13,6 +14,7 @@
 
     function onExit(){
         goto(base+"/home");
+        exitLobby();
         modalStore.close();
     }
 

@@ -54,7 +54,8 @@ export const deleteSentLobbyInvitationsPath:string = apiBase + 'auth/sent_lobby_
 export const deleteReceivedInvitationPath:string = apiBase + 'auth/received_lobby_invitation/';
 // List of all of the lobbies
 export const allLobbiesPath:string = apiBase + 'auth/getAllLobbies';
-
+// To know if the user is already in a lobby
+export const isUserInLobbyPath:string = apiBase + 'auth/isUserInLobby';
 
 // GAMELOBBY
 // Get all game lobby invitations for the authenticated user

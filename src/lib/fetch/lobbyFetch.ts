@@ -1,5 +1,5 @@
 import type { inviteItem, LobbyInfo, LobbyDisplay } from "$lib/interfaces";
-import { allLobbiesPath, createLobbyPath, deleteSentLobbyInvitationsPath, exitLobbyPath, joinLobbyPath, sendLobbyInvitationsPath, sentLobbyInvitationsPath, receivedGameInvitations, deleteReceivedInvitationPath } from "$lib/paths";
+import { allLobbiesPath, createLobbyPath, deleteSentLobbyInvitationsPath, exitLobbyPath, joinLobbyPath, sendLobbyInvitationsPath, sentLobbyInvitationsPath, receivedGameInvitations, deleteReceivedInvitationPath, isUserInLobbyPath } from "$lib/paths";
 import { lobbyStore, userDataStore } from "$lib/stores";
 import { get } from "svelte/store";
 import { fetchDeleteGameInvitation } from "$lib/fetch/inboxFetch";
@@ -82,7 +82,7 @@ export async function joinLobbyFetch(lobbyCode: string): Promise<boolean> {
         
         // After successfully joining, check for pending invitations to this lobby
         try {
-            loadingStore.startLoading('Limpiando invitaciones pendientes...');
+            loadingStore.startLoading('Cleaning pending invitations...');
             
             // Get all received invitations
             const invitationsResponse = await fetch(receivedGameInvitations, {
@@ -371,5 +371,38 @@ export async function deleteReceivedInvitation(lobbyId: string, senderUsername: 
     } catch (error) {
         console.error("Exception deleting invitation:", error);
         return false;
+    }
+}
+
+/**
+ * Checks wherever the user is already in a lobby, if true then returns the code
+ * @returns lobby code if no errors or "" if an error occurs
+ */
+export async function isUserInLobby(): Promise<string> {
+    try {
+        const response = await fetch(isUserInLobbyPath, {
+            method: 'GET',
+            headers: {
+                'accept': 'application/json',
+                'Authorization': 'Bearer ' + get(userDataStore).token
+            }
+        });
+
+        if (!response.ok) {
+            console.error("Error getting user lobby info:", await response.text());
+            return "";
+        }
+
+        const data = await response.json();
+        console.log("User lobby info got:",data);
+
+        if(data.in_lobby){
+            return data.lobby_id;
+        }else{
+            return "";
+        }
+    } catch (error) {
+        console.error("Exception getting user lobby info:", error);
+        return "";
     }
 }
