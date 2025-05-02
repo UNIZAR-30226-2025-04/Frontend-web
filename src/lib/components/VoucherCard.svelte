@@ -32,7 +32,7 @@
 
 </script>
 
-<div class="{width} min-w-[70px] relative">
+<div class="{width} min-w-[70px] relative flex items-center justify-center" style="aspect-ratio: {ratio};">
 
     <!--Tooltip-->
     <div class="card p-4 variant-filled-surface w-[200%] border-2 " data-popup={voucher.name+salt}>
@@ -45,16 +45,16 @@
             use:tilt={{ reverse: true }}
             src={voucher.image}
             alt={voucher.name}
-            class="{width} min-w-[70px]"
-            style="aspect-ratio: {ratio}; transform-style: preserve-3d;"
+            class="{width} min-w-[70px] content-center"
+            style="transform-style: preserve-3d;"
             use:popup={popupHover}
         />
     {:else}
         <img
             src={voucher.image}
             alt={voucher.name}
-            class="{width} min-w-[70px]"
-            style="aspect-ratio: {ratio}; transform-style: preserve-3d;"
+            class="{width} min-w-[70px] content-center"
+            style="transform-style: preserve-3d;"
             use:popup={popupHover}
         />
     {/if}

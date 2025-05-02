@@ -11,8 +11,8 @@ import { get } from "svelte/store";
 export function addToHand(cards:Card[]){
     cards = cards.sort(
         (cardA, cardB: Card) =>
-            getHierarchyFromRank(cardA.rank) -
-            getHierarchyFromRank(cardB.rank),
+            getHierarchyFromRank(cardB.rank) -
+            getHierarchyFromRank(cardA.rank),
     );
     const drawDelay:number = get(animationSpeedStore)*3;
 

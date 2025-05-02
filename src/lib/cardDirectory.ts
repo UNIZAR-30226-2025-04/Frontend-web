@@ -125,8 +125,14 @@ export const errorVoucher:Voucher = {
 }
 
 export const voucherDirectory:Voucher[] = [
-    {name:"Clearence sell", image:"cards/vouchers/Clearance_Sale.png",tooltip:"Next shop its 50% off!", targetType:false},
-    {name:"Crystal Ball",image:"cards/vouchers/Crystal_Ball.png",tooltip:"1 in 4 chance of getting a normal card replaced by an ace in next round", targetType:true, targetCount:3},
+    {name:"Daimond eyes", image:"cards/vouchers/vouchers deftones.png",tooltip:"I love Deftones !!!!", targetType:false},
+    {name:"Daimond eyes", image:"cards/vouchers/vouchers deftones.png",tooltip:"I love Deftones !!!!", targetType:false},
+    {name:"Daimond eyes", image:"cards/vouchers/vouchers deftones.png",tooltip:"I love Deftones !!!!", targetType:false},
+    {name:"Daimond eyes", image:"cards/vouchers/vouchers deftones.png",tooltip:"I love Deftones !!!!", targetType:false},
+    {name:"Daimond eyes", image:"cards/vouchers/vouchers deftones.png",tooltip:"I love Deftones !!!!", targetType:false},
+    {name:"Daimond eyes", image:"cards/vouchers/vouchers deftones.png",tooltip:"I love Deftones !!!!", targetType:false},
+    {name:"Daimond eyes", image:"cards/vouchers/vouchers deftones.png",tooltip:"I love Deftones !!!!", targetType:false},
+    {name:"Daimond eyes", image:"cards/vouchers/vouchers deftones.png",tooltip:"I love Deftones !!!!", targetType:false},
 ]
 
 // Packs
