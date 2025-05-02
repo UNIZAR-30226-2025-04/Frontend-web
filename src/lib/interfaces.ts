@@ -133,6 +133,7 @@ export type Joker = {
     name:string,
     image:string,
     tooltip:string,
+    rarity:number
 }
 
 // Edition of the joker

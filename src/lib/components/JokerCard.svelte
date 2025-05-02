@@ -72,7 +72,7 @@
         {#if sellable}
             <div class="w-full grid grid-cols-[65%_33%] gap-[2%]">
                 <div class="card p-4 variant-filled-surface border-2">
-                    {#if editionId > 0}
+                    {#if edition.name !== ""}
                         <p>{joker.name}: {joker.tooltip}.</p>
                         <p>{edition.name}: {edition.tooltip}</p>
                     {:else}
@@ -98,7 +98,7 @@
     </div>
 
     <!--Edition image-->
-    {#if editionId > 0}
+    {#if edition.image !== ""}
         <img
             bind:this={overlayImage}
             src={edition.image}

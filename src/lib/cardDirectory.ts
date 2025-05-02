@@ -86,16 +86,35 @@ export const HandTypesBase:HandType[] = [
 // Jokers
 
 export const errorJoker:Joker = {
-    name:"Error joker", image:"icons/missing.png",tooltip:"This is an error"
+    name:"Error joker", image:"icons/missing.png",tooltip:"This is an error",rarity:0
 }
 
 export const jokerDirectory:Joker[] = [
-    {name:"Average size Michael",image:"cards/jokers/AVERAGE_SIZE_MICHAEL.png",tooltip:"+15 mult, 1/15 chance of being sold each round"},
-    {name:"Glass",image:"cards/overlays/glassDemo3.png",tooltip:"This is a tooltip for the glass overlay!"}
+    {name:"Solid seven joker",image:"cards/jokers/solid_seven.png",tooltip:"+7 chips +7 mult",rarity:0},
+    {name:"Poor joker",image:"cards/jokers/poor joker.png",tooltip:"Generates 4 gold each round",rarity:0},
+    {name:"Petpet",image:"cards/jokers/petpet.png",tooltip:"Sums the number of gold the user has to mult",rarity:0},
+    {name:"Average size michael",image:"cards/jokers/AVERAGE_SIZE_MICHAEL.png",tooltip:"+15 mult, 1/15 chance of being sold each round",rarity:0},
+    {name:"Hell cowboy",image:"cards/jokers/hell_cowboy.png",tooltip:"Adds +mult equivalent to the highest scoring card",rarity:0},
+    {name:"Crab sponge",image:"cards/jokers/bob_spider.png",tooltip:"+50 chips if you have 3 of the same cards in played hand",rarity:0},
+    {name:"Two friends joker",image:"cards/jokers/2 friends.png",tooltip:"Takes 10 of your +chips and changes them to +mult",rarity:0},
+    {name:"BIRDIFICATION",image:"cards/jokers/birdification.png",tooltip:"+50 chips for each 1,4,6,7",rarity:0},
+    {name:"Photograph",image:"cards/jokers/PHOTOGRAPH.png",tooltip:"x2 mult the first time you play a face card",rarity:1},
+    {name:"Empty joker",image:"cards/jokers/empty joker.png",tooltip:"1/50 chance of +25 chips and +200 mult",rarity:1},
+    {name:"Lirili Larila",image:"cards/jokers/lirili_larila.png",tooltip:"+2 to to mult for each played / scoring 2 then x2 mult",rarity:1},
+    {name:"Rusty ahh",image:"cards/jokers/rusty ahh joker.png",tooltip:"Gold won before this joker applies = 0 but 2x mult",rarity:1},
+    {name:"Damn 4th april?",image:"cards/jokers/damn april.jpg",tooltip:"Randomizes chips and mult but guarantee at least +14 in total",rarity:1},
+    {name:"crowave",image:"cards/jokers/crowave.png",tooltip:"Grants +3 to the multiplier for each red card with a 90% probability. 10% of the time, it grants +5 tokens per red card instead",rarity:1},
+    {name:"bicicleta",image:"cards/jokers/bicicle_ta.png",tooltip:"Each 2 gives +2 mult and +20 chips",rarity:1},
+    {name:"salebalatrito",image:"cards/jokers/salebalatrito.png",tooltip:"+50 chips if three of a kind",rarity:1},
+    {name:"Diego joker",image:"cards/jokers/diego_joker.png",tooltip:"x4 mult if you only play 3 cards",rarity:1},
+    {name:"It's so over",image:"cards/jokers/its so over.png",tooltip:"+10 gold if only 1 (one) card is played",rarity:1},
+    {name:"paris",image:"cards/jokers/paris.png",tooltip:"+3 mult for every suited pair in played hand",rarity:2},
+    {name:"nasus",image:"cards/jokers/nasus.png",tooltip:"Multiplies your gold by the mult",rarity:2},
+    {name:"som brilla",image:"cards/jokers/som brilla.png",tooltip:"Grants +20 mult when only face cards are played",rarity:2},
 ]
 
 export const jokerEditionsDirectory:JokerEdition[] = [
-    {name:"None",image:"",tooltip:""},
+    {name:"",image:"cards/jokers/joker overlay.png",tooltip:""},
     {name:"Glass",image:"cards/overlays/glassDemo3.png",tooltip:"This is a tooltip for the glass overlay!"}
 ]
 
