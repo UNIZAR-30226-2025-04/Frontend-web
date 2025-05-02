@@ -1,6 +1,6 @@
 <script lang="ts">
     import type { SvelteComponent } from "svelte";
-    import { getModalStore } from "@skeletonlabs/skeleton";
+    import { getModalStore, getToastStore, type ToastSettings } from "@skeletonlabs/skeleton";
     import { apiBase, joinLobbyPath } from '$lib/paths';
     import { get } from 'svelte/store';
     import { base } from '$app/paths';
@@ -12,6 +12,15 @@
     export let parent: SvelteComponent;
 
     const modalStore = getModalStore();
+
+    const toastStore = getToastStore();
+
+    const errorOnJoindToast:ToastSettings = {
+        message: 'Not able to connect',
+        background: 'variant-filled-error',
+        timeout: 3500,
+        classes: 'gap-[0px]'
+    };
 
     let token = get(userDataStore).token;
 
@@ -72,6 +81,8 @@
         if (await joinLobbyFetch(enteredCode)) {
             goto(base+"/lobby");
             parent.onClose();
+        }else{
+            toastStore.trigger(errorOnJoindToast);
         }
     }
 

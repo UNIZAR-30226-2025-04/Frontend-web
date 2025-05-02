@@ -11,10 +11,41 @@
     import { joinLobbyFetch } from "$lib/fetch/lobbyFetch";
     import { goto } from "$app/navigation";
     import { base } from "$app/paths";
+    import { getToastStore, type ToastSettings } from "@skeletonlabs/skeleton";
 
     // Props
     /** Exposes parent props to this component. */
     export let parent: SvelteComponent;
+
+    const toastStore = getToastStore();
+
+    const errorAcceptingInvToast:ToastSettings = {
+        message: 'Error accepting invitation',
+        background: 'variant-filled-error',
+        timeout: 3500,
+        classes: 'gap-[0px]'
+    };
+
+    const errorAcceptingFriendRToast:ToastSettings = {
+        message: 'Error accepting friend request',
+        background: 'variant-filled-error',
+        timeout: 3500,
+        classes: 'gap-[0px]'
+    };
+
+    const errorRemovingInvToast:ToastSettings = {
+        message: 'Error removing invitation',
+        background: 'variant-filled-error',
+        timeout: 3500,
+        classes: 'gap-[0px]'
+    };
+    
+    const errorRemovingFriendRToast:ToastSettings = {
+        message: 'Error removing friend request',
+        background: 'variant-filled-error',
+        timeout: 3500,
+        classes: 'gap-[0px]'
+    };
 
     // Array of invitations, name and players in the lobby
     let invitations: invitation[] = [];
@@ -23,7 +54,7 @@
 
     // Loads both the lobby invitations and the pending friend requests in parallel
     async function loadData() {
-        loadingStore.startLoading('Cargando notificaciones...');
+        loadingStore.startLoading('Loading notifications...');
         try {
             await Promise.all([
                 fetchReceivedGameInvitations(invitations),
@@ -54,6 +85,7 @@
             invitations = invitations.filter(request => request.key !== key);
         }else{
             invitations[index].username = auxUsername;
+            toastStore.trigger(errorRemovingInvToast);
         }
         invitations = invitations;
     }
@@ -76,6 +108,8 @@
             // Navigate to lobby and close the modal
             goto(base+"/lobby");
             parent.onClose();
+        }else{
+            toastStore.trigger(errorAcceptingInvToast);
         }
     }
 
@@ -93,6 +127,7 @@
             pendingRequests = pendingRequests.filter(request => request.key !== key);
         }else{
             pendingRequests[index].username = auxUsername;
+            toastStore.trigger(errorRemovingFriendRToast);
         }
         pendingRequests = pendingRequests;
     }
@@ -113,6 +148,8 @@
             pendingRequests=pendingRequests;
             fetchDeleteFriendRequest(auxUsername);
             pendingRequests = pendingRequests.filter(request => request.key !== key);
+        }else{
+            toastStore.trigger(errorAcceptingFriendRToast);
         }
 
         pendingRequests = pendingRequests;

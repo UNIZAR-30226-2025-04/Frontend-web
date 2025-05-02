@@ -12,7 +12,7 @@ import { get } from "svelte/store";
  */
 export async function fetchFriends(savedFriends:userItem[]) {
     try {
-        loadingStore.startLoading('Cargando amigos...');
+        loadingStore.startLoading('Loading friends...');
         const response = await fetch(friendsPath, {
             method: 'GET',
             headers: {
@@ -48,7 +48,7 @@ export async function fetchFriends(savedFriends:userItem[]) {
  */
 export async function fetchSentRequests(pendingRequests:userItem[]) {
     try {
-        loadingStore.startLoading('Cargando solicitudes enviadas...');
+        loadingStore.startLoading('Loading recieved requests...');
         const response = await fetch(sentRequestsPath, {
             method: 'GET',
             headers: {
@@ -88,7 +88,7 @@ export async function fetchSentRequests(pendingRequests:userItem[]) {
  */
 export async function fetchSendFriendshipRequest(username:string): Promise<boolean> {
     try {
-        loadingStore.startLoading('Enviando solicitud de amistad...');
+        loadingStore.startLoading('Sending friend request...');
         const formData = new FormData();
         formData.append('friendUsername', username);
 
@@ -122,7 +122,7 @@ export async function fetchSendFriendshipRequest(username:string): Promise<boole
  */
 export async function fetchDeleteSentFriendRequest(username:string): Promise<boolean> {
     try {
-        loadingStore.startLoading('Eliminando solicitud...');
+        loadingStore.startLoading('Removing friend request...');
         const response = await fetch(deleteSentRequestPath + username, {
             method: 'DELETE',
             headers: {
@@ -151,7 +151,7 @@ export async function fetchDeleteSentFriendRequest(username:string): Promise<boo
  */
 export async function fetchDeleteFriend(username:string): Promise<boolean> {
     try {
-        loadingStore.startLoading('Eliminando amigo...');
+        loadingStore.startLoading('Removing friend...');
         const response = await fetch(deleteFriendPath + username, {
             method: 'DELETE',
             headers: {

@@ -2,7 +2,7 @@
   import AvatarDisplay from "../../lib/components/AvatarDisplay.svelte";
   import { goto } from "$app/navigation";
   import { base } from '$app/paths';
-  import { getModalStore, type ModalSettings } from '@skeletonlabs/skeleton';
+  import { getModalStore, getToastStore, type ModalSettings, type ToastSettings } from '@skeletonlabs/skeleton';
   import { onMount } from 'svelte';
   import { getAllLobbiesFetch, joinLobbyFetch } from "$lib/fetch/lobbyFetch";
   import { lobbyStore } from "$lib/stores";
@@ -10,6 +10,15 @@
   import type { LobbyDisplay } from "$lib/interfaces";
 
   const modalStore = getModalStore();
+
+  const toastStore = getToastStore();
+
+  const errorOnJoindToast:ToastSettings = {
+      message: 'Not able to connect',
+      background: 'variant-filled-error',
+      timeout: 3500,
+      classes: 'gap-[0px]'
+  };
 
   // Modal settings
   const modalJoinLobbyCode: ModalSettings = {
@@ -34,7 +43,7 @@
   // Function to refresh the list of lobbies
   async function refreshLobbies() {
     try {
-      loadingStore.startLoading('Buscando lobbies disponibles...');
+      loadingStore.startLoading('Searching aviable lobbies...');
       lobbies = await getAllLobbiesFetch();
     } catch (err: any) {
       error = err.message;
@@ -45,12 +54,13 @@
 
   // Function to join a lobby
   async function handleJoinLobby(lobbyId: string) {
-    loadingStore.startLoading('Uniéndose al lobby...');
+    loadingStore.startLoading('Joining lobby...');
     if (await joinLobbyFetch(lobbyId)) {  
       // Redirect to the lobby page
       goto(base + "/lobby");
     } else {
       loadingStore.stopLoading();
+      toastStore.trigger(errorOnJoindToast);
     }
   }
 
@@ -81,13 +91,9 @@
 
 <!-- Lobbies -->
 <div class="w-[85vw] mt-[8vh] overflow-y-auto h-[60vh] rounded-lg">
-  {#if loadingStore.isLoading}
+  {#if lobbies.length === 0}
     <div class="flex justify-center items-center h-full">
-      <p class="text-[4vmin]">Cargando lobbies...</p>
-    </div>
-  {:else if lobbies.length === 0}
-    <div class="flex justify-center items-center h-full">
-      <p class="text-[4vmin]">No hay lobbies disponibles</p>
+      <p class="text-[4vmin]">No open lobbies found</p>
     </div>
   {:else}
     <nav>

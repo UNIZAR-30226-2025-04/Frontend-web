@@ -585,7 +585,7 @@
 		state.jokers.push({
 			id: getNextKey(),
 			jokerId: newJoker,
-			edition: newEdition,
+			edition: 0,
 			sellAmount: Math.floor(Math.random() * 30) + 1,
 			picked: false,
 		});
@@ -610,7 +610,9 @@
 
 		// Only add to state.vouchers, not to activeVouchers
 		state.vouchers.push(newVoucherItem);
+		state.activeVouchers.push(newVoucherItem);
 		state.vouchers = [...state.vouchers];
+		state.activeVouchers = [...state.activeVouchers];
 	}
 
 	
@@ -1239,45 +1241,7 @@
 			</div>
 		</div>
 
-		<!--Debug buttons-->
-		<div class="flex flex-col gap-2">
-			<button class="btn variant-filled-surface h-[3vh]" on:click={onNextPhase}>
-				Next phase
-			</button>
-			<button class="btn variant-filled-surface h-[3vh]" on:click={onAddMoney}>
-				Add money
-			</button>
-			<button class="btn variant-filled-surface h-[3vh]" on:click={onAddCard}>
-				Add card
-			</button>
-			<button class="btn variant-filled-surface h-[3vh]" on:click={onAddJoker}>
-				Add joker
-			</button>
-			<button
-				class="btn variant-filled-surface h-[3vh]"
-				on:click={testA}
-			>
-				Test A
-			</button>
-			<button
-				class="btn variant-filled-surface h-[3vh]"
-				on:click={testB}
-			>
-				Test B
-			</button>
-			<button
-				class="btn variant-filled-surface h-[3vh]"
-				on:click={testC}
-			>
-				Test C
-			</button>
-			<button
-				class="btn variant-filled-surface h-[3vh]"
-				on:click={testD}
-			>
-				Test D
-			</button>
-		</div>
+		
 
 		<!--Deck-->
 		<div>
@@ -1297,6 +1261,49 @@
 			</div>
 		</div>
 	</div>
+</div>
+
+<!--Debug buttons-->
+<div class="flex flex-col gap-2">
+	<button class="btn variant-filled-surface h-[3vh]" on:click={onNextPhase}>
+		Next phase
+	</button>
+	<button class="btn variant-filled-surface h-[3vh]" on:click={onAddMoney}>
+		Add money
+	</button>
+	<button class="btn variant-filled-surface h-[3vh]" on:click={onAddCard}>
+		Add card
+	</button>
+	<button class="btn variant-filled-surface h-[3vh]" on:click={onAddJoker}>
+		Add joker
+	</button>
+	<button class="btn variant-filled-surface h-[3vh]" on:click={onAddVoucher}>
+		Add voucher
+	</button>
+	<button
+		class="btn variant-filled-surface h-[3vh]"
+		on:click={testA}
+	>
+		Test A
+	</button>
+	<button
+		class="btn variant-filled-surface h-[3vh]"
+		on:click={testB}
+	>
+		Test B
+	</button>
+	<button
+		class="btn variant-filled-surface h-[3vh]"
+		on:click={testC}
+	>
+		Test C
+	</button>
+	<button
+		class="btn variant-filled-surface h-[3vh]"
+		on:click={testD}
+	>
+		Test D
+	</button>
 </div>
 
 <style>

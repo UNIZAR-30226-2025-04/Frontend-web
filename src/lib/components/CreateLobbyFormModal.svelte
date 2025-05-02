@@ -1,6 +1,6 @@
 <script lang="ts">
     import type { SvelteComponent } from "svelte";
-    import { getModalStore } from "@skeletonlabs/skeleton";
+    import { getModalStore, getToastStore, type ToastSettings } from "@skeletonlabs/skeleton";
     import { SlideToggle } from '@skeletonlabs/skeleton';
     import { goto } from '$app/navigation';
     import { base } from '$app/paths';
@@ -16,6 +16,15 @@
     export let parent: SvelteComponent;
 
     const modalStore = getModalStore();
+
+    const toastStore = getToastStore();
+
+    const createError:ToastSettings = {
+        message: 'Error creating lobby',
+        background: 'variant-filled-error',
+        timeout: 3500,
+        classes: 'gap-[0px]'
+    };
 
     let isPublic = false;
     let isLoading = false;    
@@ -44,6 +53,7 @@
         } else {
             console.error("Error when creating lobby");
             loadingStore.stopLoading();
+            toastStore.trigger(createError);
         }
     }
 
@@ -62,6 +72,7 @@
             // Manejar el error
             console.error("Error when creating lobby");
             loadingStore.stopLoading();
+            toastStore.trigger(createError);
         }
     }
 

@@ -12,7 +12,7 @@
 
 	// Floating UI for Popup
 	import { computePosition, autoUpdate, offset, shift, flip, arrow } from '@floating-ui/dom';
-	import { storePopup, type ModalComponent } from '@skeletonlabs/skeleton';
+	import { storePopup, Toast, type ModalComponent } from '@skeletonlabs/skeleton';
 	storePopup.set({ computePosition, autoUpdate, flip, shift, offset, arrow });
 
 	// Modal signleton setup, once per proyect
@@ -66,6 +66,8 @@
 </Drawer>
 
 <Modal components={modalRegistry}/>
+
+<Toast />
 
 {#if $loadingStore.isLoading}
     <LoadingScreen message={$loadingStore.message} />

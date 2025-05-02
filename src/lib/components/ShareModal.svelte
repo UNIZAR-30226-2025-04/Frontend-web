@@ -7,10 +7,27 @@
     import { fetchFriends } from "$lib/fetch/friendsFetch";
     import { get } from "svelte/store";
     import { lobbyStore } from "$lib/stores";
+    import { getToastStore, type ToastSettings } from "@skeletonlabs/skeleton";
 
     // Props
     /** Exposes parent props to this component. */
     export let parent: SvelteComponent;
+
+    const toastStore = getToastStore();
+
+    const errorShareToast:ToastSettings = {
+        message: 'Could not send invitation',
+        background: 'variant-filled-error',
+        timeout: 3500,
+        classes: 'gap-[0px]'
+    };
+
+    const errorUnShareToast:ToastSettings = {
+        message: 'Could not unsend invitation',
+        background: 'variant-filled-error',
+        timeout: 3500,
+        classes: 'gap-[0px]'
+    };
 
     // Array of invitations, names and players in the lobby
     let invitations: inviteItem[] = [];
@@ -115,8 +132,14 @@
         let success: boolean = false;
         if (invitations[index].sent) {
             success = await fetchDeleteSentInvitation(invitations[index].username);
+            if(!success){
+                toastStore.trigger(errorUnShareToast);
+            }
         } else {
             success = await fetchSendInvitation(invitations[index].username);
+            if(!success){
+                toastStore.trigger(errorShareToast);
+            }
         }
 
         if (success) {

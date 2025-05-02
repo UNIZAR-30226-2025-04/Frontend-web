@@ -1,8 +1,10 @@
 <script lang="ts">
 	import {
 		getModalStore,
+		getToastStore,
 		type ModalComponent,
 		type ModalSettings,
+        type ToastSettings,
 	} from "@skeletonlabs/skeleton";
 	import {
 		chatInitial,
@@ -26,6 +28,8 @@
 
 	const modalStore = getModalStore();
 
+	const toastStore = getToastStore();
+
 	const modalInfoChange: ModalSettings = {
 		type: "component",
 		component: "infoChangeModal",
@@ -44,6 +48,13 @@
 	const modalFriends: ModalSettings = {
 		type: "component",
 		component: "friendsModal",
+	};
+
+	const reconexionToast:ToastSettings = {
+		message: 'Checking for reconexion',
+		background: 'variant-filled-tertiary',
+		timeout: 3500,
+		classes: 'gap-[0px]'
 	};
 
 	// TO TEST
@@ -75,8 +86,10 @@
 	 * @async
 	 */
 	async function attemptReconect() {
+		toastStore.trigger(reconexionToast);
 		const lobbyCode: string = await isUserInLobby();
 		if (lobbyCode !== "") {
+			
 			lobbyStore.set({
 				code: lobbyCode,
 				host: false,
@@ -119,6 +132,7 @@
 
 	function toggleWsTest() {
 		showWsTest = !showWsTest;
+		
 	}
 </script>
 

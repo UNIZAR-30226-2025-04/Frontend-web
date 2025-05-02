@@ -8,6 +8,30 @@
     import type { userItem } from "$lib/interfaces";
     import { fetchDeleteFriend, fetchDeleteSentFriendRequest, fetchFriends, fetchSendFriendshipRequest, fetchSentRequests } from "$lib/fetch/friendsFetch";
     import { fetchUserInfo } from "$lib/fetch/usersFetch";
+    import { getToastStore, type ToastSettings } from "@skeletonlabs/skeleton";
+
+    const toastStore = getToastStore();
+
+    const userDoesntExistToast:ToastSettings = {
+        message: 'User does not exist',
+        background: 'variant-filled-tertiary',
+        timeout: 3500,
+        classes: 'gap-[0px]'
+    };
+
+    const errorRemovingFriendToast:ToastSettings = {
+        message: 'Error removing friend',
+        background: 'variant-filled-error',
+        timeout: 3500,
+        classes: 'gap-[0px]'
+    };
+
+    const errorRemovingSentReq:ToastSettings = {
+        message: 'Error removing firend request',
+        background: 'variant-filled-error',
+        timeout: 3500,
+        classes: 'gap-[0px]'
+    };
 
     // Style classes for the error message and the containers that hold it
     const errorContainer = 'alert variant-ghost-error p-2';
@@ -58,6 +82,7 @@
             savedFriends = savedFriends.filter(request => request.key !== key);
         }else{
             savedFriends[index].username = auxUsername;
+            toastStore.trigger(errorRemovingFriendToast);
         }
         savedFriends = savedFriends;
     }
@@ -79,6 +104,7 @@
             pendingRequests = pendingRequests.filter(request => request.key !== key);
         }else{
             pendingRequests[index].username = auxUsername;
+            toastStore.trigger(errorRemovingSentReq);
         }
         pendingRequests = pendingRequests;
     }
@@ -97,6 +123,8 @@
                 let newRequest: userItem = {key:pendingRequests.length, username:usernameSearch, icon:response.icon };
                 pendingRequests.push(newRequest);
             }
+        }else{
+            toastStore.trigger(userDoesntExistToast);
         }
         
         AddText = "Add";

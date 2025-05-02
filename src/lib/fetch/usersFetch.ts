@@ -38,52 +38,54 @@ export async function meFetch(token:string) {
  * @param passwd of the user
  * @param remember = true if it wants to be auto loged in every time the user gets to /
  * @async
+ * @returns true if successfully changed info
  */
-export async function updateFetch(username:string, passwd:string, icon:number) {
+export async function updateFetch(username:string, passwd:string, icon:number): Promise<boolean> {
+    try{
+        if(typeof username === 'undefined') username = "";
+        if(typeof passwd === 'undefined') passwd = "";
+        if(typeof icon === 'undefined') icon = 1;
 
-    console.log("UPDATE FETCH");
-    console.log("username: "+username);
-    console.log("passwd: "+passwd);
-    console.log("icon: "+icon);
+        const formData = new URLSearchParams();
+        if(username !== "") formData.append("username", username);
+        if(passwd !== "") formData.append("password", passwd);
+        if(icon > 0) formData.append("icon", ""+icon);
 
-    if(typeof username === 'undefined') username = "";
-    if(typeof passwd === 'undefined') passwd = "";
-    if(typeof icon === 'undefined') icon = 1;
+        console.log("formData: "+formData.toString());
 
-    const formData = new URLSearchParams();
-    if(username !== "") formData.append("username", username);
-    if(passwd !== "") formData.append("password", passwd);
-    if(icon > 0) formData.append("icon", ""+icon);
+        const response = await fetch(updatePath, {
+            method: 'PATCH',
+            headers: {
+                'accept': 'application/json',
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Authorization': 'Bearer ' + get(userDataStore).token
+            },
+            body: formData.toString()
+        });
+        
+        if (!response.ok) {
+            throw new Error("Error on authentication");
+        }
+        
+        const data = await response.json();
+        console.log("API Response:", data);
+        
+        const newUsername = username !== "" ? username : get(userDataStore).username;
+        const newPassword = passwd !== "" ? passwd : get(userDataStore).password;
+        const newIcon = icon > 0 ? icon : get(userDataStore).icon;
 
-    console.log("formData: "+formData.toString());
+        userDataStore.update(user => ({
+            ...user,
+            username: newUsername,
+            password: newPassword,
+            icon: newIcon
+        }));
 
-    const response = await fetch(updatePath, {
-        method: 'PATCH',
-        headers: {
-            'accept': 'application/json',
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'Authorization': 'Bearer ' + get(userDataStore).token
-        },
-        body: formData.toString()
-    });
-    
-    if (!response.ok) {
-        throw new Error("Error on authentication");
+        return true;
+    } catch (err:any) {
+        console.log("API error (info change):", err);
+        return false;
     }
-    
-    const data = await response.json();
-    console.log("API Response:", data);
-    
-    const newUsername = username !== "" ? username : get(userDataStore).username;
-    const newPassword = passwd !== "" ? passwd : get(userDataStore).password;
-    const newIcon = icon > 0 ? icon : get(userDataStore).icon;
-
-    userDataStore.update(user => ({
-        ...user,
-        username: newUsername,
-        password: newPassword,
-        icon: newIcon
-    }));
 }
 
 /**

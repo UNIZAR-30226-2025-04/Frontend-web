@@ -1,7 +1,7 @@
 <script lang="ts">
     import type { SvelteComponent } from "svelte";
     import type { ProfileChangeFormData, UserData } from "$lib/interfaces";
-    import { getModalStore } from "@skeletonlabs/skeleton";
+    import { getModalStore, getToastStore, type ToastSettings } from "@skeletonlabs/skeleton";
     import { userDataStore } from '$lib/stores';
     import  AvatarDisplay  from "./AvatarDisplay.svelte";
     import { avatarDirectory } from "$lib/avatarsDirectory";
@@ -16,6 +16,15 @@
     export let parent: SvelteComponent;
 
     const modalStore = getModalStore();
+
+    const toastStore = getToastStore();
+
+    const infoToast:ToastSettings = {
+        message: 'Info successfully changed',
+        background: 'variant-filled-primary',
+        timeout: 3500,
+        classes: 'gap-[0px]'
+    };
 
     // Form data, it shows username and stored icon so it needs some initializing
     //let username: string = get(userDataStore).username;
@@ -42,7 +51,9 @@
 
         if (errorCode.every((v) => v === false)){
             ChangeButtonText = "...";
-            await updateFetch(username, password1, avatar);
+            if(await updateFetch(username, password1, avatar)){
+                toastStore.trigger(infoToast);
+            }
             modalStore.close();
         }
         errorCode = errorCode;

@@ -2,6 +2,7 @@
     import { goto } from '$app/navigation';
 	import { base } from '$app/paths';
 	import { apiBase, sigupPath } from '$lib/paths';
+    import { getToastStore, type ToastSettings } from '@skeletonlabs/skeleton';
 
 	const errorContainer = 'alert variant-ghost-error p-2';
     const errorMessagePasswd = 'alert-message text-left text-black'
@@ -12,6 +13,15 @@
 	let passwd2 = '';
 	let errorMessage = false;
 	let error:string = '';
+
+	const toastStore = getToastStore();
+
+	const accountCreatedToast:ToastSettings = {
+		message: 'Account created!',
+		background: 'variant-filled-primary',
+		timeout: 3500,
+		classes: 'gap-[0px]'
+	};
   
 	/**
 	 * Registers the user with the form data
@@ -62,6 +72,7 @@
 
 			if(success){
 				goto(base+"/login");
+				toastStore.trigger(accountCreatedToast);
 				// TODO make the user autologin when creating an account
 			}else{
 				errorMessage = true;
