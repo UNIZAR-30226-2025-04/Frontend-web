@@ -56,7 +56,7 @@ export async function createLobbyFetch(mode: number = 0): Promise<boolean> {
 export async function joinLobbyFetch(lobbyCode: string): Promise<boolean> {
     try {
         // Start the loading with a specific message
-        loadingStore.startLoading('Uniéndose al lobby...');
+        loadingStore.startLoading('Joining lobby...');
         
         const response = await fetch(joinLobbyPath + lobbyCode, {
             method: 'POST',
@@ -310,7 +310,7 @@ export async function getAllLobbiesFetch(): Promise<LobbyDisplay[]> {
  */
 export async function fetchLobbyInfo(lobbyId: string): Promise<any> {
     try {
-        console.log(`Intentando obtener información del lobby: ${lobbyId}`);
+        console.log(`Trying to get lobby info: ${lobbyId}`);
         
         const response = await fetch(`https://nogler.ddns.net:443/auth/lobbyInfo/${lobbyId}`, {
             method: 'GET',
@@ -328,13 +328,13 @@ export async function fetchLobbyInfo(lobbyId: string): Promise<any> {
         const data = await response.json();
         
         // Show the full response
-        console.log("%c RESPUESTA COMPLETA DE LA API:", "background: #222; color: #bada55; font-size: 16px");
+        console.log("%c Complete response from API:", "background: #222; color: #bada55; font-size: 16px");
         console.log(JSON.stringify(data, null, 2));
         console.dir(data); // Shows the object interatively
         
         // If the response doesn't contain players, add an empty array
         if (!data.players) {
-            console.warn("La API no devolvió un array de jugadores, usando array vacío");
+            console.warn("The API didn't return a player array, using empty array");
             data.players = [];
         }
         

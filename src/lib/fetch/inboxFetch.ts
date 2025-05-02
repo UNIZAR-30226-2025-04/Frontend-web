@@ -11,7 +11,7 @@ import { loadingStore } from "$lib/stores/loadingStore";
  */
 export async function fetchReceivedFriendshipRequests(pendingRequests:request[]) {
     try {
-        loadingStore.startLoading('Cargando solicitudes...');
+        loadingStore.startLoading('Loading requests...');
         const response = await fetch(receivedFriendshipRequestsPath, {
             method: 'GET',
             headers: {
@@ -80,7 +80,7 @@ export async function fetchDeleteFriendRequest(posibleFriend:string): Promise<bo
  */
 export async function fetchAcceptFriendshipRequest(posibleFriend:string): Promise<boolean> {
     try {
-        loadingStore.startLoading('Aceptando solicitud...');
+        loadingStore.startLoading('Accepting request...');
         const formData = new FormData();
         formData.append('friendUsername', posibleFriend);
 
@@ -115,7 +115,7 @@ export async function fetchAcceptFriendshipRequest(posibleFriend:string): Promis
  */
 export async function fetchReceivedGameInvitations(invitations:invitation[]) {
     try {
-        loadingStore.startLoading('Cargando invitaciones...');
+        loadingStore.startLoading('Loading invitations...');
         const response = await fetch(receivedGameInvitations, {
             method: 'GET',
             headers: {
