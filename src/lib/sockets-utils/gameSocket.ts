@@ -38,8 +38,6 @@ export function fullStateUpdate(args:any){
 		const newPhase:number = stringToPhase(args.phase);
 		let timeLeft = 99999;
 		if(newPhase >= 0 && newPhase < timePerPhase.length){
-			goto(base + "/game");
-
 			timeLeft = timePerPhase[newPhase] - secondsSince(args.timeout);
 
 			gameStore.update((state: GameState) => ({
@@ -56,8 +54,9 @@ export function fullStateUpdate(args:any){
 				deckSize: args.player_data.unplayed_cards + args.player_data.played_cards,
 				deckLeft: args.player_data.unplayed_cards,
 				money: args.player_data.players_money,
+				rerollAmount: args.next_reroll_price,
 				jokers: [],
-				vouchers: []
+				vouchers: [],
 			}));
 
 			addToHand(argsToCards(args.player_data.current_hand));
@@ -382,6 +381,11 @@ export function shopPhaseSetup(args: any) {
             state.money = args.money;
         }
 
+		// Update reroll ammount if provided
+		if(args.next_reroll_price !== undefined){
+			state.rerollAmount = args.next_reroll_price;
+		}
+
         // Set timeLeft for the shop phase
         if (args.timeout && args.timeout_start_date) {
             state.timeLeft = args.timeout - secondsSince(args.timeout_start_date);
@@ -671,6 +675,7 @@ export function jokersRerolled(args:any){
 	gameStore.update((state: GameState) => {
         // Initialize empty shop arrays
         state.shop.jokerRow = [];
+		state.rerollAmount = args.next_reroll_cost;
         
         // Process rerollable items (jokers)
 		args.new_jokers.jokers.forEach((item: any) => {

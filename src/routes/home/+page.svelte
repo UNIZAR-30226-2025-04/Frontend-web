@@ -25,6 +25,7 @@
 	import { get } from "svelte/store";
 	import { fetchLobbyInfo, isUserInLobby } from "$lib/fetch/lobbyFetch";
     import { requestGamePhasePlayerInfo } from "$lib/sockets-utils/gameSocket";
+    import ShaderBackground from "$lib/components/ShaderBackground.svelte";
 
 	const modalStore = getModalStore();
 
@@ -220,6 +221,7 @@
 		</a>
 	</div>
 </div>
+
 
 <style>
 	.card {

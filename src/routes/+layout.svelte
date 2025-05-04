@@ -33,6 +33,7 @@
     import UseVoucherModal from '$lib/components/UseVoucherModal.svelte';
     import WinModal from '$lib/components/WinModal.svelte';
     import LoseModal from '$lib/components/LoseModal.svelte';
+    import ShaderBackground from '$lib/components/ShaderBackground.svelte';
 
 	// For all singletons
 	initializeStores();
@@ -56,6 +57,8 @@
 	};
   
 </script>
+
+<ShaderBackground/>
 
 <Drawer>
 	{#if $drawerStore.id === "chat" }
