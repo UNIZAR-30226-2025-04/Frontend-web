@@ -58,6 +58,8 @@
   
 </script>
 
+<link rel="icon" href="/favicon-512x512.png" />
+
 <ShaderBackground/>
 
 <Drawer>
