@@ -85,9 +85,9 @@
 	 * @async
 	 */
 	async function attemptReconect() {
-		toastStore.trigger(reconexionToast);
 		const lobbyCode: string = await isUserInLobby();
 		if (lobbyCode !== "") {
+			toastStore.trigger(reconexionToast);
 			
 			lobbyStore.set({
 				code: lobbyCode,
@@ -134,7 +134,7 @@
 <div class="p-[10vh] container h-full flex flex-col justify-center content-centerm items-center">
 
 	<!-- Game logo -->
-	<img class="mt-[2vh] h-[50vmin] w-auto" src="nogler2.png" alt="Nogler" />
+	<img class="mt-[2vh] h-[50vmin] w-auto object-contain" src="nogler2.png" alt="Nogler" />
 
 	<!-- Button bar -->
 	<div class="gap-[2vmin] mt-[4%] flex">

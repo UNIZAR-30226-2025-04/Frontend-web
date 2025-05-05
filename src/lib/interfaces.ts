@@ -229,7 +229,8 @@ export type PackageItem = {
     id: number,
     packageId: number,
     sellAmount: number,
-    contents: CardItem[] | JokerItem[] | VoucherItem[],
+    contents: any[],
+    chooseAmount: number,
 } 
 
 export type AnimationVariables = {

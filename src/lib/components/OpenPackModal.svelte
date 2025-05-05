@@ -7,13 +7,15 @@
         PackageItem,
         VoucherItem,
     } from "$lib/interfaces";
-    import { getModalStore } from "@skeletonlabs/skeleton";
+    import { filter, getModalStore } from "@skeletonlabs/skeleton";
     import GameCard from "./GameCard.svelte";
     import PackageCard from "./PackageCard.svelte";
     import JokerCard from "./JokerCard.svelte";
     import VoucherCard from "./VoucherCard.svelte";
     import { flip } from "svelte/animate";
     import { packageStore } from "$lib/stores";
+    import { getNextKey } from "$lib/keyGenerator";
+    import { it } from "node:test";
 
     const modalStore = getModalStore();
 
@@ -39,9 +41,14 @@
      * @param index
      */
     function onClickCard(index: number) {
-        if (pack.chooseAmount === 1)
+        if(packItem.contents[index].picked){
+            packItem.contents[index].picked = false;
+        }else if (packItem.chooseAmount === 1){
             packItem.contents.map((cardItem) => (cardItem.picked = false));
-        packItem.contents[index].picked = !packItem.contents[index].picked;
+            packItem.contents[index].picked = !packItem.contents[index].picked;
+        }else if(packItem.chooseAmount > packItem.contents.filter(item => item.picked).length){
+            packItem.contents[index].picked = !packItem.contents[index].picked;
+        }
     }
 
     /**
@@ -50,19 +57,19 @@
     function onChoose(){
         if(packItem){
             if(pack.contentType === 0){
-                toCardItems(packItem.contents).forEach(cardItem => {
+                packItem.contents.forEach(cardItem => {
                     if(cardItem.picked){
                         console.log("Picked card:",cardItem);
                     }
                 }); 
             }else if(pack.contentType === 1){
-                toJokerItems(packItem.contents).forEach(jokerItem => {
+                packItem.contents.forEach(jokerItem => {
                     if(jokerItem.picked){
                         console.log("Picked joker:",jokerItem);
                     }
                 });
             }else{
-                toVoucherItems(packItem.contents).forEach(voucherItem => {
+                packItem.contents.forEach(voucherItem => {
                     if(voucherItem.picked){
                         console.log("Picked voucher:",voucherItem);
                     }
@@ -72,25 +79,11 @@
         modalStore.close();
     }
 
-    // Type inference functions
-
-    function toCardItems(items: unknown[]): CardItem[] {
-        return items as CardItem[];
-    }
-
-    function toJokerItems(items: unknown[]): JokerItem[] {
-        return items as JokerItem[];
-    }
-
-    function toVoucherItems(items: unknown[]): VoucherItem[] {
-        return items as VoucherItem[];
-    }
-
 </script>
 
 {#if $modalStore[0] && $modalStore[0].meta && packItem && pack}
     <div
-        class="w-[45vh] card p-4 grid grid-rows-[1fr_3fr_4fr_1fr] items-center"
+        class="w-min-[45vh] card p-4 grid grid-rows-[1fr_3fr_4fr_1fr] items-center"
     >
         <!--Title card-->
         <div
@@ -122,7 +115,7 @@
                 <div class="flex gap-3 justify-around">
                     {#if pack.contentType === 0}
                         <!--Normal card type-->
-                        {#each toCardItems(packItem.contents) as card, index (card.id)}
+                        {#each packItem.contents as card, index (card.id)}
                             <div
                                 animate:flip={{
                                     duration:
@@ -141,7 +134,7 @@
                         {/each}
                     {:else if pack.contentType === 1}
                         <!--Joker type-->
-                        {#each toJokerItems(packItem.contents) as joker, index (joker.id)}
+                        {#each packItem.contents as joker, index (joker.id)}
                             <div
                                 animate:flip={{
                                     duration:
@@ -161,7 +154,7 @@
                         {/each}
                     {:else}
                         <!--Voucher type-->
-                        {#each toVoucherItems(packItem.contents) as voucher, index (voucher.id)}
+                        {#each packItem.contents as voucher, index (voucher.id)}
                             <div
                                 animate:flip={{
                                     duration:
@@ -181,8 +174,8 @@
                     {/if}
                 </div>
                 <div class="mt-[5%] h-[20%]">
-                    {#if pack.chooseAmount > 1}
-                        Choose up to {pack.chooseAmount}
+                    {#if packItem.chooseAmount > 1}
+                        Choose up to {packItem.chooseAmount}
                     {:else}
                         Choose 1
                     {/if}
