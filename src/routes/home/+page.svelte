@@ -131,7 +131,7 @@
 
 </script>
 
-<div class="container h-full flex flex-col justify-center">
+<div class="p-[10vh] container h-full flex flex-col justify-center content-centerm items-center">
 
 	<!-- Game logo -->
 	<img class="mt-[2vh] h-[50vmin] w-auto" src="nogler2.png" alt="Nogler" />

@@ -34,6 +34,7 @@
     import WinModal from '$lib/components/WinModal.svelte';
     import LoseModal from '$lib/components/LoseModal.svelte';
     import ShaderBackground from '$lib/components/ShaderBackground.svelte';
+    import { base } from '$app/paths';
 
 	// For all singletons
 	initializeStores();
@@ -58,7 +59,7 @@
   
 </script>
 
-<link rel="icon" href="/favicon-512x512.png" />
+<link rel="icon" href={base+"/favicon-512x512.png"} />
 
 <ShaderBackground/>
 
