@@ -125,14 +125,15 @@ export const errorVoucher:Voucher = {
 }
 
 export const voucherDirectory:Voucher[] = [
-    {name:"Daimond eyes", image:"cards/vouchers/vouchers deftones.png",tooltip:"I love Deftones !!!!", targetType:false},
-    {name:"Daimond eyes", image:"cards/vouchers/vouchers deftones.png",tooltip:"I love Deftones !!!!", targetType:false},
-    {name:"Daimond eyes", image:"cards/vouchers/vouchers deftones.png",tooltip:"I love Deftones !!!!", targetType:false},
-    {name:"Daimond eyes", image:"cards/vouchers/vouchers deftones.png",tooltip:"I love Deftones !!!!", targetType:false},
-    {name:"Daimond eyes", image:"cards/vouchers/vouchers deftones.png",tooltip:"I love Deftones !!!!", targetType:false},
-    {name:"Daimond eyes", image:"cards/vouchers/vouchers deftones.png",tooltip:"I love Deftones !!!!", targetType:false},
-    {name:"Daimond eyes", image:"cards/vouchers/vouchers deftones.png",tooltip:"I love Deftones !!!!", targetType:false},
-    {name:"Daimond eyes", image:"cards/vouchers/vouchers deftones.png",tooltip:"I love Deftones !!!!", targetType:false},
+    {name:"DAMN", image:"cards/vouchers/voucher damn.png",tooltip:"Divide starting chips and mult by half", targetType:true, targetCount:3},
+    {name:"Pablo Honey", image:"cards/vouchers/voucher pablo honey.png",tooltip:"Earn 1 dollar for each card played", targetType:false},
+    {name:"Random Access Memories", image:"cards/vouchers/voucher RAM.png",tooltip:"Remove one joker from other player's rack chosen randomly", targetType:true, targetCount:1},
+    {name:"Weezer", image:"cards/vouchers/voucher weezer.png",tooltip:"Bans up to 4 players to play four of a kind for 1 round", targetType:true, targetCount:4},
+    {name:"Blonde", image:"cards/vouchers/voucher blond.png",tooltip:"Bans up to 2 players from playing straights for 1 round", targetType:true, targetCount:2},
+    {name:"Abbey Road", image:"cards/vouchers/voucher abbey road.png",tooltip:"Every King or Queen played scores negative points", targetType:true, targetCount:4},
+    {name:"Rock transgresivo", image:"cards/vouchers/voucher extremoduro.png",tooltip:"Aces and K's score double", targetType:false},
+    {name:"Diamond Eyes", image:"cards/vouchers/voucher deftones.png",tooltip:"Applicable to up to 3 players. Substracts from their mult the money they have", targetType:true, targetCount:3},
+    {name:"The money store", image:"cards/vouchers/voucher victor.png",tooltip:"Each black card played (spades and clubs) grants 1 dollar, +10 chips, +2 mult", targetType:false},
 ]
 
 // Packs
