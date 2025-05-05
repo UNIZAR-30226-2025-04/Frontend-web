@@ -3,7 +3,7 @@
     import { base } from "$app/paths";
 	import AvatarDisplay from "$lib/components/AvatarDisplay.svelte";
 	import { exitLobby, initializeSocket, kickUser } from "$lib/sockets-utils/lobbySocket";
-	import { lobbyStore, socketStore, userDataStore } from "$lib/stores";
+	import { lobbyStore, socketStore, userDataStore, unreadMessages } from "$lib/stores";
 	import {
 		getDrawerStore,
 		getModalStore,
@@ -15,6 +15,8 @@
 	import { cubicOut } from "svelte/easing";
 	import { get } from "svelte/store";
 	import { startGame } from "$lib/sockets-utils/gameSocket";
+	import { updateLobbyVisibility } from "$lib/fetch/lobbyFetch";
+	import { markMessagesAsRead } from "$lib/sockets-utils/chatAddMessage";
 
 	const modalStore = getModalStore();
 	const drawerStore = getDrawerStore();
@@ -39,11 +41,23 @@
 	$: players = $lobbyStore.players; // List of players
 
 	// Function to switch the public value
-	function onSwitchPublic() {
-		if (host){ 
-			publicString = publicValue ? "PRIVATE" : "PUBLIC";
-			publicValue = !publicValue;
-			console.log(publicValue);
+	async function onSwitchPublic() {
+		if (host) {
+			// Toggle the visibility state
+			const newVisibility = !publicValue;
+			
+			// Show visual feedback immediately (optimistic UI update)
+			publicString = newVisibility ? "PUBLIC" : "PRIVATE";
+			publicValue = newVisibility;
+			
+			// Make the API call to update on the server
+			const success = await updateLobbyVisibility(newVisibility);
+			
+			// If it failed, revert the UI
+			if (!success) {
+				publicValue = !newVisibility;
+				publicString = publicValue ? "PUBLIC" : "PRIVATE";
+			}
 		}
 	}
 
@@ -81,6 +95,7 @@
 	}
 
 	function openDrawer() {
+		markMessagesAsRead();
 		drawerStore.open(settingsChat);
 	}
 
@@ -121,10 +136,14 @@
 		</div>
 		<button
 			type="button"
-			class="btn btn-lg variant-filled"
+			class="btn btn-lg variant-filled relative"
 			on:click={openDrawer}
-			><img src="icons/chat.png" alt="chat" class="w-[20px]" /></button
 		>
+			<img src="icons/chat.png" alt="chat" class="w-[20px]" />
+			{#if $unreadMessages}
+				<span class="notification-dot"></span>
+			{/if}
+		</button>
 	</div>
 
 	<!-- Players -->
@@ -168,3 +187,22 @@
 		{/if}
 	</div>
 </div>
+
+<style>
+	.notification-dot {
+		position: absolute;
+		top: -5px;
+		right: -5px;
+		width: 10px;
+		height: 10px;
+		background-color: #FF4136;
+		border-radius: 50%;
+		animation: pulse 1.5s infinite;
+	}
+	
+	@keyframes pulse {
+		0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 65, 54, 0.7); }
+		70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(255, 65, 54, 0); }
+		100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 65, 54, 0); }
+	}
+</style>

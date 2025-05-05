@@ -1,5 +1,5 @@
 import type { inviteItem, LobbyInfo, LobbyDisplay } from "$lib/interfaces";
-import { allLobbiesPath, createLobbyPath, deleteSentLobbyInvitationsPath, exitLobbyPath, joinLobbyPath, sendLobbyInvitationsPath, sentLobbyInvitationsPath, receivedGameInvitations, deleteReceivedInvitationPath, isUserInLobbyPath } from "$lib/paths";
+import { allLobbiesPath, createLobbyPath, deleteSentLobbyInvitationsPath, exitLobbyPath, joinLobbyPath, sendLobbyInvitationsPath, sentLobbyInvitationsPath, receivedGameInvitations, deleteReceivedInvitationPath, isUserInLobbyPath, setLobbyVisibilityPath } from "$lib/paths";
 import { lobbyStore, userDataStore } from "$lib/stores";
 import { get } from "svelte/store";
 import { fetchDeleteGameInvitation } from "$lib/fetch/inboxFetch";
@@ -404,5 +404,63 @@ export async function isUserInLobby(): Promise<string> {
     } catch (error) {
         console.error("Exception getting user lobby info:", error);
         return "";
+    }
+}
+
+/**
+ * Updates the visibility of a lobby (public/private)
+ * @param isPublic Boolean indicating if lobby should be public (true) or private (false)
+ * @returns true if success, false if error
+ * @async
+ */
+export async function updateLobbyVisibility(isPublic: boolean): Promise<boolean> {
+    try {
+        const lobbyCode = get(lobbyStore).code;
+        
+        // Create form data with the exact string value expected by the backend
+        const formData = new URLSearchParams();
+        // Explicitly use the string "true" or "false" instead of using toString()
+        formData.append('is_public', isPublic ? "true" : "false");
+        
+        // Debug the actual data being sent
+        console.log("Updating lobby visibility:");
+        console.log("- Lobby code:", lobbyCode);
+        console.log("- Setting public:", isPublic);
+        console.log("- Form data:", formData.toString());
+        
+        const response = await fetch(setLobbyVisibilityPath + lobbyCode, {
+            method: 'POST',
+            headers: {
+                'accept': 'application/json',
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Authorization': 'Bearer ' + get(userDataStore).token,
+            },
+            body: formData
+        });
+
+        // Debug response details
+        console.log("Response status:", response.status);
+        
+        if (!response.ok) {
+            // Try to get more detailed error information
+            const errorText = await response.text();
+            console.error(`Error updating lobby visibility: ${response.status} ${response.statusText}`);
+            console.error("Error details:", errorText);
+            throw new Error("Error updating lobby visibility");
+        }
+
+        const data = await response.json();
+        console.log("API response (update lobby visibility):", data);
+
+        // Update the store with the new visibility status
+        lobbyStore.update(lobby => ({
+            ...lobby,
+            isPublic: data.is_public
+        }));
+
+        return true;
+    } catch (err: any) {
+        console.log("API error (update lobby visibility):", err);
+        return false;
     }
 }

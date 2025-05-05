@@ -56,6 +56,8 @@
     import { tweened } from "svelte/motion";
     import { get } from "svelte/store";
     import { fade, fly } from "svelte/transition";
+    import { unreadMessages } from "$lib/stores";
+    import { markMessagesAsRead } from "$lib/sockets-utils/chatAddMessage";
 
 	// Main state variable
 
@@ -195,6 +197,7 @@
 	 * Opens chat modal
 	 */
 	function onChat() {
+		markMessagesAsRead();
 		drawerStore.open(settingsChat);
 	}
 
@@ -1243,7 +1246,7 @@
 			<!--Chat and leave buttons-->
 			<div class="flex justify-end gap-4">
 				<button
-					class="card w-[25%] aspect-square content-center"
+					class="card w-[25%] aspect-square content-center relative"
 					on:click={onChat}
 				>
 					<img
@@ -1251,6 +1254,9 @@
 						alt="chat"
 						class="w-[50%] min-w-[12px] mx-auto"
 					/>
+					{#if $unreadMessages}
+						<span class="notification-dot"></span>
+					{/if}
 				</button>
 				<button
 					class="card w-[25%] aspect-square text-4xl-r"
@@ -1375,5 +1381,22 @@
 		text-shadow:
 			2px 0.5px 2px #ea36af,
 			-1px -0.5px 2px #75fa69;
+	}
+
+	.notification-dot {
+		position: absolute;
+		top: 5px;
+		right: 5px;
+		width: 10px;
+		height: 10px;
+		background-color: #FF4136;
+		border-radius: 50%;
+		animation: pulse 1.5s infinite;
+	}
+	
+	@keyframes pulse {
+		0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 65, 54, 0.7); }
+		70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(255, 65, 54, 0); }
+		100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 65, 54, 0); }
 	}
 </style>

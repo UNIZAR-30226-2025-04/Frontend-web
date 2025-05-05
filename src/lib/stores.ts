@@ -73,3 +73,5 @@ export const animationSpeedStore = writable<number>(100);
 export const gameEndStore = writable<GameEndInfo>();
 
 export const packageStore = writable<PackageItem>();
+
+export const unreadMessages = writable(false);
