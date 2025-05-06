@@ -38,6 +38,8 @@ export function fullStateUpdate(args:any){
 		const newPhase:number = stringToPhase(args.phase);
 		let timeLeft = 99999;
 		if(newPhase >= 0 && newPhase < timePerPhase.length){
+			goto(base + "/game");
+
 			timeLeft = timePerPhase[newPhase] - secondsSince(args.timeout);
 
 			gameStore.update((state: GameState) => ({
@@ -457,9 +459,10 @@ export function shopPhaseItemsSetup(args: any) {
             args.fixed_packs.forEach((pack: any) => {
                 state.shop.packageRow.push({
                     id: pack.id,
-                    packageId: pack.pack_seed % 3, // Using pack_seed to determine packageId
+                    packageId: pack.pack_type,
                     sellAmount: pack.price || 0,
-                    contents: [] // Empty contents array for type requirement
+                    contents: [],
+					chooseAmount: pack.max_selectable
                 });
             });
         } 
@@ -534,14 +537,18 @@ export function sellJoker(jokerId: number) {
 /**
  * Emits a pack_selection event to select items from an opened pack
  * @param packId ID of the pack
- * @param selectedCard Selected card
- * @param selectedJokerId ID of the selected joker
+ * @param selectedCard Selected cards
+ * @param selectedJokers ID of the selected jokers
+ * @param selectedVouchers ID of the selected vouchers
  */
-export function selectPackItems(packId: number, selectedCard: any, selectedJokerId: number) {
-	console.log("<- pack_selection:", packId, selectedCard, selectedJokerId);
-	get(socketStore).emit("pack_selection", packId, selectedCard, selectedJokerId);
+export function selectPackItems(packId: number, selectionsMap: any) {
+	console.log("<- choose_pack_items:", packId, selectionsMap);
+	get(socketStore).emit("choose_pack_items", packId, selectionsMap);
 }
 
+/**
+ * When the user click 'Next round' button on shop phase 
+ */
 export function continueShop(){
     console.log("<- continue_to_vouchers");
     get(socketStore).emit("continue_to_vouchers");
@@ -641,14 +648,17 @@ export function packPurchased(args: any) {
             pack => pack.id === args.item_id
         );
 
-        if(packItem){
-            if(args.cards){
-                packItem.contents = args.cards;
-            }else if(args.jokers){
-                packItem.contents = args.jokers;
+        if(packItem && packItem.packageId >= 0 && packItem.packageId < packageDirectory.length){
+			const type:number = packageDirectory[packItem.packageId].contentType;
+            if(type === 0){
+                packItem.contents = toCardItems(args.cards);
+            }else if(type === 1){
+                packItem.contents = toJokerItems(args.jokers);
+            }else if(type === 2){
+                packItem.contents = toVoucherItems(args.vouchers);
             }else{
-                console.error("Pack contents are empty")
-            }
+				console.error("Pack type not recognized");
+			}
         }else{
             console.error("Pack id not recognized");
         }
@@ -665,6 +675,119 @@ export function packPurchased(args: any) {
         
         return state;
     });
+}
+
+/**
+ * Handles the pack purchase response from server after choosing the contents
+ * @param args given by the server
+ */
+export function packPurchasedComplete(args: any) {
+
+	gameStore.update((state: GameState) => {
+        // Update player's money
+        state.money = args.remaining_money;
+
+		const packItem:PackageItem = get(packageStore);
+
+		// Include any jokers
+		args.selections.selectedJokers.forEach((jokerId: any) => {
+			for (const item of packItem.contents) {
+				if(item.jokerId === jokerId){
+					state.jokers.push({
+						id:getNextKey(),
+						jokerId:jokerId,
+						edition:0,
+						sellAmount: item.sellAmount,
+						picked:false
+					});
+					break; // Once we find the matching joker we break
+				}
+			};
+		});
+
+		// Include any vouchers
+		args.selections.selectedVouchers.forEach((voucherId: any) => {
+			state.vouchers.push({
+				id:getNextKey(),
+				voucherId: voucherId,
+				sellAmount: 0,
+				picked:false,
+			});
+		});
+
+		// Reset contents on completion
+		packageStore.update((pack: PackageItem) => ({
+			...pack,
+			contents: []
+		}));
+        
+        return state;
+    });
+}
+
+/**
+ * Converts args from package purchased to CardItem[]
+ * @param items to convert
+ * @returns 
+ */
+function toCardItems(items: unknown[]): CardItem[] {
+	let ret:CardItem[] = [];
+
+	items.forEach((item:any) => {
+		ret.push({
+			id:getNextKey(),
+			card:{
+				rank:item.Rank,
+				suit:item.Suit,
+				faceUp:true,
+				overlay:item.Enhancement
+			},
+			picked:false
+		});
+	});
+	
+	return ret;
+}
+
+/**
+ * Converts args from package purchased to JokerItem[]
+ * @param items to convert
+ * @returns 
+ */
+function toJokerItems(items: unknown[]): JokerItem[] {
+	let ret:JokerItem[] = [];
+
+	items.forEach((item:any) => {
+		ret.push({
+			id:getNextKey(),
+			jokerId:item.Juglares[0].id,
+			edition:0,
+			sellAmount:item.Juglares[0].sell_price,
+			picked:false
+		});
+	});
+
+	return ret;
+}
+
+/**
+ * Converts args from package purchased to VoucherItem[]
+ * @param items to convert
+ * @returns 
+ */
+function toVoucherItems(items: unknown[]): VoucherItem[] {
+	let ret:VoucherItem[] = [];
+
+	items.forEach((item:any) => {
+		ret.push({
+			id:getNextKey(),
+			voucherId:item.value,
+			sellAmount:0,
+			picked:false
+		});
+	});
+
+	return ret;
 }
 
 /**

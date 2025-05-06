@@ -144,6 +144,7 @@ export const errorPack:Package = {
 
 export const packageDirectory:Package[] = [
     {name:"Standar pack", image:"cards/packs/Standard_Normal_1.png", chooseAmount:3, contentType:0, contentSize:3},
-    {name:"Buffon pack", image:"cards/packs/Buffoon_Normal_2.png", chooseAmount:1, contentType:1, contentSize:3},
-    {name:"Voucher pack", image:"cards/packs/Spectral_Jumbo_1.png", chooseAmount:1, contentType:2, contentSize:2},
+    {name:"Card pack", image:"cards/packs/pack_cards.png", chooseAmount:1, contentType:0, contentSize:3},
+    {name:"Joker pack", image:"cards/packs/pack_jokers.png", chooseAmount:1, contentType:1, contentSize:3},
+    {name:"Voucher pack", image:"cards/packs/pack_vouchers.png", chooseAmount:1, contentType:2, contentSize:3},
 ]
