@@ -14,6 +14,7 @@ import {
 	jokerSold,
 	jokersRerolled,
 	packPurchased, 
+	packPurchasedComplete, 
 	playedHand, 
 	playPhaseSetup, 
 	shopPhaseSetup,
@@ -246,6 +247,11 @@ export function initializeSocket() {
 	socket.on("pack_purchased", (args: any) => {
 		console.log("-> pack_purchased", args);
 		packPurchased(args);
+	});
+
+	socket.on("pack_selection_complete", (args: any) => {
+		console.log("-> pack_selection_complete", args);
+		packPurchasedComplete(args);
 	});
 
 	socket.on("joker_sold", (args: any) => {

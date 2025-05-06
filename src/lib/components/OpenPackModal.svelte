@@ -16,6 +16,7 @@
     import { packageStore } from "$lib/stores";
     import { getNextKey } from "$lib/keyGenerator";
     import { it } from "node:test";
+    import { selectPackItems } from "$lib/sockets-utils/gameSocket";
 
     const modalStore = getModalStore();
 
@@ -56,25 +57,46 @@
      */
     function onChoose(){
         if(packItem){
+            let selectedCards:{
+                Rank:string,
+                Suit:string,
+                Enhancement:number
+            }[] = [];
+            let selectedJokers:number[] = [];
+            let selectedVouchers:number[] = [];
+
             if(pack.contentType === 0){
                 packItem.contents.forEach(cardItem => {
                     if(cardItem.picked){
-                        console.log("Picked card:",cardItem);
+                        selectedCards.push({
+                            Rank: cardItem.card.rank,
+                            Suit: cardItem.card.suit,
+                            Enhancement: cardItem.card.overlay,
+                        });
                     }
                 }); 
             }else if(pack.contentType === 1){
                 packItem.contents.forEach(jokerItem => {
                     if(jokerItem.picked){
-                        console.log("Picked joker:",jokerItem);
+                        selectedJokers.push(jokerItem.jokerId);
                     }
                 });
             }else{
                 packItem.contents.forEach(voucherItem => {
                     if(voucherItem.picked){
-                        console.log("Picked voucher:",voucherItem);
+                        selectedVouchers.push(voucherItem.voucherId);
                     }
                 });
             }
+
+            const selectionsMap = {
+                selectedCards: selectedCards,
+                selectedJokers: selectedJokers,
+                selectedVouchers: selectedVouchers
+            };
+
+            selectPackItems(packItem.id,selectionsMap);
+            
         }
         modalStore.close();
     }
