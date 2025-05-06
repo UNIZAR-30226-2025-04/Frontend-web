@@ -1,5 +1,5 @@
 import type { inviteItem, LobbyInfo, LobbyDisplay } from "$lib/interfaces";
-import { allLobbiesPath, createLobbyPath, deleteSentLobbyInvitationsPath, exitLobbyPath, joinLobbyPath, sendLobbyInvitationsPath, sentLobbyInvitationsPath, receivedGameInvitations, deleteReceivedInvitationPath, isUserInLobbyPath, setLobbyVisibilityPath } from "$lib/paths";
+import { allLobbiesPath, createLobbyPath, deleteSentLobbyInvitationsPath, exitLobbyPath, joinLobbyPath, sendLobbyInvitationsPath, sentLobbyInvitationsPath, receivedGameInvitations, deleteReceivedInvitationPath, isUserInLobbyPath, setLobbyVisibilityPath, matchMakingPath } from "$lib/paths";
 import { lobbyStore, userDataStore } from "$lib/stores";
 import { get } from "svelte/store";
 import { fetchDeleteGameInvitation } from "$lib/fetch/inboxFetch";
@@ -462,5 +462,45 @@ export async function updateLobbyVisibility(isPublic: boolean): Promise<boolean>
     } catch (err: any) {
         console.log("API error (update lobby visibility):", err);
         return false;
+    }
+}
+
+/**
+ * Finds a suitable lobby for the user based on skill level and joins it
+ * @returns True if a lobby was found and joined successfully, false otherwise
+ * @async
+ */
+export async function fetchMatchMaking(): Promise<boolean> {
+    try {
+        loadingStore.startLoading('Finding a match...');
+        
+        const response = await fetch(matchMakingPath, {
+            method: 'GET',
+            headers: {
+                'accept': 'application/json',
+                'Authorization': 'Bearer ' + get(userDataStore).token,
+            }
+        });
+
+        if (!response.ok) {
+            console.error(`Error finding match: ${response.status} ${response.statusText}`);
+            throw new Error("No suitable lobbies found");
+        }
+
+        const data = await response.json();
+        console.log("API response (matchmaking):", data);
+        
+        if (!data.lobby_id) {
+            throw new Error("No lobby ID returned from matchmaking");
+        }
+        
+        // Join the found lobby
+        return await joinLobbyFetch(data.lobby_id);
+        
+    } catch (err: any) {
+        console.log("API error (matchmaking):", err);
+        return false;
+    } finally {
+        loadingStore.stopLoading();
     }
 }

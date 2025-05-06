@@ -4,7 +4,7 @@
   import { base } from '$app/paths';
   import { getModalStore, getToastStore, type ModalSettings, type ToastSettings } from '@skeletonlabs/skeleton';
   import { onMount } from 'svelte';
-  import { getAllLobbiesFetch, joinLobbyFetch } from "$lib/fetch/lobbyFetch";
+  import { getAllLobbiesFetch, joinLobbyFetch, fetchMatchMaking } from "$lib/fetch/lobbyFetch";
   import { lobbyStore } from "$lib/stores";
   import { loadingStore } from "$lib/stores/loadingStore";
   import type { LobbyDisplay } from "$lib/interfaces";

@@ -58,6 +58,8 @@ export const allLobbiesPath:string = apiBase + 'auth/getAllLobbies';
 export const isUserInLobbyPath:string = apiBase + 'auth/isUserInLobby';
 // Set the visibility of a lobby
 export const setLobbyVisibilityPath = apiBase + 'auth/setLobbyVisibility/';
+// Matchmaking
+export const matchMakingPath:string = apiBase + 'auth/matchMaking';
 
 // GAMELOBBY
 // Get all game lobby invitations for the authenticated user
