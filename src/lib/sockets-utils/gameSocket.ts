@@ -1,5 +1,5 @@
 import { HandTypesBase, voucherDirectory, packageDirectory } from "$lib/cardDirectory";
-import type { Card, CardItem, GameState, VoucherItem, JokerItem, PackageItem, Package } from "$lib/interfaces";
+import type { Card, CardItem, GameState, VoucherItem, JokerItem, PackageItem, Package, Lobby } from "$lib/interfaces";
 import { gameStore, lobbyStore, packageStore, socketStore, userDataStore } from "$lib/stores";
 import { get } from "svelte/store";
 import { timePerPhase } from "$lib/gameDirectory";
@@ -816,4 +816,60 @@ export function jokersRerolled(args:any){
 		});
         return state;
     });
+}
+
+
+// -----------------------
+// VOUCHER PHASE FUNCS
+// -----------------------
+
+
+/**
+ * Hanldes the setup of the voucher phase 
+ * when recieving a 'starting_vouchers' event 
+ * @param args given by the server
+ */
+export function voucherPhaseSetup(args:any){
+	gameStore.update((state: GameState) => {
+
+        // Set timeLeft for the shop phase
+        if (args.timeout && args.timeout_start_date) {
+            state.timeLeft = args.timeout - secondsSince(args.timeout_start_date);
+        } else if (args.shop && args.shop.timeout && args.shop.timeout_start_date) {
+            state.timeLeft = args.shop.timeout - secondsSince(args.shop.timeout_start_date);
+        }
+        
+		// Update round number
+		state.round = args.current_round;
+
+		// Update players in lobby
+		lobbyStore.update((lobby:Lobby) => {
+			lobby.players = [];
+			args.users_in_lobby.forEach((user:any) => {
+				lobby.players.push({
+					key:getNextKey(),
+					username:user.username,
+					icon:user.icon,
+					host:false
+				});
+			});
+			return lobby;
+		});
+
+		// Update vouchers
+		state.vouchers = [];
+		args.vouchers.Modificadores.forEach((voucher:any) => {
+			state.vouchers.push({
+				id:getNextKey(),
+				voucherId:voucher.value,
+				sellAmount:0,
+				picked:false
+			});
+		});
+        
+        return state;
+    });
+    
+    // Ensure phase is fully updated in UI
+    setPhaseTo(3);
 }
