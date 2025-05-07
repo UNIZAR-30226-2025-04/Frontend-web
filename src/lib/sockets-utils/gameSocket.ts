@@ -823,6 +823,18 @@ export function jokersRerolled(args:any){
 // VOUCHER PHASE FUNCS
 // -----------------------
 
+/**
+ * Activates a voucher by sending an 'activate_modifiers' event
+ * @param voucherId to activate
+ */
+export function activateVoucher(voucherId:number){
+	const args:any = [
+		[voucherId]
+	];
+	console.log("<- activate_modifiers",args);
+	get(socketStore).emit("activate_modifiers",args);
+}
+
 
 /**
  * Hanldes the setup of the voucher phase 
@@ -872,4 +884,25 @@ export function voucherPhaseSetup(args:any){
     
     // Ensure phase is fully updated in UI
     setPhaseTo(3);
+}
+
+/**
+ * Triggers on 'modifiers_activated' event, updates state.vouchers
+ * @param args given by the server
+ */
+export function updateVouchers(args:any){
+	gameStore.update((state: GameState) => {
+		// Update vouchers
+		state.vouchers = [];
+		args.modifiers.forEach((voucher:any) => {
+			state.vouchers.push({
+				id:getNextKey(),
+				voucherId:voucher.value,
+				sellAmount:0,
+				picked:false
+			});
+		});
+        
+        return state;
+    });
 }

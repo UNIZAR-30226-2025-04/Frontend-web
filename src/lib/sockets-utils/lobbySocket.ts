@@ -20,6 +20,7 @@ import {
 	shopPhaseSetup,
 	updateHand, 
 	updateMinimunScore,
+	updateVouchers,
 	voucherPhaseSetup,
 	voucherPurchased
 } from "./gameSocket";
@@ -268,6 +269,11 @@ export function initializeSocket() {
 	socket.on("starting_vouchers", (args: any) => {
 		console.log("-> starting_vouchers", args);
 		voucherPhaseSetup(args);
+	});
+
+	socket.on("modifiers_activated", (args: any) => {
+		console.log("-> modifiers_activated", args);
+		updateVouchers(args);
 	});
 }
 

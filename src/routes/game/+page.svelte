@@ -34,10 +34,9 @@
         playHand,
         proposeBlind,
         requestGamePhasePlayerInfo,
-
         rerollShop,
-
-        sellJoker
+        sellJoker,
+		activateVoucher,
 
     } from "$lib/sockets-utils/gameSocket";
     import { animationSpeedStore, gameEndStore, gameStore } from "$lib/stores";
@@ -488,6 +487,7 @@
 			} else {
 				state.activeVouchers.push(pickedVoucher);
 				state.vouchers.splice(index, 1);
+				activateVoucher(pickedVoucher.voucherId);
 			}
 
 			// Reset the picked voucher
