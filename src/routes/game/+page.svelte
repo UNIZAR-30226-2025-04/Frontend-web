@@ -37,6 +37,7 @@
         rerollShop,
         sellJoker,
 		activateVoucher,
+        continueVouchers,
 
     } from "$lib/sockets-utils/gameSocket";
     import { animationSpeedStore, gameEndStore, gameStore } from "$lib/stores";
@@ -450,6 +451,7 @@
 			state.money >= state.rerollAmount &&
 			state.shop.jokerRow.length > 0
 		) {
+			state.money -= state.rerollAmount;
 			rerollShop();
 		}
 	}
@@ -485,8 +487,8 @@
 
 				modalStore.trigger(useVoucherModal);
 			} else {
-				state.activeVouchers.push(pickedVoucher);
 				state.vouchers.splice(index, 1);
+				state.activeVouchers.push(pickedVoucher);
 				activateVoucher(pickedVoucher.voucherId);
 			}
 
@@ -506,11 +508,14 @@
 		if (
 			response &&
 			response === true &&
-			index > 0 &&
+			index >= 0 &&
 			index < state.vouchers.length
 		) {
 			state.vouchers.splice(index, 1);
 			state.vouchers = [...state.vouchers];
+			console.log("removeVoucherModal => true");
+		}else{
+			console.log("removeVoucherModal => !true ",response,index);
 		}
 	}
 
@@ -1231,7 +1236,7 @@
 					</button>
 					<button
 						class="btn variant-filled-error w-[35%] text-5xl-r"
-						on:click={onNextPhase}
+						on:click={continueVouchers}
 						>Next Round
 					</button>
 				</div>

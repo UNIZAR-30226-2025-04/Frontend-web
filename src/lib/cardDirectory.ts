@@ -90,10 +90,11 @@ export const errorJoker:Joker = {
 }
 
 export const jokerDirectory:Joker[] = [
+    {name:"Error joker", image:"icons/missing.png",tooltip:"This is an error",rarity:0},
     {name:"Solid seven joker",image:"cards/jokers/solid_seven.png",tooltip:"+7 chips +7 mult",rarity:0},
-    {name:"Poor joker",image:"cards/jokers/poor joker.png",tooltip:"Generates 4 gold each round",rarity:0},
+    {name:"Poor joker",image:"cards/jokers/poor joker.png",tooltip:"Generates 4 gold each hand",rarity:0},
     {name:"Petpet",image:"cards/jokers/petpet.png",tooltip:"Sums the number of gold the user has to mult",rarity:0},
-    {name:"Average size michael",image:"cards/jokers/AVERAGE_SIZE_MICHAEL.png",tooltip:"+15 mult, 1/15 chance of being sold each round",rarity:0},
+    {name:"Average size michael",image:"cards/jokers/AVERAGE_SIZE_MICHAEL.png",tooltip:"1/15 chance of +15 mult",rarity:0},
     {name:"Hell cowboy",image:"cards/jokers/hell_cowboy.png",tooltip:"Adds +mult equivalent to the highest scoring card",rarity:0},
     {name:"Crab sponge",image:"cards/jokers/bob_spider.png",tooltip:"+50 chips if you have 3 of the same cards in played hand",rarity:0},
     {name:"Two friends joker",image:"cards/jokers/2 friends.png",tooltip:"Takes 10 of your +chips and changes them to +mult",rarity:0},
@@ -121,10 +122,11 @@ export const jokerEditionsDirectory:JokerEdition[] = [
 // Vouchers
 
 export const errorVoucher:Voucher = {
-    name:"Error boucher", image:"icons/missing.png",tooltip:"Error boucher",targetType:true,targetCount:1
+    name:"Error voucher", image:"icons/missing.png",tooltip:"Error boucher",targetType:true,targetCount:1
 }
 
 export const voucherDirectory:Voucher[] = [
+    {name:"Error voucher", image:"icons/missing.png",tooltip:"Error boucher",targetType:true,targetCount:1},
     {name:"DAMN", image:"cards/vouchers/voucher damn.png",tooltip:"Divide starting chips and mult by half", targetType:true, targetCount:3},
     {name:"Pablo Honey", image:"cards/vouchers/voucher pablo honey.png",tooltip:"Earn 1 dollar for each card played", targetType:false},
     {name:"Random Access Memories", image:"cards/vouchers/voucher RAM.png",tooltip:"Remove one joker from other player's rack chosen randomly", targetType:true, targetCount:1},

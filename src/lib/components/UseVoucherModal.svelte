@@ -9,32 +9,23 @@
     import { voucherDirectory } from "$lib/cardDirectory";
     import type { SvelteComponent } from "svelte";
     import AvatarDisplay from "./AvatarDisplay.svelte";
-    import { userDataStore } from "$lib/stores";
+    import { lobbyStore, userDataStore } from "$lib/stores";
     import { get } from "svelte/store";
+    import { sendVoucher } from "$lib/sockets-utils/gameSocket";
 
     const modalStore = getModalStore();
+
+    const userList:Player[] = get(lobbyStore).players;
 
     // Meta variables
     let voucher: Voucher;
     let vId: number;
 
     // Wich of the player as the user choosen
-    let pickedUsers:boolean[] = Array(10).fill(false);
+    let pickedUsers:boolean[] = Array(userList.length).fill(false);
 
     // For coloring the username if it is the user
     let me:string = get(userDataStore).username;
-
-    // TODO Mock players, change later
-    const mockPlayers: Player[] = [
-        { key: 0, username: "Username", icon: 1, host: false },
-        { key: 1, username: "User", icon: 2, host: false },
-        { key: 2, username: "bictor", icon: 3, host: false },
-        { key: 3, username: "Username2", icon: 4, host: false },
-        { key: 4, username: "A", icon: 5, host: false },
-        { key: 5, username: "Username s", icon: 6, host: false },
-        { key: 6, username: "Username f", icon: 0, host: false },
-        { key: 7, username: "Username h", icon: 1, host: false },
-    ];
 
     // If the meta variables exists we fill the data 
     if ($modalStore[0]) {
@@ -62,7 +53,21 @@
      * Click on the "Use" button, returns response to the parent and closes modal
      */
     function onUse() {
-        if ($modalStore[0].response) $modalStore[0].response(true);
+        // Get picked user list and send the event to server
+        let userArgs:string[] = [];
+        for(let i=0;i<userList.length;i++){
+            if(pickedUsers[i]){
+                userArgs.push(userList[i].username);
+            }
+        }
+        sendVoucher(vId,userArgs);
+
+        // Close modal and remove from hand
+        if ($modalStore[0].response){
+            $modalStore[0].response(true);
+        }else{
+            console.error("$modalStore[0].response doesn't exist!");
+        }
         modalStore.close();
     }
 
@@ -116,7 +121,7 @@
                 </div>
             {/if}
             <div class="w-full h-full grid grid-cols-2 gap-4 content-center p-[5%]">
-                {#each mockPlayers as player,index (player.key)}
+                {#each userList as player,index (player.key)}
                     <!-- svelte-ignore a11y-click-events-have-key-events -->
                     <!-- svelte-ignore a11y-no-static-element-interactions -->
                     <div class={`card flex flex-col items-center gap-[2%] p-[5%] transition-all duration-[500ms] ease-in-out 

@@ -59,7 +59,23 @@ export function fullStateUpdate(args:any){
 				rerollAmount: args.next_reroll_price,
 				jokers: [],
 				vouchers: [],
+				activeVouchers: [],
 			}));
+
+			// Update jokers
+			gameStore.update((state: GameState) => {
+				args.player_data.current_jokers.forEach((argsJoker:any) => {
+					state.jokers.push({
+						id:getNextKey(),
+						jokerId:argsJoker.id,
+						edition:0,
+						sellAmount:argsJoker.sell_price,
+						picked:false
+					})
+				});
+
+				return state;
+			});
 
 			addToHand(argsToCards(args.player_data.current_hand));
 
@@ -336,6 +352,7 @@ export function playPhaseSetup(args:any){
 		...state,
 		minScore: args.blind,
 		round: args.round_number,
+		money: args.players_money,
 		timeLeft: timePerPhase[1] - secondsSince(args.timeout_start_date),
 		deckSize: args.current_deck_size,
 		pot: args.current_pot,
@@ -591,7 +608,7 @@ export function jokerPurchased(args: any) {
         
         // Add the joker to player's collection
         const newJoker: JokerItem = {
-            id: args.item_id,
+            id: getNextKey(),
             jokerId: args.joker_id,
             edition: args.edition || 0,
             sellAmount: args.sell_price,
@@ -828,13 +845,29 @@ export function jokersRerolled(args:any){
  * @param voucherId to activate
  */
 export function activateVoucher(voucherId:number){
-	const args:any = [
-		[voucherId]
-	];
+	const args = [[voucherId]];
 	console.log("<- activate_modifiers",args);
 	get(socketStore).emit("activate_modifiers",args);
 }
 
+/**
+ * Sends a voucher by sending an 'send_modifiers' event to a list of usernames
+ * @param voucherId to send
+ * @param users to send the voucher to
+ */
+export function sendVoucher(voucherId:number, users:string[]){
+	const args = [[voucherId],users];
+	console.log("<- send_modifiers",args);
+	get(socketStore).emit("send_modifiers",args);
+}
+
+/**
+ * When the user click 'Next round' button on vouchers phase 
+ */
+export function continueVouchers(){
+	console.log("<- continue_to_next_blind");
+	get(socketStore).emit("continue_to_next_blind");
+}
 
 /**
  * Hanldes the setup of the voucher phase 
@@ -870,14 +903,16 @@ export function voucherPhaseSetup(args:any){
 
 		// Update vouchers
 		state.vouchers = [];
-		args.vouchers.Modificadores.forEach((voucher:any) => {
-			state.vouchers.push({
-				id:getNextKey(),
-				voucherId:voucher.value,
-				sellAmount:0,
-				picked:false
+		if(args.vouchers){
+			args.vouchers.Modificadores.forEach((voucher:any) => {
+				state.vouchers.push({
+					id:getNextKey(),
+					voucherId:voucher.value,
+					sellAmount:0,
+					picked:false
+				});
 			});
-		});
+		}
         
         return state;
     });
@@ -894,10 +929,26 @@ export function updateVouchers(args:any){
 	gameStore.update((state: GameState) => {
 		// Update vouchers
 		state.vouchers = [];
-		args.modifiers.forEach((voucher:any) => {
+		args.modifiers.Modificadores.forEach((voucher:any) => {
 			state.vouchers.push({
 				id:getNextKey(),
 				voucherId:voucher.value,
+				sellAmount:0,
+				picked:false
+			});
+		});
+        
+        return state;
+    });
+}
+
+export function recievedModifiers(args:any){
+	gameStore.update((state: GameState) => {
+		// Update vouchers with recieved vouchers
+		args.modifiers.modifiers.forEach((voucher:any) => {
+			state.activeVouchers.push({
+				id:getNextKey(),
+				voucherId:voucher.modifier.value,
 				sellAmount:0,
 				picked:false
 			});

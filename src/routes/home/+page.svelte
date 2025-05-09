@@ -117,6 +117,13 @@
 
 		// Reset game state
 		gameStore.set(stateInit);
+		gameStore.update((state) => ({
+			...state,
+			jokers:[],
+			vouchers:[],
+			activeVouchers:[]
+		}));
+		console.log("Game reseted:",get(gameStore));
 
 		if (get(socketStore)) {
 			get(socketStore).disconnect();

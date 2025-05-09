@@ -17,6 +17,7 @@ import {
 	packPurchasedComplete, 
 	playedHand, 
 	playPhaseSetup, 
+	recievedModifiers, 
 	shopPhaseSetup,
 	updateHand, 
 	updateMinimunScore,
@@ -274,6 +275,11 @@ export function initializeSocket() {
 	socket.on("modifiers_activated", (args: any) => {
 		console.log("-> modifiers_activated", args);
 		updateVouchers(args);
+	});
+
+	socket.on("modifiers_received", (args: any) => {
+		console.log("-> modifiers_received", args);
+		recievedModifiers(args);
 	});
 }
 
