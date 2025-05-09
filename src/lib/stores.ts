@@ -70,7 +70,13 @@ export const gameStore = writable<GameState>(stateInit);
 
 export const animationSpeedStore = writable<number>(100);
 
-export const gameEndStore = writable<GameEndInfo>();
+export const gameEndInit = {
+    winner:"",
+    points:0,
+    userWon:false
+}
+
+export const gameEndStore = writable<GameEndInfo>(gameEndInit);
 
 export const packageStore = writable<PackageItem>();
 

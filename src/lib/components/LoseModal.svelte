@@ -2,8 +2,9 @@
     import { goto } from "$app/navigation";
     import { base } from "$app/paths";
     import type { GameEndInfo } from "$lib/interfaces";
-    import { gameEndStore } from "$lib/stores";
+    import { gameEndInit, gameEndStore } from "$lib/stores";
     import { getModalStore } from "@skeletonlabs/skeleton";
+    import { onMount } from "svelte";
     import { get } from "svelte/store";
 
 
@@ -12,9 +13,15 @@
     const info:GameEndInfo = get(gameEndStore);
 
     function onExit(){
-        modalStore.close();
         goto(base+"/home");
+        modalStore.close();
+        gameEndStore.set(gameEndInit);
     }
+
+    onMount(() => {
+        goto(base+"/home");
+        gameEndStore.set(gameEndInit);
+	});
 
 </script>
 
@@ -45,7 +52,7 @@
             {info.winner}
         </div>
         <div class="card text-2xl-r p-5">
-            Points
+            Points left
             <div class="text-5xl-r p-3">
                 {info.points}
             </div>
@@ -53,7 +60,7 @@
     </div>
     
     <button class="btn variant-filled-tertiary text-4xl-r" on:click={onExit}>
-        Home
+        Close
     </button>
 
 </div>

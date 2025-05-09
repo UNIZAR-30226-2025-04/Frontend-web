@@ -40,7 +40,7 @@
         continueVouchers,
 
     } from "$lib/sockets-utils/gameSocket";
-    import { animationSpeedStore, gameEndStore, gameStore } from "$lib/stores";
+    import { animationSpeedStore, gameEndStore, gameStore, userDataStore } from "$lib/stores";
     import {
         getDrawerStore,
         getModalStore,
@@ -192,6 +192,14 @@
 	// -----------------------
 	// ALL PHASE FUNCS
 	// -----------------------
+
+	$: if(gameEndStore && $gameEndStore.winner !== ""){
+		if($gameEndStore.userWon){
+			modalStore.trigger(winModal);
+		}else{
+			modalStore.trigger(loseModal);
+		}
+	}
 
 	/**
 	 * Opens chat modal
@@ -657,7 +665,8 @@
 	function testB(){
 		const newInfo:GameEndInfo = {
 			winner:"bictor",
-			points:6545348
+			points:6545348,
+			userWon:true
 		}
 		gameEndStore.set(newInfo);
 		modalStore.trigger(winModal);
@@ -666,7 +675,8 @@
 	function testC(){
 		const newInfo:GameEndInfo = {
 			winner:"Evil Victor",
-			points:63521
+			points:63521,
+			userWon:false
 		}
 		gameEndStore.set(newInfo);
 		modalStore.trigger(loseModal);
@@ -1229,16 +1239,27 @@
 
 				<!-- Action buttons -->
 				<div class="flex justify-center gap-[4%]">
-					<button
-						class="btn variant-filled-tertiary w-[35%] text-5xl-r"
-						on:click={onPlayVoucher}
-						>Use Voucher
-					</button>
-					<button
-						class="btn variant-filled-error w-[35%] text-5xl-r"
-						on:click={continueVouchers}
-						>Next Round
-					</button>
+					{#if actionBlocked}
+						<button
+							class="btn variant-filled-tertiary w-[35%] text-5xl-r"
+							>...
+						</button>
+						<button
+							class="btn variant-filled-error w-[35%] text-5xl-r"
+							>...
+						</button>
+					{:else}
+						<button
+							class="btn variant-filled-tertiary w-[35%] text-5xl-r"
+							on:click={onPlayVoucher}
+							>Use Voucher
+						</button>
+						<button
+							class="btn variant-filled-error w-[35%] text-5xl-r"
+							on:click={continueVouchers}
+							>Next Round
+						</button>
+					{/if}
 				</div>
 			</div>
 		{/if}

@@ -110,7 +110,7 @@ export const jokerDirectory:Joker[] = [
     {name:"Diego joker",image:"cards/jokers/diego_joker.png",tooltip:"x4 mult if you only play 3 cards",rarity:1},
     {name:"It's so over",image:"cards/jokers/its so over.png",tooltip:"+10 gold if only 1 (one) card is played",rarity:1},
     {name:"paris",image:"cards/jokers/paris.png",tooltip:"+3 mult for every suited pair in played hand",rarity:2},
-    {name:"nasus",image:"cards/jokers/nasus.png",tooltip:"Multiplies your gold by the mult",rarity:2},
+    {name:"nasus",image:"cards/jokers/nasus.png",tooltip:"Multiplies your mult by the gold",rarity:2},
     {name:"som brilla",image:"cards/jokers/som brilla.png",tooltip:"Grants +20 mult when only face cards are played",rarity:2},
 ]
 

@@ -10,12 +10,14 @@ import {
 	blindPhaseSetup, 
 	discardedCards, 
 	fullStateUpdate, 
+	gameEnd, 
 	jokerPurchased,
 	jokerSold,
 	jokersRerolled,
 	packPurchased, 
 	packPurchasedComplete, 
 	playedHand, 
+	playerEliminated, 
 	playPhaseSetup, 
 	recievedModifiers, 
 	shopPhaseSetup,
@@ -280,6 +282,16 @@ export function initializeSocket() {
 	socket.on("modifiers_received", (args: any) => {
 		console.log("-> modifiers_received", args);
 		recievedModifiers(args);
+	});
+
+	socket.on("game_end", (args: any) => {
+		console.log("-> game_end", args);
+		gameEnd(args);
+	});
+
+	socket.on("players_eliminated", (args: any) => {
+		console.log("-> players_eliminated", args);
+		playerEliminated(args);
 	});
 }
 

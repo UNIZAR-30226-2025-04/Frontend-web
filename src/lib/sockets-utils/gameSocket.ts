@@ -1,6 +1,6 @@
 import { HandTypesBase, voucherDirectory, packageDirectory } from "$lib/cardDirectory";
 import type { Card, CardItem, GameState, VoucherItem, JokerItem, PackageItem, Package, Lobby } from "$lib/interfaces";
-import { gameStore, lobbyStore, packageStore, socketStore, userDataStore } from "$lib/stores";
+import { gameEndStore, gameStore, lobbyStore, packageStore, socketStore, userDataStore } from "$lib/stores";
 import { get } from "svelte/store";
 import { timePerPhase } from "$lib/gameDirectory";
 import { logFullState, setPhaseTo } from "$lib/game-utils/phaseManager";
@@ -155,6 +155,55 @@ function argsToCards(deck:{Rank:string, Suit:string, Enhancement:number}[]): Car
  */
 function cardToArgs(card:Card):{rank:string, suit:string, Enhancement:number}{
 	return {rank:card.rank, suit: card.suit, Enhancement:card.overlay};
+}
+
+/**
+ * Function called on 'game_end' event, modifies the gameEndStore
+ * @param args given by the server
+ */
+export function gameEnd(args:any){
+	const me:string = get(userDataStore).username;
+	
+	// Check if user won
+	args.winners.forEach((winner:any) => {
+		if(winner.winner_username === me){
+			gameEndStore.update(() => ({
+				winner:me,
+				points:winner.points,
+				userWon:true
+			}));
+			return;
+		}
+	});
+
+	// If it hasn't won then it has lost
+	if(get(gameEndStore).winner === ""){
+		const points:number = get(gameStore).minScore;
+		gameEndStore.update(() => ({
+			winner:me,
+			points:points,
+			userWon:false
+		}));
+	}
+}
+
+/**
+ * Function called on 'players_eliminated' event, modifies the gameEndStore
+ * @param args given by the server
+ */
+export function playerEliminated(args:any){
+	const me:string = get(userDataStore).username;
+	args.eliminated_players.forEach((user:any) => {
+		if(me === user){
+			const points:number = get(gameStore).minScore;
+			gameEndStore.update(() => ({
+				winner:me,
+				points:points,
+				userWon:false
+			}));
+			return;
+		}		
+	})
 }
 
 
@@ -867,6 +916,10 @@ export function sendVoucher(voucherId:number, users:string[]){
 export function continueVouchers(){
 	console.log("<- continue_to_next_blind");
 	get(socketStore).emit("continue_to_next_blind");
+	gameStore.update((state: GameState) => ({
+        ...state,
+        actionBlocked: true
+    }));
 }
 
 /**
@@ -942,6 +995,10 @@ export function updateVouchers(args:any){
     });
 }
 
+/**
+ * Triggers on 'modifiers_received' event, updates state.activeVouchers
+ * @param args given by the server
+ */
 export function recievedModifiers(args:any){
 	gameStore.update((state: GameState) => {
 		// Update vouchers with recieved vouchers
@@ -957,3 +1014,7 @@ export function recievedModifiers(args:any){
         return state;
     });
 }
+
+
+
+

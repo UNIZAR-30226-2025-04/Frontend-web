@@ -244,4 +244,5 @@ export type AnimationVariables = {
 export type GameEndInfo = {
     winner:string
     points:number
+    userWon:boolean
 }
