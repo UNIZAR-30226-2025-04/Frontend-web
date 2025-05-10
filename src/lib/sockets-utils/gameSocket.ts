@@ -61,6 +61,20 @@ export function fullStateUpdate(args:any){
 				activeVouchers: [],
 			}));
 
+			// Update players in lobby
+			lobbyStore.update((lobby:Lobby) => {
+				lobby.players = [];
+				args.players.forEach((user:any) => {
+					lobby.players.push({
+						key:getNextKey(),
+						username:user.username,
+						icon:user.icon,
+						host:false
+					});
+				});
+				return lobby;
+			});
+
 			// Update hand
 			if(args.player_data.current_hand)
 				addToHand(argsToCards(args.player_data.current_hand));

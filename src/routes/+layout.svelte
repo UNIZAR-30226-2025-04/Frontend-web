@@ -59,7 +59,9 @@
   
 </script>
 
+<!--Favicon and title-->
 <link rel="icon" href={base+"/favicon-512x512.png"} />
+<title>Nøgler</title>
 
 <ShaderBackground/>
 
