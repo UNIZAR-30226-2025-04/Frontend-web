@@ -219,7 +219,6 @@ export type Shop = {
 
 export type Package = {
     name:string,
-    image:string,
     chooseAmount: number,
     contentType: number,
     contentSize: number

@@ -128,9 +128,9 @@ export const errorVoucher:Voucher = {
 
 export const voucherDirectory:Voucher[] = [
     {name:"Error voucher", image:"icons/missing.png",tooltip:"Error boucher",targetType:true,targetCount:1},
-    {name:"DAMN", image:"cards/vouchers/voucher damn.png",tooltip:"Multiplies your chips by a random number betwen 1 and 3", targetType:false},
+    {name:"DAMN", image:"cards/vouchers/voucher damn.png",tooltip:"Multiplies your chips by a random number betwen 1 and 3", targetType:false, targetCount:3},
     {name:"Pablo Honey", image:"cards/vouchers/voucher pablo honey.png",tooltip:"Earn 1 dollar for each card played", targetType:false},
-    {name:"Random Access Memories", image:"cards/vouchers/voucher RAM.png",tooltip:"Remove one joker from other player's rack chosen randomly", targetType:true, targetCount:1},
+    {name:"Random Access Memories", image:"cards/vouchers/voucher RAM.png",tooltip:"Remove one joker from other player's rack chosen randomly", targetType:false},
     {name:"Weezer", image:"cards/vouchers/voucher weezer.png",tooltip:"Bans up to 4 players to play four of a kind for 1 round", targetType:true, targetCount:4},
     {name:"Blonde", image:"cards/vouchers/voucher blond.png",tooltip:"Bans up to 2 players from playing straights for 1 round", targetType:true, targetCount:2},
     {name:"Abbey Road", image:"cards/vouchers/voucher abbey road.png",tooltip:"Every King or Queen played scores negative points", targetType:true, targetCount:4},
@@ -142,12 +142,18 @@ export const voucherDirectory:Voucher[] = [
 // Packs
 
 export const errorPack:Package = {
-    name:"Error boucher", image:"icons/missing.png", chooseAmount: 1, contentType: 0, contentSize: 1
+    name:"Error boucher", chooseAmount: 1, contentType: 0, contentSize: 1
 }
 
 export const packageDirectory:Package[] = [
-    {name:"Standar pack", image:"cards/packs/Standard_Normal_1.png", chooseAmount:3, contentType:0, contentSize:3},
-    {name:"Card pack", image:"cards/packs/pack_cards.png", chooseAmount:1, contentType:0, contentSize:3},
-    {name:"Joker pack", image:"cards/packs/pack_jokers.png", chooseAmount:1, contentType:1, contentSize:3},
-    {name:"Voucher pack", image:"cards/packs/pack_vouchers.png", chooseAmount:1, contentType:2, contentSize:3},
+    {name:"Standar pack", chooseAmount:3, contentType:0, contentSize:3},
+    {name:"Card pack", chooseAmount:1, contentType:0, contentSize:3},
+    {name:"Joker pack", chooseAmount:1, contentType:1, contentSize:3},
+    {name:"Voucher pack", chooseAmount:1, contentType:2, contentSize:3},
+]
+
+export const packageImages:string[][] = [
+    ["cards/packs/pack_cards.png","cards/packs/Standard_Normal_1.png","cards/packs/Standard_Mega_1.png","cards/packs/Standard_Normal_3.png"],
+    ["cards/packs/pack_jokers.png","cards/packs/Buffoon_Normal_2.png","cards/packs/Buffoon_Mega_1.png",],
+    ["cards/packs/pack_vouchers.png","cards/packs/Spectral_Jumbo_1.png","cards/packs/Arcana_Mega_1.png","cards/packs/Arcana_Normal_4.png",],
 ]
