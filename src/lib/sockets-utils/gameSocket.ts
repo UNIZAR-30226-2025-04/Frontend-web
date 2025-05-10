@@ -677,10 +677,14 @@ export function jokerSold(args: any) {
     gameStore.update((state: GameState) => {
         // Remove the sold joker from player's collection
         const index:number = state.jokers.findIndex(
-            joker => joker.jokerId === args.joker_id
+            (joker:JokerItem) => joker.jokerId === args.joker_id
         );
-		if(index)
+		if(index !== -1){
 			state.jokers.splice(index,1);
+		}else{
+			console.log("COULD NOT FIND JOKER in jokerSold:",args.joker_id);
+		}
+
 		
         
         // Update player's money
@@ -698,11 +702,14 @@ export function jokerPurchased(args: any) {
     
     gameStore.update((state: GameState) => {
         // Remove the purchased joker from the shop
-        const index:number = state.jokers.findIndex(
-            joker => joker.jokerId === args.joker_id
+        const index:number = state.shop.jokerRow.findIndex(
+            (joker:JokerItem) => joker.jokerId === args.joker_id
         );
-		if(index)
-			state.jokers.splice(index,1);
+		if(index !== -1){
+			state.shop.jokerRow.splice(index,1);
+		}else{
+			console.log("COULD NOT FIND JOKER in jokerPurchased")
+		}
         
         // Add the joker to player's collection
         const newJoker: JokerItem = {
