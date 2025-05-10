@@ -456,12 +456,14 @@
 		if(state.actionBlocked) return;
 
 		if (
-			state.money >= state.rerollAmount &&
-			state.shop.jokerRow.length > 0
+			state.money >= state.rerollAmount
 		) {
 			state.money -= state.rerollAmount;
 			rerollShop();
+		}else{
+			toastStore.trigger(notEnoughMoneyToast);
 		}
+		
 	}
 
 	// -----------------------

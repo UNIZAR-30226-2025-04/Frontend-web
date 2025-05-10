@@ -153,6 +153,11 @@ export function fullStateUpdate(args:any){
 					setTimeout(() => continueVouchers(),500);
 				}
 			}
+
+			// In case the timer is 0 or less we request again the info
+			if(timeLeft <= 0){
+				requestGamePhasePlayerInfo();
+			}
 		}else{
 			goto(base + "/lobby");
 		}
