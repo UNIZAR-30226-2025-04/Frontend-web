@@ -36,61 +36,105 @@ export function requestGamePhasePlayerInfo(){
 export function fullStateUpdate(args:any){
 	try{
 		const newPhase:number = stringToPhase(args.phase);
-		let timeLeft = 99999;
 		if(newPhase >= 0 && newPhase < timePerPhase.length){
 			goto(base + "/game");
 
-			timeLeft = timePerPhase[newPhase] - secondsSince(args.timeout);
+			const timeLeft = timePerPhase[newPhase] - secondsSince(args.timeout);
 
 			gameStore.update((state: GameState) => ({
 				...state,
 				timeLeft: timeLeft,
 				phase: newPhase,
-				minScore: args.current_base_blind - args.player_data.total_points,
+				minScore: args.current_base_blind,
 				pot: args.current_pot,
 				maxRounds: args.max_rounds,
 				round: args.current_round,
-				handCards: [],
 				discards: args.player_data.discards_left,
 				hands: args.player_data.hand_plays_left,
 				deckSize: args.player_data.unplayed_cards + args.player_data.played_cards,
 				deckLeft: args.player_data.unplayed_cards,
 				money: args.player_data.players_money,
-				rerollAmount: args.next_reroll_price,
+				rerollAmount: args.reroll_price,
+				handCards: [],
 				jokers: [],
 				vouchers: [],
 				activeVouchers: [],
 			}));
 
-			// Update jokers
+			// Update hand
+			if(args.player_data.current_hand)
+				addToHand(argsToCards(args.player_data.current_hand));
+
+			// Update jokers, vouchers and activeVouchers
 			gameStore.update((state: GameState) => {
-				args.player_data.current_jokers.forEach((argsJoker:any) => {
-					state.jokers.push({
-						id:getNextKey(),
-						jokerId:argsJoker.id,
-						edition:0,
-						sellAmount:argsJoker.sell_price,
-						picked:false
-					})
-				});
+				// Jokers
+				if(args.player_data.current_jokers){
+					args.player_data.current_jokers.forEach((argsJoker:any) => {
+						state.jokers.push({
+							id:getNextKey(),
+							jokerId:argsJoker.id,
+							edition:0,
+							sellAmount:argsJoker.sell_price,
+							picked:false
+						})
+					});
+				}
+
+				// Vouchers
+				if(args.player_data.vouchers && args.player_data.vouchers.Modificadores){
+					args.player_data.vouchers.Modificadores.forEach((argsVoucher:any) => {
+						state.vouchers.push({
+							id:getNextKey(),
+							voucherId:argsVoucher.value,
+							sellAmount:0,
+							picked:false
+						})
+					});
+				}
+				
+				// Active vouchers
+
+				if(args.player_data.received_vouchers && args.player_data.received_vouchers.modifiers){
+					args.player_data.received_vouchers.modifiers.forEach((argsVoucher:any) => {
+						state.activeVouchers.push({
+							id:getNextKey(),
+							voucherId:argsVoucher.modifier.value,
+							sellAmount:0,
+							picked:false
+						})
+					});
+				}
+
+				if(args.player_data.active_vouchers && args.player_data.active_vouchers.Modificadores){
+					args.player_data.active_vouchers.Modificadores.forEach((argsVoucher:any) => {
+						state.activeVouchers.push({
+							id:getNextKey(),
+							voucherId:argsVoucher.value,
+							sellAmount:0,
+							picked:false
+						})
+					});
+				}
 
 				return state;
 			});
 
-			addToHand(argsToCards(args.player_data.current_hand));
-
 			// Play phase and empty hand => get cards
-			if(newPhase === 2 && get(gameStore).handCards.length === 0){
+			if(newPhase === 1 && get(gameStore).handCards.length === 0){
 				getFullHand()
+				gameStore.update((state: GameState) => ({
+					...state,
+					minScore: args.current_base_blind - args.player_data.total_points,
+				}));
 			}
 
 			// Shop phase => Get shop info
-			if(newPhase == 3){
+			if(newPhase == 2){
 				shopPhaseItemsSetup(args.shop_items);
 			}
 
 			// Voucher phase => 
-			if(newPhase == 4){
+			if(newPhase == 3){
 				// TODO
 			}
 		}else{

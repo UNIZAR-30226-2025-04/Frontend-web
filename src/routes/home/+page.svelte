@@ -9,6 +9,7 @@
 	import {
 		chatInitial,
 		chatStore,
+		colorStore,
 		gameStore,
 		lobbyStore,
 		socketStore,
@@ -26,6 +27,8 @@
 	import { fetchLobbyInfo, isUserInLobby } from "$lib/fetch/lobbyFetch";
     import { requestGamePhasePlayerInfo } from "$lib/sockets-utils/gameSocket";
     import ShaderBackground from "$lib/components/ShaderBackground.svelte";
+    import ColorControler from "$lib/components/ColorControler.svelte";
+    import { changeColorTo } from "$lib/changeColor";
 
 	const modalStore = getModalStore();
 
@@ -134,6 +137,9 @@
 		} else {
 			attemptReconect();
 		}
+
+		// Set default bg colors
+		changeColorTo(0);
 	});
 
 </script>
@@ -202,7 +208,6 @@
 		</div>
 	</div>
 </div>
-
 
 <style>
 	.card {

@@ -1,5 +1,5 @@
 import { writable } from 'svelte/store';
-import { type UserData, type Lobby, type ChatBuble, type GameState, type GameEndInfo, type PackageItem } from '$lib/interfaces';
+import { type UserData, type Lobby, type ChatBuble, type GameState, type GameEndInfo, type PackageItem, type Colors } from '$lib/interfaces';
 import { persisted } from 'svelte-persisted-store'
 import { Socket } from 'socket.io-client';
 import { HandTypesBase } from './cardDirectory';
@@ -81,3 +81,10 @@ export const gameEndStore = writable<GameEndInfo>(gameEndInit);
 export const packageStore = writable<PackageItem>();
 
 export const unreadMessages = writable(false);
+
+export const colorStore = writable<Colors>({
+	color1: [0.1, 0.238, 0.4, 1.0],
+	color2: [0.36, 0.1, 0.224, 1.0],
+	color3: [0.086, 0.137, 0.145, 1.0],
+});
+

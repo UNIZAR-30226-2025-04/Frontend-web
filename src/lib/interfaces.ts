@@ -246,3 +246,12 @@ export type GameEndInfo = {
     points:number
     userWon:boolean
 }
+
+export type Vec4 = [number, number, number, number];
+
+
+export type Colors = {
+    color1:Vec4,
+    color2:Vec4,
+    color3:Vec4,
+}

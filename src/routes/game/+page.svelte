@@ -1291,11 +1291,20 @@
 					X
 				</button>
 			</div>
-			<div
-				class={`w-full card text-5xl-r text-right p-4 mt-[5%] ${state.timeLeft <= 0 ? "variant-filled-error" : ""}`}
-			>
-				{state.timeLeft}s
-			</div>
+			{#if state.timeLeft <= 0}
+				<div
+					class='w-full card text-5xl-r text-right p-4 mt-[5%] variant-filled-error'
+				>
+					0s
+				</div>
+			{:else}
+				<div
+					class='w-full card text-5xl-r text-right p-4 mt-[5%]'
+				>
+					{state.timeLeft}s
+				</div>
+			{/if}
+			
 		</div>
 
 		
@@ -1364,12 +1373,6 @@
 </div>
 
 <style>
-	.game-div {
-		background-image: url("/fondo_juego.png") !important;
-		background-size: cover;
-		background-position: center;
-		background-repeat: no-repeat;
-	}
 
 	.text-6xl-r {
 		font-size: 5vh;

@@ -1,4 +1,5 @@
 import { jokerDirectory, jokerEditionsDirectory, overlayDirectory, packageDirectory, suitDirectory, voucherDirectory } from "$lib/cardDirectory";
+import { changeColorTo } from "$lib/changeColor";
 import { timePerPhase } from "$lib/gameDirectory";
 import type { Card, CardItem, GameState, JokerItem, VoucherItem } from "$lib/interfaces";
 import { getNextKey } from "$lib/keyGenerator";
@@ -30,24 +31,25 @@ export function setPhaseTo(phase:number){
     // Reset all blocks
     state.actionBlocked = false;
 
-    // Sets the timer
-    state.timeLeft = timePerPhase[phase];
 
     // Phase dependent variable values
     switch(phase){
         case 0:
-            
+            changeColorTo(1);
             break;
         case 1:
             //getFullDeck();
             state.handCards = [];
             state.playedCards = []; 
             //drawCards(false);
+            changeColorTo(1);
             break;
         case 2:
             state.activeVouchers = [];
+            changeColorTo(2);
             break;
         case 3:
+            changeColorTo(3);
             break;
     }
 
