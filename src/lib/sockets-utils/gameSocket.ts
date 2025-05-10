@@ -1037,7 +1037,10 @@ export function voucherPhaseSetup(args:any){
 				});
 			});
 		}
-        
+
+		// Reset activeVouchers
+		state.activeVouchers = [];
+		        
         return state;
     });
     
@@ -1081,9 +1084,11 @@ export function recievedModifiers(args:any){
 	if(args.modifiers && args.modifiers.modifiers){
 		gameStore.update((state: GameState) => {
 			// Update vouchers with recieved vouchers
-			state.activeVouchers = state.activeVouchers.filter((voucher:VoucherItem) => {
+			/*
+			state.activeVouchers = state.activeVouchers.filter((voucher:VoucherItem) => 
 				!voucherDirectory[voucher.voucherId].targetType
-			});
+			);
+			*/
 			args.modifiers.modifiers.forEach((voucher:any) => {
 				state.activeVouchers.push({
 					id:getNextKey(),
