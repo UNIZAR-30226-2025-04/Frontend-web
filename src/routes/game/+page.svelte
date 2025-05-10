@@ -343,11 +343,13 @@
 
 		const card: CardItem = state.handCards[index];
 
-		// Switch state
-		card.picked = !card.picked;
+		if(card.picked || state.handCards.filter(card => card.picked).length < 5){
+			// Switch state
+			card.picked = !card.picked;
 
-		// Update state to reflect changes in UI
-		state.handCards = [...state.handCards];
+			// Update state to reflect changes in UI
+			state.handCards = [...state.handCards];
+		}
 	}
 
 	// -----------------------
