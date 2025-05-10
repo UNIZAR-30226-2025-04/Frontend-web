@@ -102,16 +102,6 @@
         modalStore.close();
     }
 
-    onDestroy(() => {
-        packageStore.set({
-            id:-1,
-            packageId:-1,
-            sellAmount:-1,
-            contents:[],
-            chooseAmount:-1
-        })
-    });
-
 </script>
 
 {#if $modalStore[0] && $modalStore[0].meta && packItem && pack}

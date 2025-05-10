@@ -860,6 +860,15 @@ export function packPurchasedComplete(args: any) {
         
         return state;
     });
+
+	// Reset package store 
+	packageStore.set({
+		id:-1,
+		packageId:-1,
+		sellAmount:-1,
+		contents:[],
+		chooseAmount:-1
+	})
 }
 
 /**
