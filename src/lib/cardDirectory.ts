@@ -63,7 +63,8 @@ export const suitColorDirectory:string[] = [
 // Overlays for regular cards
 export const overlayDirectory:Overlay[] = [
     {name:"None",image:"",tooltip:""},
-    {name:"Glass",image:"cards/overlays/glassDemo3.png",tooltip:"This is a tooltip for the glass overlay!"}
+    {name:"Glass",image:"cards/overlays/glassDemo3.png",tooltip:"x1.5 mult"},
+    {name:"Repeater",image:"cards/overlays/blue.png",tooltip:"x1.5 chips"}
 ]
 
 // Base scores for diferent hands

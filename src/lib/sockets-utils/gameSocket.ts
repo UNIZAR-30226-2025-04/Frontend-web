@@ -676,9 +676,12 @@ export function jokerSold(args: any) {
     
     gameStore.update((state: GameState) => {
         // Remove the sold joker from player's collection
-        state.jokers = state.jokers.filter(
-            joker => joker.jokerId !== args.joker_id
+        const index:number = state.jokers.findIndex(
+            joker => joker.jokerId === args.joker_id
         );
+		if(index)
+			state.jokers.splice(index,1);
+		
         
         // Update player's money
         state.money = args.remaining_money;
@@ -695,9 +698,11 @@ export function jokerPurchased(args: any) {
     
     gameStore.update((state: GameState) => {
         // Remove the purchased joker from the shop
-        state.shop.jokerRow = state.shop.jokerRow.filter(
-            joker => joker.id !== args.item_id
+        const index:number = state.jokers.findIndex(
+            joker => joker.jokerId === args.joker_id
         );
+		if(index)
+			state.jokers.splice(index,1);
         
         // Add the joker to player's collection
         const newJoker: JokerItem = {
@@ -1000,7 +1005,7 @@ export function voucherPhaseSetup(args:any){
 
 		// Update vouchers
 		state.vouchers = [];
-		if(args.vouchers){
+		if(args.vouchers && args.vouchers.Modificadores){
 			args.vouchers.Modificadores.forEach((voucher:any) => {
 				state.vouchers.push({
 					id:getNextKey(),
