@@ -302,7 +302,7 @@ export function exitLobby() {
 	// Sending an event to let know the that the user just left the lobby
 	console.log("<- exit_lobby:", get(lobbyStore).code);
 	get(socketStore).emit("exit_lobby", get(lobbyStore).code);
-	goto(base + "/home");
+	setTimeout(() => goto(base + "/home"),500);
 }
 
 /**

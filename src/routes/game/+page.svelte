@@ -40,7 +40,7 @@
         continueVouchers,
 
     } from "$lib/sockets-utils/gameSocket";
-    import { animationSpeedStore, gameEndStore, gameStore, userDataStore } from "$lib/stores";
+    import { animationSpeedStore, gameEndStore, gameStore, socketStore, lobbyStore } from "$lib/stores";
     import {
         getDrawerStore,
         getModalStore,
@@ -54,10 +54,10 @@
     import { flip } from "svelte/animate";
     import { bounceOut, cubicOut } from "svelte/easing";
     import { tweened } from "svelte/motion";
-    import { get } from "svelte/store";
     import { fade, fly } from "svelte/transition";
     import { unreadMessages } from "$lib/stores";
     import { markMessagesAsRead } from "$lib/sockets-utils/chatAddMessage";
+    import { get } from "svelte/store";
 
 	// Main state variable
 
@@ -665,13 +665,8 @@
 	}
 
 	function testB(){
-		const newInfo:GameEndInfo = {
-			winner:"bictor",
-			points:6545348,
-			userWon:true
-		}
-		gameEndStore.set(newInfo);
-		modalStore.trigger(winModal);
+		console.log("<- exit_lobby:", get(lobbyStore).code);
+		get(socketStore).emit("exit_lobby", get(lobbyStore).code);
 	}
 
 	function testC(){
