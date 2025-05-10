@@ -581,7 +581,7 @@
 	function onAddCard() {
 		state.handCards.push({
 			id: getNextKey(),
-			card: generateCard(false,true),
+			card: generateCard(true,true),
 			picked:false
 		});
 		state.handCards  = [...state.handCards];

@@ -76,7 +76,7 @@
 	{#if card.faceUp}
 		<!--Pop up-->
 		<div
-			class="card p-4 variant-filled-surface border-2 w-[200%]"
+			class="card p-4 variant-filled-surface border-2 w-[120%]"
 			data-popup={overlay.name + salt}
 		>
 			<p>{overlay.name}: {overlay.tooltip}</p>
@@ -88,7 +88,7 @@
 				bind:this={overlayImage}
 				src={overlay.image}
 				alt={overlay.name}
-				class="absolute w-full h-full object-fill top-0 z-[3] rounded-[5.46875%] opacity-50"
+				class="absolute w-full h-full object-fill top-0 z-[3] rounded-[5.46875%] opacity-[0.8]"
 				style="transform-style: preserve-3d;"
 				use:popup={popupHover}
 			/>
