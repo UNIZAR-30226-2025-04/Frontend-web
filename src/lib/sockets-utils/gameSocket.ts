@@ -776,9 +776,12 @@ export function packPurchased(args: any) {
     
     gameStore.update((state: GameState) => {
         // Remove the purchased pack from the shop
-        let packItem:any = state.shop.packageRow.find(
-            pack => pack.id === args.item_id
+		let packItem:any;
+		const index:number = state.shop.packageRow.findIndex(
+            (pack:PackageItem) => pack.id === args.item_id
         );
+		if(index !== -1)
+        	packItem = state.shop.packageRow[index];
 
         if(packItem && packItem.packageId >= 0 && packItem.packageId < packageDirectory.length){
 			const type:number = packageDirectory[packItem.packageId].contentType;
@@ -798,15 +801,14 @@ export function packPurchased(args: any) {
         // Update player's money
         state.money = args.remaining_money;
 
-		// Remove pack from shop
-		const index:number = state.shop.packageRow.findIndex(
-            (pack:PackageItem) => pack.id === args.item_id
-        );
-		if(index !== -1)
-			state.shop.packageRow.splice(index,1);
-
+		// Set the store for the modal
         packageStore.set(packItem);
         console.log("PackPurchased:",packItem);
+        console.log("packageStore:",get(packageStore));
+
+		// Remove pack from shop
+		if(index !== -1)
+			state.shop.packageRow.splice(index,1);
         
         return state;
     });

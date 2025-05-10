@@ -17,6 +17,7 @@
     import { getNextKey } from "$lib/keyGenerator";
     import { it } from "node:test";
     import { selectPackItems } from "$lib/sockets-utils/gameSocket";
+    import { onDestroy } from "svelte";
 
     const modalStore = getModalStore();
 
@@ -101,6 +102,16 @@
         modalStore.close();
     }
 
+    onDestroy(() => {
+        packageStore.set({
+            id:-1,
+            packageId:-1,
+            sellAmount:-1,
+            contents:[],
+            chooseAmount:-1
+        })
+    });
+
 </script>
 
 {#if $modalStore[0] && $modalStore[0].meta && packItem && pack}
@@ -122,11 +133,13 @@
                 class="absolute w-[24vh] pulse-shadow"
                 style="transform-style: preserve-3d;"
             />
-            <PackageCard
-                width="w-[16vh]"
-                packageId={packItem.packageId}
-                animateCard={true}
-            />
+            {#if packItem.packageId >= 0 && packItem.packageId < packageDirectory.length}
+                <PackageCard
+                    width="w-[16vh]"
+                    packageId={packItem.packageId}
+                    animateCard={true}
+                />
+            {/if}
         </div>
 
         <!--Pack contents-->
