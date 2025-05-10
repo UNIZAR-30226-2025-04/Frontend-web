@@ -153,7 +153,7 @@
 <div class="modal-form card p-4 w-[450px] shadow-xl space-y-4 text-left">
     <!--Top row, title and cross button-->
     <div class="flex justify-between">
-        <div class="content-center text-[22px]">Invitar amigos</div>
+        <div class="content-center text-[22px]">Invite friends</div>
         <button class="block btn-icon-sm rounded-md font-bold variant-filled text-[18px]" on:click={parent.onClose}>X</button>
     </div>
     
