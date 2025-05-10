@@ -73,6 +73,8 @@
 	// Global speed of animations
 	const animationSpeed:number = get(animationSpeedStore); // ms
 
+	let waitTimerBlock:boolean = false;
+
 
 	// To draw the deck
 	let dummyCard: Card = {
@@ -457,13 +459,17 @@
 	export function onReroll() {
 		if(state.actionBlocked) return;
 
-		if (
-			state.money >= state.rerollAmount
-		) {
-			state.money -= state.rerollAmount;
-			rerollShop();
-		}else{
-			toastStore.trigger(notEnoughMoneyToast);
+		if(!waitTimerBlock){
+			if (
+				state.money >= state.rerollAmount
+			) {
+				state.money -= state.rerollAmount;
+				rerollShop();
+				waitTimerBlock = true;
+				setTimeout(()=>{waitTimerBlock=false;},500);
+			}else{
+				toastStore.trigger(notEnoughMoneyToast);
+			}
 		}
 		
 	}
