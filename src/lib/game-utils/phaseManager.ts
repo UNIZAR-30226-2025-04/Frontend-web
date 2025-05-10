@@ -3,7 +3,6 @@ import { changeColorTo } from "$lib/changeColor";
 import { timePerPhase } from "$lib/gameDirectory";
 import type { Card, CardItem, GameState, JokerItem, VoucherItem } from "$lib/interfaces";
 import { getNextKey } from "$lib/keyGenerator";
-import { continueVouchers } from "$lib/sockets-utils/gameSocket";
 import { gameStore } from "$lib/stores";
 import { getModalStore } from "@skeletonlabs/skeleton";
 import { get } from "svelte/store";
@@ -50,9 +49,6 @@ export function setPhaseTo(phase:number){
             changeColorTo(2);
             break;
         case 3:
-            if(state.vouchers.length === 0){
-                setTimeout(() => continueVouchers(),500);
-            }
             changeColorTo(3);
             break;
     }

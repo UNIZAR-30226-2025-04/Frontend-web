@@ -148,8 +148,8 @@ export function fullStateUpdate(args:any){
 			}
 
 			// Voucher phase => 
-			if(newPhase == 3 && get(gameStore).vouchers.length === 0){
-				continueVouchers();
+			if(newPhase == 3){
+				// TODO
 			}
 		}else{
 			goto(base + "/lobby");
@@ -1062,11 +1062,6 @@ export function updateVouchers(args:any){
 			return state;
 		});
 	}
-
-	// If no vouchers remaing auto click Next round
-	if(get(gameStore).vouchers.length === 0){
-		continueVouchers();
-	}
 }
 
 /**
@@ -1077,7 +1072,6 @@ export function recievedModifiers(args:any){
 	if(args.modifiers && args.modifiers.modifiers){
 		gameStore.update((state: GameState) => {
 			// Update vouchers with recieved vouchers
-			state.activeVouchers = [];
 			args.modifiers.modifiers.forEach((voucher:any) => {
 				state.activeVouchers.push({
 					id:getNextKey(),
@@ -1089,11 +1083,6 @@ export function recievedModifiers(args:any){
 			
 			return state;
 		});
-	}
-
-	// If no vouchers remaing auto click Next round
-	if(get(gameStore).vouchers.length === 0){
-		continueVouchers();
 	}
 }
 
