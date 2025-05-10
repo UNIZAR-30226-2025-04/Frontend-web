@@ -679,14 +679,9 @@ export function jokerSold(args: any) {
         const index:number = state.jokers.findIndex(
             (joker:JokerItem) => joker.jokerId === args.joker_id
         );
-		if(index !== -1){
+		if(index !== -1)
 			state.jokers.splice(index,1);
-		}else{
-			console.log("COULD NOT FIND JOKER in jokerSold:",args.joker_id);
-		}
-
 		
-        
         // Update player's money
         state.money = args.remaining_money;
         
@@ -705,11 +700,8 @@ export function jokerPurchased(args: any) {
         const index:number = state.shop.jokerRow.findIndex(
             (joker:JokerItem) => joker.jokerId === args.joker_id
         );
-		if(index !== -1){
+		if(index !== -1)
 			state.shop.jokerRow.splice(index,1);
-		}else{
-			console.log("COULD NOT FIND JOKER in jokerPurchased")
-		}
         
         // Add the joker to player's collection
         const newJoker: JokerItem = {
@@ -737,9 +729,11 @@ export function voucherPurchased(args: any) {
     
     gameStore.update((state: GameState) => {
         // Remove the purchased voucher from the shop
-        state.shop.voucherRow = state.shop.voucherRow.filter(
-            voucher => voucher.id !== args.item_id
+		const index:number = state.shop.voucherRow.findIndex(
+            (voucher:VoucherItem) => voucher.id === args.item_id
         );
+		if(index !== -1)
+			state.shop.voucherRow.splice(index,1);
         
         // Add the voucher to player's collection
         const newVoucher: VoucherItem = {
@@ -788,9 +782,12 @@ export function packPurchased(args: any) {
         // Update player's money
         state.money = args.remaining_money;
 
-        state.shop.packageRow = state.shop.packageRow.filter(
-            pack => pack.id !== args.item_id
+		// Remove pack from shop
+		const index:number = state.shop.packageRow.findIndex(
+            (pack:PackageItem) => pack.id === args.item_id
         );
+		if(index !== -1)
+			state.shop.packageRow.splice(index,1);
 
         packageStore.set(packItem);
         console.log("PackPurchased:",packItem);
