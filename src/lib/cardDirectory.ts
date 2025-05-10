@@ -128,9 +128,9 @@ export const errorVoucher:Voucher = {
 
 export const voucherDirectory:Voucher[] = [
     {name:"Error voucher", image:"icons/missing.png",tooltip:"Error boucher",targetType:true,targetCount:1},
-    {name:"DAMN", image:"cards/vouchers/voucher damn.png",tooltip:"Multiplies your chips by a random number betwen 1 and 3", targetType:false},
+    {name:"DAMN", image:"cards/vouchers/voucher damn.png",tooltip:"", targetType:false},
     {name:"Pablo Honey", image:"cards/vouchers/voucher pablo honey.png",tooltip:"Earn 1 dollar for each card played", targetType:false},
-    {name:"Random Access Memories", image:"cards/vouchers/voucher RAM.png",tooltip:"Remove one joker from other player's rack chosen randomly", targetType:true, targetCount:1},
+    {name:"Random Access Memories", image:"cards/vouchers/voucher RAM.png",tooltip:"Multiplies your chips by a random number betwen 1 and 3", targetType:true, targetCount:1},
     {name:"Weezer", image:"cards/vouchers/voucher weezer.png",tooltip:"Bans up to 4 players to play four of a kind for 1 round", targetType:true, targetCount:4},
     {name:"Blonde", image:"cards/vouchers/voucher blond.png",tooltip:"Bans up to 2 players from playing straights for 1 round", targetType:true, targetCount:2},
     {name:"Abbey Road", image:"cards/vouchers/voucher abbey road.png",tooltip:"Every King or Queen played scores negative points", targetType:true, targetCount:4},
