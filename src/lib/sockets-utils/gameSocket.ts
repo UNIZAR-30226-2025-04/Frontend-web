@@ -1023,20 +1023,22 @@ export function voucherPhaseSetup(args:any){
  * @param args given by the server
  */
 export function updateVouchers(args:any){
-	gameStore.update((state: GameState) => {
-		// Update vouchers
-		state.vouchers = [];
-		args.modifiers.Modificadores.forEach((voucher:any) => {
-			state.vouchers.push({
-				id:getNextKey(),
-				voucherId:voucher.value,
-				sellAmount:0,
-				picked:false
+	if(args.modifiers && args.modifiers.Modificadores){
+		gameStore.update((state: GameState) => {
+			// Update vouchers
+			state.vouchers = [];
+			args.modifiers.Modificadores.forEach((voucher:any) => {
+				state.vouchers.push({
+					id:getNextKey(),
+					voucherId:voucher.value,
+					sellAmount:0,
+					picked:false
+				});
 			});
+			
+			return state;
 		});
-        
-        return state;
-    });
+	}
 }
 
 /**
@@ -1044,21 +1046,22 @@ export function updateVouchers(args:any){
  * @param args given by the server
  */
 export function recievedModifiers(args:any){
-	gameStore.update((state: GameState) => {
-		// Update vouchers with recieved vouchers
-		args.modifiers.modifiers.forEach((voucher:any) => {
-			state.activeVouchers.push({
-				id:getNextKey(),
-				voucherId:voucher.modifier.value,
-				sellAmount:0,
-				picked:false
+	if(args.modifiers && args.modifiers.modifiers){
+		gameStore.update((state: GameState) => {
+			// Update vouchers with recieved vouchers
+			args.modifiers.modifiers.forEach((voucher:any) => {
+				state.activeVouchers.push({
+					id:getNextKey(),
+					voucherId:voucher.modifier.value,
+					sellAmount:0,
+					picked:false
+				});
 			});
+			
+			return state;
 		});
-        
-        return state;
-    });
+	}
 }
-
 
 
 
