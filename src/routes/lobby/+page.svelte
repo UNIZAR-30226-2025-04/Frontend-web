@@ -43,7 +43,7 @@
 	$: if(!autoStart && mode === 2 && $lobbyStore.players.length === 1 && host){
 		console.log("AUTO STARTING");
 		autoStart = true;
-		startGame();
+		setTimeout(() => startGame(), 500);
 	}
 
 	// Function to switch the public value
@@ -186,8 +186,13 @@
 			<button
 				type="button"
 				class="btn btn-lg variant-filled text-2xl w-[21vw]"
-				on:click={onStart}>Start</button
-			>
+				on:click={onStart}>
+				{#if mode === 2}
+					Starting game...
+				{:else}
+					Start
+				{/if}
+			</button>
 		{/if}
 	</div>
 </div>
