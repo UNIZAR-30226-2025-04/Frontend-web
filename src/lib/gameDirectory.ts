@@ -1,2 +1,2 @@
 
-export const timePerPhase: number[] = [20, 120, 50, 20];
+export const timePerPhase: number[] = [20, 120, 60, 60];
