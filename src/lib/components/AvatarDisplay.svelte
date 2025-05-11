@@ -9,7 +9,7 @@
 
 {#if (icon <= 0 || icon > avatarDirectory.length)}
     <img
-        src="icons/missing.png"
+        src="icons/bot.gif"
         alt="Missing"
         style="width: {width}px; height: {width}px; border-radius: 100%;"
         class={classAdd}

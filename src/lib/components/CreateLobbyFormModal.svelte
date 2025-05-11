@@ -31,15 +31,6 @@
     let publicValue = true;
 
     /**
-     * Function to switch the public value
-     */
-    function onSwitchPublic(){
-        publicValue = !publicValue;
-        console.log(publicValue);
-    }
-
-
-    /**
      * Function to create a lobby, takes into account the isPublic variable
      * @async
      */

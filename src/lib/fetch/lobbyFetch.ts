@@ -38,7 +38,7 @@ export async function createLobbyFetch(mode: number = 0): Promise<boolean> {
             code: lobbyCode,
             host: true,
             players: [],
-            isPublic: mode === 1
+            mode: mode
         });
         
         return await joinLobbyFetch(lobbyCode);
@@ -147,7 +147,8 @@ export async function fetchExitLobby() {
         lobbyStore.update(() => ({
             code: "0000",
             host: false,
-            players:[]
+            players:[],
+            mode:0
         }));
 
         const data = await response.json();
@@ -413,20 +414,14 @@ export async function isUserInLobby(): Promise<string> {
  * @returns true if success, false if error
  * @async
  */
-export async function updateLobbyVisibility(isPublic: boolean): Promise<boolean> {
+export async function updateLobbyVisibility(mode: number): Promise<boolean> {
     try {
         const lobbyCode = get(lobbyStore).code;
         
         // Create form data with the exact string value expected by the backend
         const formData = new URLSearchParams();
         // Explicitly use the string "true" or "false" instead of using toString()
-        formData.append('is_public', isPublic ? "true" : "false");
-        
-        // Debug the actual data being sent
-        console.log("Updating lobby visibility:");
-        console.log("- Lobby code:", lobbyCode);
-        console.log("- Setting public:", isPublic);
-        console.log("- Form data:", formData.toString());
+        formData.append('is_public', mode === 1 ? "1" : "0");
         
         const response = await fetch(setLobbyVisibilityPath + lobbyCode, {
             method: 'POST',
@@ -455,7 +450,7 @@ export async function updateLobbyVisibility(isPublic: boolean): Promise<boolean>
         // Update the store with the new visibility status
         lobbyStore.update(lobby => ({
             ...lobby,
-            isPublic: data.is_public
+            mode: mode
         }));
 
         return true;

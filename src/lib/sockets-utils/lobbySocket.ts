@@ -49,6 +49,7 @@ function addPlayer(username: string, icon: number, host: boolean) {
 		let updatedPlayers = [...oldPlayerList, newUser];
 
 		lobbyStore.update((lob: Lobby) => ({
+			...lob,
 			code: lob.code,
 			host: lob.host || (host && username === get(userDataStore).username),
 			players: updatedPlayers

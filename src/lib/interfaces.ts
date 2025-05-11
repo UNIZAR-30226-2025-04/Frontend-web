@@ -32,7 +32,7 @@ export interface Lobby {
     code: string
     host: boolean
     players: Player[]
-    isPublic?: boolean
+    mode:number
 }
 
 // INBOX AND FRIENDS interfaces

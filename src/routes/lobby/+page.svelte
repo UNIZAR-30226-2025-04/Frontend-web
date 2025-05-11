@@ -34,30 +34,25 @@
 	};
 
 	let max = 8; // Maximum number of players
-	let publicString = "PUBLIC"; // String to show if the lobby is public or private
-	let publicValue = true; // Boolean to know if the lobby is public or private
+	let autoStart = false;
 	$: actual = $lobbyStore.players.length; // Actual number of players
 	$: host = $lobbyStore.host; // Boolean to know if the player is the host
 	$: players = $lobbyStore.players; // List of players
+	$: mode = $lobbyStore.mode;	// Mode of the lobby
+
+	$: if(!autoStart && mode === 2 && $lobbyStore.players.length === 1 && host){
+		console.log("AUTO STARTING");
+		autoStart = true;
+		startGame();
+	}
 
 	// Function to switch the public value
 	async function onSwitchPublic() {
-		if (host) {
+		if (host && mode < 2) {
 			// Toggle the visibility state
-			const newVisibility = !publicValue;
-			
-			// Show visual feedback immediately (optimistic UI update)
-			publicString = newVisibility ? "PUBLIC" : "PRIVATE";
-			publicValue = newVisibility;
-			
-			// Make the API call to update on the server
-			const success = await updateLobbyVisibility(newVisibility);
-			
-			// If it failed, revert the UI
-			if (!success) {
-				publicValue = !newVisibility;
-				publicString = publicValue ? "PUBLIC" : "PRIVATE";
-			}
+			const newVisibility = mode === 1? 0:1;
+						
+			await updateLobbyVisibility(newVisibility)
 		}
 	}
 
@@ -120,8 +115,17 @@
 			<button
 				type="button"
 				class="btn btn-lg variant-filled"
-				on:click={onSwitchPublic}>{publicString}</button
-			>
+				on:click={onSwitchPublic}>
+				{#if mode === 0}
+					PRIVATE
+				{:else if mode === 1}
+					PUBLIC
+				{:else if mode === 2}
+					VS IA
+				{:else}
+					LOADING
+				{/if}
+			</button>
 			<h2>Code : {$lobbyStore.code}</h2>
 			<button
 				type="button"

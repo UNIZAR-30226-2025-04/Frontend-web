@@ -96,7 +96,7 @@
 				code: lobbyCode,
 				host: false,
 				players: [],
-				isPublic: false
+				mode: 0
 			});
 			setTimeout(() => initializeSocket(), 500);
 		}else{
@@ -111,7 +111,7 @@
 			code: "0000",
 			host: false,
 			players: [],
-			isPublic: false,
+			mode: 0,
 		};
 		lobbyStore.set(defaultLobby);
 
