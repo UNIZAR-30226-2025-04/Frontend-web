@@ -98,7 +98,7 @@
 				players: [],
 				isPublic: false
 			});
-			initializeSocket();
+			setTimeout(() => initializeSocket(), 500);
 		}else{
 			console.log("User is not in lobby");
 		}
