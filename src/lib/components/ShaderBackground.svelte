@@ -3,6 +3,10 @@
 	import { onMount } from "svelte";
 	import { get } from "svelte/store";
 
+	// From https://www.shadertoy.com/view/XXtBRr
+	// Made by xxidbr9 in shader toy
+	// Modified by changing colors and adding pixel shader
+
 	let canvas: HTMLCanvasElement;
 	let gl: WebGLRenderingContext;
 	let animationFrame: number;

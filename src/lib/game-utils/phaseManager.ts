@@ -43,7 +43,11 @@ export function setPhaseTo(phase:number){
             state.handCards = [];
             state.playedCards = []; 
             //drawCards(false);
-            changeColorTo(1);
+            if(state.minScore < 999999){
+                changeColorTo(1);
+            }else{
+                changeColorTo(4);
+            }
             break;
         case 2:
             state.activeVouchers = [];

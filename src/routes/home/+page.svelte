@@ -144,6 +144,7 @@
 
 </script>
 
+
 <div class="p-[10vh] container h-full flex flex-col justify-center content-centerm items-center">
 
 	<!-- Game logo -->
@@ -208,6 +209,7 @@
 		</div>
 	</div>
 </div>
+
 
 <style>
 	.card {
