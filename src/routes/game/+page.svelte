@@ -1334,7 +1334,8 @@
 	</div>
 </div>
 
-<!--Debug buttons-->
+
+<!--Debug buttons
 <div class="flex flex-col gap-2">
 	<button class="btn variant-filled-surface h-[3vh]" on:click={onNextPhase}>
 		Next phase
@@ -1376,6 +1377,7 @@
 		Test D
 	</button>
 </div>
+-->
 
 <style>
 

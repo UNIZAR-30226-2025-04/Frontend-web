@@ -106,7 +106,7 @@
 
 {#if $modalStore[0] && $modalStore[0].meta && packItem && pack}
     <div
-        class="w-min-[45vh] card p-4 grid grid-rows-[1fr_3fr_4fr_1fr] items-center"
+        class="w-min-[45vh] card p-4 grid grid-rows-[1fr_3fr_4fr_1fr] items-center tv-filter"
     >
         <!--Title card-->
         <div
@@ -225,6 +225,12 @@
 {/if}
 
 <style>
+    .tv-filter {
+		text-shadow:
+			2px 0.5px 2px #ea36af,
+			-1px -0.5px 2px #75fa69;
+	}
+
     .pulse-shadow {
         animation:
             pulseShadow 4s ease-in-out infinite,
