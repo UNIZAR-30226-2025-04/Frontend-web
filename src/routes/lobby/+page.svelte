@@ -58,7 +58,11 @@
 
 	// Function to start the game
 	function onStart() {
-		startGame();
+		if(!autoStart && $lobbyStore.players.length === 1 && host){
+			autoStart = true;
+			setTimeout(() => { startGame(); autoStart = false}, 500);
+		}
+		
 	}
 	
 	// Function to copy code to clipboard
