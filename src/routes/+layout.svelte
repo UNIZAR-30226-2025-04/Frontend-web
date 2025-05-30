@@ -35,6 +35,7 @@
     import LoseModal from '$lib/components/LoseModal.svelte';
     import ShaderBackground from '$lib/components/ShaderBackground.svelte';
     import { base } from '$app/paths';
+    import DomainChangeModal from '$lib/components/DomainChangeModal.svelte';
 
 	// For all singletons
 	initializeStores();
@@ -55,6 +56,7 @@
 		useVoucherModal: {ref: UseVoucherModal},
 		winModal: {ref: WinModal},
 		loseModal: {ref: LoseModal},
+		domainChangeModal: {ref: DomainChangeModal},
 	};
   
 </script>

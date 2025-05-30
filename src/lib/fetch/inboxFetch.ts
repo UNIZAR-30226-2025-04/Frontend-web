@@ -1,4 +1,4 @@
-import { addFriendPath, deleteReceivedInvitationPath, deleteReceivedRequestsPath, receivedFriendshipRequestsPath, receivedGameInvitations } from "$lib/paths";
+import { addFriendPath, apiBaseStore, deleteReceivedInvitationPath, deleteReceivedRequestsPath, receivedFriendshipRequestsPath, receivedGameInvitations } from "$lib/paths";
 import { userDataStore } from "$lib/stores";
 import { get } from "svelte/store";
 import type { invitation, request } from '$lib/interfaces'
@@ -12,7 +12,7 @@ import { loadingStore } from "$lib/stores/loadingStore";
 export async function fetchReceivedFriendshipRequests(pendingRequests:request[]) {
     try {
         loadingStore.startLoading('Loading requests...');
-        const response = await fetch(receivedFriendshipRequestsPath, {
+        const response = await fetch(get(apiBaseStore) + receivedFriendshipRequestsPath, {
             method: 'GET',
             headers: {
                 'accept': 'application/json',
@@ -53,7 +53,7 @@ export async function fetchReceivedFriendshipRequests(pendingRequests:request[])
  */
 export async function fetchDeleteFriendRequest(posibleFriend:string): Promise<boolean> {
     try {
-        const response = await fetch(deleteReceivedRequestsPath + posibleFriend, {
+        const response = await fetch(get(apiBaseStore) + deleteReceivedRequestsPath + posibleFriend, {
             method: 'DELETE',
             headers: {
                 'accept': 'application/json',
@@ -84,7 +84,7 @@ export async function fetchAcceptFriendshipRequest(posibleFriend:string): Promis
         const formData = new FormData();
         formData.append('friendUsername', posibleFriend);
 
-        const response = await fetch(addFriendPath, {
+        const response = await fetch(get(apiBaseStore) + addFriendPath, {
             method: 'POST',
             headers: {
                 'accept': 'application/json',
@@ -116,7 +116,7 @@ export async function fetchAcceptFriendshipRequest(posibleFriend:string): Promis
 export async function fetchReceivedGameInvitations(invitations:invitation[]) {
     try {
         loadingStore.startLoading('Loading invitations...');
-        const response = await fetch(receivedGameInvitations, {
+        const response = await fetch(get(apiBaseStore) + receivedGameInvitations, {
             method: 'GET',
             headers: {
                 'accept': 'application/json',
@@ -164,7 +164,7 @@ export async function fetchReceivedGameInvitations(invitations:invitation[]) {
 export async function fetchDeleteGameInvitation(code:string, username: string): Promise<boolean> {
     try {
 
-        const response = await fetch(deleteReceivedInvitationPath + code + "/" + username, {
+        const response = await fetch(get(apiBaseStore) + deleteReceivedInvitationPath + code + "/" + username, {
             method: 'DELETE',
             headers: {
                 'accept': 'application/json',

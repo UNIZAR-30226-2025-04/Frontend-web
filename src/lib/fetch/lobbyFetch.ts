@@ -1,5 +1,5 @@
 import type { inviteItem, LobbyInfo, LobbyDisplay } from "$lib/interfaces";
-import { allLobbiesPath, createLobbyPath, deleteSentLobbyInvitationsPath, exitLobbyPath, joinLobbyPath, sendLobbyInvitationsPath, sentLobbyInvitationsPath, receivedGameInvitations, deleteReceivedInvitationPath, isUserInLobbyPath, setLobbyVisibilityPath, matchMakingPath } from "$lib/paths";
+import { allLobbiesPath, createLobbyPath, deleteSentLobbyInvitationsPath, exitLobbyPath, joinLobbyPath, sendLobbyInvitationsPath, sentLobbyInvitationsPath, receivedGameInvitations, deleteReceivedInvitationPath, isUserInLobbyPath, setLobbyVisibilityPath, matchMakingPath, apiBaseStore, lobbyInfoPath } from "$lib/paths";
 import { lobbyStore, userDataStore } from "$lib/stores";
 import { get } from "svelte/store";
 import { fetchDeleteGameInvitation } from "$lib/fetch/inboxFetch";
@@ -15,7 +15,7 @@ export async function createLobbyFetch(mode: number = 0): Promise<boolean> {
         const formData = new URLSearchParams();
         formData.append('public', mode.toString());
 
-        const response = await fetch(createLobbyPath, {
+        const response = await fetch(get(apiBaseStore) + createLobbyPath, {
             method: 'POST',
             headers: {
                 'accept': 'application/json',
@@ -58,7 +58,7 @@ export async function joinLobbyFetch(lobbyCode: string): Promise<boolean> {
         // Start the loading with a specific message
         loadingStore.startLoading('Joining lobby...');
         
-        const response = await fetch(joinLobbyPath + lobbyCode, {
+        const response = await fetch(get(apiBaseStore) + joinLobbyPath + lobbyCode, {
             method: 'POST',
             headers: {
                 'accept': 'application/json',
@@ -132,7 +132,7 @@ export async function joinLobbyFetch(lobbyCode: string): Promise<boolean> {
 export async function fetchExitLobby() {
     try {
 
-        const response = await fetch(exitLobbyPath + get(lobbyStore).code, {
+        const response = await fetch(get(apiBaseStore) + exitLobbyPath + get(lobbyStore).code, {
             method: 'POST',
             headers: {
                 'accept': 'application/json',
@@ -166,7 +166,7 @@ export async function fetchExitLobby() {
 export async function fetchSentInvitations(invitation: inviteItem[]) {
     try {
 
-        const response = await fetch(sentLobbyInvitationsPath, {
+        const response = await fetch(get(apiBaseStore) + sentLobbyInvitationsPath, {
             method: 'GET',
             headers: {
                 'accept': 'application/json',
@@ -244,7 +244,7 @@ export async function fetchSendInvitation(username: string): Promise<boolean> {
 export async function fetchDeleteSentInvitation(username: string): Promise<boolean> {
     try {
 
-        const response = await fetch(deleteSentLobbyInvitationsPath + get(lobbyStore).code + "/" + username, {
+        const response = await fetch(get(apiBaseStore) + deleteSentLobbyInvitationsPath + get(lobbyStore).code + "/" + username, {
             method: 'DELETE',
             headers: {
                 'accept': 'application/json',
@@ -275,7 +275,7 @@ export async function getAllLobbiesFetch(): Promise<LobbyDisplay[]> {
     const token = get(userDataStore).token;
     console.log("Token para pruebas:", token);
     
-    const response = await fetch(allLobbiesPath, {
+    const response = await fetch(get(apiBaseStore) + allLobbiesPath, {
       method: 'GET',
       headers: {
         'accept': 'application/json',
@@ -313,7 +313,7 @@ export async function fetchLobbyInfo(lobbyId: string): Promise<any> {
     try {
         console.log(`Trying to get lobby info: ${lobbyId}`);
         
-        const response = await fetch(`https://nogler.ddns.net:443/auth/lobbyInfo/${lobbyId}`, {
+        const response = await fetch(get(apiBaseStore) + lobbyInfoPath + '/' + lobbyId, {
             method: 'GET',
             headers: {
                 'accept': 'application/json',
@@ -354,7 +354,7 @@ export async function fetchLobbyInfo(lobbyId: string): Promise<any> {
  */
 export async function deleteReceivedInvitation(lobbyId: string, senderUsername: string): Promise<boolean> {
     try {
-        const response = await fetch(deleteReceivedInvitationPath + lobbyId + "/" + senderUsername, {
+        const response = await fetch(get(apiBaseStore) + deleteReceivedInvitationPath + lobbyId + "/" + senderUsername, {
             method: 'DELETE',
             headers: {
                 'accept': 'application/json',
@@ -381,7 +381,7 @@ export async function deleteReceivedInvitation(lobbyId: string, senderUsername: 
  */
 export async function isUserInLobby(): Promise<string> {
     try {
-        const response = await fetch(isUserInLobbyPath, {
+        const response = await fetch(get(apiBaseStore) + isUserInLobbyPath, {
             method: 'GET',
             headers: {
                 'accept': 'application/json',
@@ -423,7 +423,7 @@ export async function updateLobbyVisibility(mode: number): Promise<boolean> {
         // Explicitly use the string "true" or "false" instead of using toString()
         formData.append('is_public', mode === 1 ? "1" : "0");
         
-        const response = await fetch(setLobbyVisibilityPath + lobbyCode, {
+        const response = await fetch(get(apiBaseStore) + setLobbyVisibilityPath + lobbyCode, {
             method: 'POST',
             headers: {
                 'accept': 'application/json',
@@ -469,7 +469,7 @@ export async function fetchMatchMaking(): Promise<boolean> {
     try {
         loadingStore.startLoading('Finding a match...');
         
-        const response = await fetch(matchMakingPath, {
+        const response = await fetch(get(apiBaseStore) + matchMakingPath, {
             method: 'GET',
             headers: {
                 'accept': 'application/json',

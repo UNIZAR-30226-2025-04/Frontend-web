@@ -4,7 +4,7 @@
     import { SlideToggle } from '@skeletonlabs/skeleton';
     import { goto } from '$app/navigation';
     import { base } from '$app/paths';
-    import { apiBase, createLobbyPath, joinLobbyPath } from '$lib/paths';
+    import { createLobbyPath, joinLobbyPath } from '$lib/paths';
     import { get } from 'svelte/store';
     import { userDataStore, lobbyStore } from '$lib/stores';
     import { loadingStore } from '$lib/stores/loadingStore';

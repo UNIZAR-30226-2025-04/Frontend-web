@@ -1,67 +1,71 @@
 // Base url of the backend API
-export const apiBase:string = 'https://nogler.ddns.net/';
-// Base url to socket
-export const wsBase:string = 'https://nogler.ddns.net:443'
+
+import { writable } from "svelte/store";
+
+export let apiBaseStore = writable('https://nogler.ddns.net/');
+export let wsBaseStore = writable('https://nogler.ddns.net/');
 
 // USERS
 // me, private information
-export const mePath:string = apiBase + 'auth/me';
+export let mePath:string = 'auth/me';
 // update private information
-export const updatePath:string = apiBase + 'auth/update';
+export let updatePath:string = 'auth/update';
 // public information
-export const userInfoPath:string = apiBase + 'users/';
+export let userInfoPath:string = 'users/';
 
 // AUTH
 // Login user
-export const loginPath:string = apiBase + 'login';
+export let loginPath:string = 'login';
 // Register user
-export const sigupPath:string = apiBase + 'signup';
+export let signupPath:string = 'signup';
 
 
 // FRIENDS
 // List of a user firends
-export const friendsPath:string = apiBase + 'auth/friends';
+export let friendsPath:string = 'auth/friends';
 // Delete friend
-export const deleteFriendPath:string = apiBase + 'auth/deleteFriend/';
+export let deleteFriendPath:string = 'auth/deleteFriend/';
 // List of sent friendship request
-export const sentRequestsPath:string = apiBase + 'auth/sent_friendship_requests';
+export let sentRequestsPath:string = 'auth/sent_friendship_requests';
 // Delete a sent friendship request
-export const deleteSentRequestPath:string = apiBase + 'auth/sent_friendship_request/';
+export let deleteSentRequestPath:string = 'auth/sent_friendship_request/';
 // Send a friendship request
-export const sendFriendshipRequestPath:string = apiBase + 'auth/sendFriendshipRequest';
+export let sendFriendshipRequestPath:string = 'auth/sendFriendshipRequest';
 // List of received friendship request
-export const receivedFriendshipRequestsPath:string = apiBase + 'auth/received_friendship_requests';
+export let receivedFriendshipRequestsPath:string = 'auth/received_friendship_requests';
 // Delete a received friendship request
-export const deleteReceivedRequestsPath:string = apiBase + 'auth/received_friendship_request/';
+export let deleteReceivedRequestsPath:string = 'auth/received_friendship_request/';
 // Accept a friendship request
-export const addFriendPath:string = apiBase + 'auth/addFriend';
+export let addFriendPath:string = 'auth/addFriend';
 
 
 // LOBBY
 // Create a lobby
-export const createLobbyPath:string = apiBase + 'auth/CreateLobby';
+export let createLobbyPath:string = 'auth/CreateLobby';
 // Insert the user into a lobby
-export const joinLobbyPath:string = apiBase + 'auth/joinLobby/';
+export let joinLobbyPath:string = 'auth/joinLobby/';
 // Remove the user from the lobby
-export const exitLobbyPath:string = apiBase + 'auth/exitLobby/';
+export let exitLobbyPath:string = 'auth/exitLobby/';
 // List of sent lobby invitations
-export const sentLobbyInvitationsPath:string = apiBase + 'auth/sent_lobby_invitations';
+export let sentLobbyInvitationsPath:string = 'auth/sent_lobby_invitations';
 // Invite a friend to the lobby
-export const sendLobbyInvitationsPath:string = apiBase + 'auth/sendLobbyInvitation';
+export let sendLobbyInvitationsPath:string = 'auth/sendLobbyInvitation';
 // Delete a sent lobby invitation
-export const deleteSentLobbyInvitationsPath:string = apiBase + 'auth/sent_lobby_invitation/';
+export let deleteSentLobbyInvitationsPath:string = 'auth/sent_lobby_invitation/';
 // Deletes a received game invitation
-export const deleteReceivedInvitationPath:string = apiBase + 'auth/received_lobby_invitation/';
+export let deleteReceivedInvitationPath:string = 'auth/received_lobby_invitation/';
 // List of all of the lobbies
-export const allLobbiesPath:string = apiBase + 'auth/getAllLobbies';
+export let allLobbiesPath:string = 'auth/getAllLobbies';
 // To know if the user is already in a lobby
-export const isUserInLobbyPath:string = apiBase + 'auth/isUserInLobby';
+export let isUserInLobbyPath:string = 'auth/isUserInLobby';
 // Set the visibility of a lobby
-export const setLobbyVisibilityPath = apiBase + 'auth/setLobbyVisibility/';
+export let setLobbyVisibilityPath = 'auth/setLobbyVisibility/';
 // Matchmaking
-export const matchMakingPath:string = apiBase + 'auth/matchMaking';
+export let matchMakingPath:string = 'auth/matchMaking';
+// Lobby info
+export let lobbyInfoPath:string = 'auth/lobbyInfo';
 
 // GAMELOBBY
 // Get all game lobby invitations for the authenticated user
-export const receivedGameInvitations:string = apiBase + 'auth/received_lobby_invitations';
+export let receivedGameInvitations:string = 'auth/received_lobby_invitations';
 

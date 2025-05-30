@@ -1,7 +1,6 @@
 import { goto } from "$app/navigation";
 import { base } from "$app/paths";
 import type { Lobby, Player } from "$lib/interfaces";
-import { wsBase } from "$lib/paths";
 import { lobbyStore, socketStore, userDataStore } from "$lib/stores";
 import { io, Socket } from "socket.io-client";
 import { get } from "svelte/store";
@@ -27,6 +26,7 @@ import {
 	voucherPhaseSetup,
 	voucherPurchased
 } from "./gameSocket";
+import { wsBaseStore } from "$lib/paths";
 
 /**
    * Adds user to the list in lobbySocket
@@ -86,7 +86,7 @@ export function initializeSocket() {
 	let socket: Socket;
 
 	console.log("Trying to connect to ws");
-	socket = io(wsBase, {
+	socket = io(get(wsBaseStore), {
 		auth: {
 			username: get(userDataStore).username,
 			authorization: "Bearer " + get(userDataStore).token,

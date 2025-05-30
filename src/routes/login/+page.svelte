@@ -1,7 +1,6 @@
 <script lang="ts">
     import { goto } from '$app/navigation';
 	import { base } from '$app/paths';
-	import { loginPath } from '$lib/paths';
     import type { UserData } from '$lib/interfaces';
 	import { userDataStore } from '$lib/stores';
     import { loginFetch } from '$lib/fetch/loginFetch';
@@ -76,7 +75,7 @@
 	  {#if showError}
 	  	<aside class="alert variant-ghost-error p-2 mb-2 mt-2">
 			<div class="alert-message text-left text-black">
-				Incorrect email or password: {error}
+				An errror just ocurred: {error}
 			</div>
 		</aside>
       {/if}

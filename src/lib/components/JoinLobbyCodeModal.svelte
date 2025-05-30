@@ -1,10 +1,9 @@
 <script lang="ts">
     import type { SvelteComponent } from "svelte";
     import { getModalStore, getToastStore, type ToastSettings } from "@skeletonlabs/skeleton";
-    import { apiBase, joinLobbyPath } from '$lib/paths';
     import { get } from 'svelte/store';
     import { base } from '$app/paths';
-    import { userDataStore, lobbyStore } from '$lib/stores';
+    import { userDataStore } from '$lib/stores';
     import { goto } from '$app/navigation';
     import { joinLobbyFetch } from "$lib/fetch/lobbyFetch";
 

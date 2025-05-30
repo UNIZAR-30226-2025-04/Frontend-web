@@ -1,5 +1,5 @@
 import type { userItem } from "$lib/interfaces";
-import { deleteFriendPath, friendsPath, sendFriendshipRequestPath, sentRequestsPath, deleteSentRequestPath } from "$lib/paths";
+import { deleteFriendPath, friendsPath, sendFriendshipRequestPath, sentRequestsPath, deleteSentRequestPath, apiBaseStore } from "$lib/paths";
 import { userDataStore } from "$lib/stores";
 import { loadingStore } from "$lib/stores/loadingStore";
 import { get } from "svelte/store";
@@ -13,7 +13,7 @@ import { get } from "svelte/store";
 export async function fetchFriends(savedFriends:userItem[]) {
     try {
         loadingStore.startLoading('Loading friends...');
-        const response = await fetch(friendsPath, {
+        const response = await fetch(get(apiBaseStore) + friendsPath, {
             method: 'GET',
             headers: {
                 'accept': 'application/json',
@@ -49,7 +49,7 @@ export async function fetchFriends(savedFriends:userItem[]) {
 export async function fetchSentRequests(pendingRequests:userItem[]) {
     try {
         loadingStore.startLoading('Loading recieved requests...');
-        const response = await fetch(sentRequestsPath, {
+        const response = await fetch(get(apiBaseStore) + sentRequestsPath, {
             method: 'GET',
             headers: {
                 'accept': 'application/json',
@@ -92,7 +92,7 @@ export async function fetchSendFriendshipRequest(username:string): Promise<boole
         const formData = new FormData();
         formData.append('friendUsername', username);
 
-        const response = await fetch(sendFriendshipRequestPath, {
+        const response = await fetch(get(apiBaseStore) + sendFriendshipRequestPath, {
             method: 'POST',
             headers: {
                 'accept': 'application/json',
@@ -123,7 +123,7 @@ export async function fetchSendFriendshipRequest(username:string): Promise<boole
 export async function fetchDeleteSentFriendRequest(username:string): Promise<boolean> {
     try {
         loadingStore.startLoading('Removing friend request...');
-        const response = await fetch(deleteSentRequestPath + username, {
+        const response = await fetch(get(apiBaseStore) + deleteSentRequestPath + username, {
             method: 'DELETE',
             headers: {
                 'accept': 'application/json',
@@ -152,7 +152,7 @@ export async function fetchDeleteSentFriendRequest(username:string): Promise<boo
 export async function fetchDeleteFriend(username:string): Promise<boolean> {
     try {
         loadingStore.startLoading('Removing friend...');
-        const response = await fetch(deleteFriendPath + username, {
+        const response = await fetch(get(apiBaseStore) + deleteFriendPath + username, {
             method: 'DELETE',
             headers: {
                 'accept': 'application/json',

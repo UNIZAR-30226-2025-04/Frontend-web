@@ -4,9 +4,16 @@
 	import { userDataStore } from '$lib/stores';
     import { onMount } from 'svelte';
     import { loginFetch } from '$lib/fetch/loginFetch';
-    import { getDrawerStore, type DrawerSettings } from '@skeletonlabs/skeleton';
+    import { getDrawerStore, getModalStore, type DrawerSettings, type ModalSettings } from '@skeletonlabs/skeleton';
     import GameCard from '$lib/components/GameCard.svelte';
     import VoucherCard from '$lib/components/VoucherCard.svelte';
+	
+	const modalStore = getModalStore();
+
+	const modalDomain: ModalSettings = {
+		type: "component",
+		component: "domainChangeModal",
+	};
 
 	onMount(async () => {
 		// If user is cached and wants to be remembered we log in and get info
@@ -24,6 +31,10 @@
 			}
 		}
 	});
+
+	function onDomainModal(){
+		modalStore.trigger(modalDomain);	
+	}
 		
 
 
@@ -64,6 +75,12 @@
 	<span>Login page</span>
 </a>
 
+<button
+	class="btn variant-filled p-[1.5vmin]" style="margin-top: 1%; font-size: max(2vmin,15px);"
+	on:click={onDomainModal}
+>
+	Change domain
+</button>
 <!-- Scroll how to play	-->
 <button class='howToPlay' style="margin-top: 6%; font-size: max(1.5vmin,12px);" on:click={scrollToBottom}>
 	<p>How to play</p>

@@ -10,7 +10,8 @@
     $: messageFeed = $chatStore;
 
     function onSend(){
-        sendMessage(currentMessage);
+        if(currentMessage.length > 0)
+            sendMessage(currentMessage);
         currentMessage = '';
     }
 

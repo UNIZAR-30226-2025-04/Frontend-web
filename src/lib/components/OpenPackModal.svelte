@@ -1,23 +1,17 @@
 <script lang="ts">
     import { errorPack, packageDirectory } from "$lib/cardDirectory";
     import type {
-        CardItem,
-        JokerItem,
         Package,
-        PackageItem,
-        VoucherItem,
+        PackageItem
     } from "$lib/interfaces";
-    import { filter, getModalStore } from "@skeletonlabs/skeleton";
-    import GameCard from "./GameCard.svelte";
-    import PackageCard from "./PackageCard.svelte";
-    import JokerCard from "./JokerCard.svelte";
-    import VoucherCard from "./VoucherCard.svelte";
-    import { flip } from "svelte/animate";
-    import { packageStore } from "$lib/stores";
-    import { getNextKey } from "$lib/keyGenerator";
-    import { it } from "node:test";
     import { selectPackItems } from "$lib/sockets-utils/gameSocket";
-    import { onDestroy } from "svelte";
+    import { packageStore } from "$lib/stores";
+    import { getModalStore } from "@skeletonlabs/skeleton";
+    import { flip } from "svelte/animate";
+    import GameCard from "./GameCard.svelte";
+    import JokerCard from "./JokerCard.svelte";
+    import PackageCard from "./PackageCard.svelte";
+    import VoucherCard from "./VoucherCard.svelte";
 
     const modalStore = getModalStore();
 

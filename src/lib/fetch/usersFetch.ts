@@ -1,4 +1,4 @@
-import { mePath, updatePath, userInfoPath } from "$lib/paths";
+import { apiBaseStore, mePath, updatePath, userInfoPath } from "$lib/paths";
 import { userDataStore } from "$lib/stores";
 import { get } from "svelte/store";
 
@@ -8,7 +8,7 @@ import { get } from "svelte/store";
  * @async
  */
 export async function meFetch(token:string) {
-    const response = await fetch(mePath, {
+    const response = await fetch(get(apiBaseStore) + mePath, {
         method: 'GET',
         headers: {
             'accept': 'application/json',
@@ -53,7 +53,7 @@ export async function updateFetch(username:string, passwd:string, icon:number): 
 
         console.log("formData: "+formData.toString());
 
-        const response = await fetch(updatePath, {
+        const response = await fetch(get(apiBaseStore) + updatePath, {
             method: 'PATCH',
             headers: {
                 'accept': 'application/json',
@@ -95,7 +95,7 @@ export async function updateFetch(username:string, passwd:string, icon:number): 
  */
 export async function fetchUserInfo(username:string) {
     try {
-        const response = await fetch(userInfoPath + username, {
+        const response = await fetch(get(apiBaseStore) + userInfoPath + username, {
             method: 'GET',
             headers: {
                 'accept': 'application/json',

@@ -1,5 +1,6 @@
-import { loginPath } from "$lib/paths";
+import { apiBaseStore, loginPath } from "$lib/paths";
 import { userDataStore } from "$lib/stores";
+import { get } from "svelte/store";
 import { meFetch } from "./usersFetch";
 
 /**
@@ -15,7 +16,7 @@ export async function loginFetch(email:string, passwd:string, remember:boolean) 
 		formData.append("email", email);
 		formData.append("password", passwd);
 
-    const response = await fetch(loginPath, {
+    const response = await fetch(get(apiBaseStore) + loginPath, {
         method: 'POST',
         headers: {
             'accept': 'application/json',

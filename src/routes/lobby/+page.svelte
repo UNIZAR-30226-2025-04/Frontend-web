@@ -58,7 +58,7 @@
 
 	// Function to start the game
 	function onStart() {
-		if(!autoStart && $lobbyStore.players.length === 1 && host){
+		if(!autoStart && $lobbyStore.players.length >= 1){
 			autoStart = true;
 			setTimeout(() => { startGame(); autoStart = false}, 500);
 		}

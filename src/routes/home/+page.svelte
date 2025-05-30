@@ -22,7 +22,6 @@
 	import type { Lobby } from "$lib/interfaces";
 	import AvatarDisplay from "$lib/components/AvatarDisplay.svelte";
 	import { initializeSocket } from "$lib/sockets-utils/lobbySocket";
-	import WebSocketTest from "$lib/components/WebSocketTest.svelte";
 	import { get } from "svelte/store";
 	import { fetchLobbyInfo, isUserInLobby } from "$lib/fetch/lobbyFetch";
     import { requestGamePhasePlayerInfo } from "$lib/sockets-utils/gameSocket";

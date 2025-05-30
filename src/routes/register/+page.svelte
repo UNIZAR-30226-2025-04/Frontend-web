@@ -1,8 +1,9 @@
 <script lang="ts">
     import { goto } from '$app/navigation';
 	import { base } from '$app/paths';
-	import { apiBase, sigupPath } from '$lib/paths';
+	import { apiBaseStore, signupPath } from '$lib/paths';
     import { getToastStore, type ToastSettings } from '@skeletonlabs/skeleton';
+    import { get } from 'svelte/store';
 
 	const errorContainer = 'alert variant-ghost-error p-2';
     const errorMessagePasswd = 'alert-message text-left text-black'
@@ -50,7 +51,7 @@
 			errorMessage = false;
 
 			try {
-				const response = await fetch(sigupPath, {
+				const response = await fetch(get(apiBaseStore) + signupPath, {
 					method: 'POST',
 					headers: {
 						'accept': 'application/json',
@@ -60,12 +61,12 @@
 				});
 
 				if (!response.ok) {
-					throw new Error("Error en la autenticación");
+					throw new Error("Error on autentication");
 				}
 
 				const data = await response.json();
 				success = true;
-				console.log("Respuesta de la API:", data);
+				console.log("API Response:", data);
 			} catch (err:any) {
 				error = err.message;
 			}
@@ -129,7 +130,7 @@
 	  {#if errorMessage}
 		<aside class="{errorContainer}">
 			<div class="{errorMessagePasswd}">
-				Password doesn't match: {error}
+				Error on register: {error}
 			</div>
 		</aside>
 	  {/if}
