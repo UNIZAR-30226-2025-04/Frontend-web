@@ -1,38 +1,38 @@
-# create-svelte
+![Logo](letras-img.png)
 
-Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/main/packages/create-svelte).
+# Nogler's frontend web
 
-## Creating a project
+This will be the frontend web for "Nogler", a multiplayer game based on "balatro" by LocalThunk, focused on creating a entertaining experience for players, in a multiplayer environment. It will maintain some of the original features, and the core game idea, as well as make some adaptations for a better multiplayer experience.
 
-If you're seeing this, you've probably already done this step. Congrats!
+## Authors
 
-```bash
-# create a new project in the current directory
-npm create svelte@latest
+- [@VictorOrrios](https://github.com/VictorOrrios)
+ 
+- [@Ruben123454](https://github.com/Ruben123454)
 
-# create a new project in my-app
-npm create svelte@latest my-app
+- [@JSerranom04](https://github.com/JSerranom04)
+
+## Core dependencies
+
+npm version 10.8.x+
+
+The remaining dependencies can be found on package-lock.json
+
+## Setup
+
+Download the repository and install the dependencies:
+
+```
+git clone git@github.com:UNIZAR-30226-2025-04/Frontend-web.git
+cd Frontend-web
+npm install
 ```
 
-## Developing
+## Deployment
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+To deploy this project run:
 
-```bash
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
 ```
-
-## Building
-
-To create a production version of your app:
-
-```bash
 npm run build
+npm run preview
 ```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
