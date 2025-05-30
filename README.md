@@ -1,4 +1,4 @@
-![Logo](letras-img.png)
+![Logo](static/nogler2.png)
 
 # Nogler's frontend web
 
