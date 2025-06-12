@@ -2,8 +2,8 @@
 
 import { writable } from "svelte/store";
 
-export let apiBaseStore = writable('https://nogler.ddns.net/');
-export let wsBaseStore = writable('https://nogler.ddns.net/');
+export let apiBaseStore = writable('https://nogler.victorr.me/');
+export let wsBaseStore = writable('https://nogler.victorr.me/');
 
 // USERS
 // me, private information

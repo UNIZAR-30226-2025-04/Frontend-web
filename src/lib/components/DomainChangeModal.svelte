@@ -23,13 +23,17 @@
     }
 
     function onPreset1(){
+        domainText = "https://nogler.victorr.me/";
+    }
+
+    function onPreset2(){
         domainText = "https://nogler.ddns.net/";
     }
 
 </script>
 
 
-<div class="modal-form card p-6 w-[15vw] shadow-xl space-y-4">
+<div class="modal-form card p-6 min-w-[300px] w-[15vw] shadow-xl space-y-4">
     <!--Title-->
     <h1 style="text-align: center; font-size:150%">Change domain to</h1>
 
@@ -39,7 +43,8 @@
         bind:value={domainText}
         placeholder="Backend url ..."
     />
-    <button style="font-size:112%"class="block btn {parent.buttonNeutral} w-full" on:click={onPreset1}>nogler.ddns.net</button>
+    <button style="font-size:112%"class="block btn {parent.buttonNeutral} w-full" on:click={onPreset1}>nogler.victorr.me</button>
+    <button style="font-size:112%"class="block btn {parent.buttonNeutral} w-full" on:click={onPreset2}>nogler.ddns.net</button>
     
     <!--Button section-->
     <div class="flex gap-6 justify-stretch">
