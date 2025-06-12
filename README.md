@@ -36,3 +36,14 @@ To deploy this project run:
 npm run build
 npm run preview
 ```
+
+## Screenshots
+
+### Homepage
+
+![Homepage](static/sshot1.png)
+
+
+### Game screen
+
+![Game screen](static/sshot2.png)
